@@ -1,0 +1,1495 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="color-scheme" content="light only" />
+  <title>쿠팡 가격 트래커 · Smart Price Watch</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap" />
+  <link rel="stylesheet" href="styles/tokens.css" />
+  <link rel="stylesheet" href="styles/app.css" />
+</head>
+<body>
+  <main class="app-shell">
+    <header class="app-header">
+      <div class="brand-wrap">
+        <div class="brand-kicker"><span class="brand-dot"></span>자동 가격 추적 · 매주 월·목 09:00</div>
+        <h1 class="app-title">쿠팡 가격 트래커</h1>
+        <p class="app-subtitle">2024.09~2026.11 구매이력 기반 · 단위 보정 최저가·재구매 주기 모니터</p>
+      </div>
+      <div class="header-actions">
+        <button type="button" class="btn btn-primary" id="btnOpenAdd">+ 관심 상품 추가</button>
+      </div>
+    </header>
+
+    <section class="status-banner" aria-label="동작 안내">
+      <strong>서비스 안내:</strong> 쿠팡은 외부 직접 크롤링을 차단하므로, 실제 현재가는 피클의 쿠팡 로그인 브라우저가 매주 월·목 오전 9시에 자동 수집해 반영합니다. 새로 추가한 상품은 현재 기기에 즉시 저장되며, 카드의 <strong>추적 요청</strong>을 누르면 자동 수집 목록에도 바로 연결할 수 있습니다.
+    </section>
+
+    <section class="kpi-grid" aria-label="요약 지표">
+      <div class="kpi-card kpi-lead">
+        <div class="kpi-label">전체 추적 품목</div>
+        <div class="kpi-value tnum" id="kpiTotal">-</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">지금 매수 적기</div>
+        <div class="kpi-value is-success tnum" id="kpiBuy">-</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">재구매 임박 (14일 내)</div>
+        <div class="kpi-value is-brand tnum" id="kpiDue">-</div>
+      </div>
+    </section>
+
+    <section class="toolbar" aria-label="검색 및 필터">
+      <div class="search-wrap">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" class="search-input" id="searchInput" placeholder="상품명·카테고리 검색 (예: 우유, 퐁츄르)" autocomplete="off" />
+        <button type="button" class="search-clear" id="searchClear" aria-label="검색어 지우기">×</button>
+      </div>
+      <div class="chips-scroll" id="chipsScroll" role="tablist" aria-label="카테고리 필터"></div>
+    </section>
+
+    <section class="product-grid" id="productGrid" aria-live="polite"></section>
+  </main>
+
+  <!-- Custom Modal: Add Product -->
+  <div class="dialog-backdrop" id="addModal" role="dialog" aria-modal="true" aria-labelledby="addModalTitle">
+    <div class="dialog-panel">
+      <div class="dialog-header">
+        <h2 class="dialog-title" id="addModalTitle">관심 쿠팡 상품 추가</h2>
+        <button type="button" class="dialog-close" data-close-modal="addModal" aria-label="닫기">×</button>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="fUrl">쿠팡 상품 URL *</label>
+        <input type="url" class="form-input" id="fUrl" placeholder="https://www.coupang.com/vp/products/..." />
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="fTitle">상품명 *</label>
+        <input type="text" class="form-input" id="fTitle" placeholder="예: 탐사수 무라벨 2L 12개" />
+      </div>
+      <div class="form-group">
+        <span class="form-label">카테고리 선택</span>
+        <div class="custom-picker" id="addCategoryPicker"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="fTarget">목표 알림가 (원) *</label>
+        <input type="text" inputmode="numeric" class="form-input tnum" id="fTarget" placeholder="예: 8900" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="fLive">현재 확인가 (원, 선택)</label>
+        <input type="text" inputmode="numeric" class="form-input tnum" id="fLive" placeholder="예: 9900" />
+      </div>
+      <div class="form-error" id="addError"></div>
+      <div class="dialog-actions">
+        <button type="button" class="btn btn-subtle" data-close-modal="addModal">취소</button>
+        <button type="button" class="btn btn-primary" id="btnSaveAdd">트래커에 추가</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom Modal: Edit Target Price -->
+  <div class="dialog-backdrop" id="editTargetModal" role="dialog" aria-modal="true" aria-labelledby="editModalTitle">
+    <div class="dialog-panel">
+      <div class="dialog-header">
+        <h2 class="dialog-title" id="editModalTitle">목표 알림가 수정</h2>
+        <button type="button" class="dialog-close" data-close-modal="editTargetModal" aria-label="닫기">×</button>
+      </div>
+      <p style="margin:0 0 12px;font-size:13px;color:var(--color-text-secondary);" id="editTargetName"></p>
+      <div class="form-group">
+        <label class="form-label" for="editTargetInput">새 목표 알림가 (원)</label>
+        <input type="text" inputmode="numeric" class="form-input tnum" id="editTargetInput" placeholder="예: 16000" />
+      </div>
+      <div class="form-error" id="editError"></div>
+      <div class="dialog-actions">
+        <button type="button" class="btn btn-subtle" data-close-modal="editTargetModal">취소</button>
+        <button type="button" class="btn btn-primary" id="btnSaveTarget">저장</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom Modal: Delete Confirm -->
+  <div class="dialog-backdrop" id="deleteModal" role="dialog" aria-modal="true" aria-labelledby="delModalTitle">
+    <div class="dialog-panel">
+      <div class="dialog-header">
+        <h2 class="dialog-title" id="delModalTitle">추가 상품 삭제</h2>
+        <button type="button" class="dialog-close" data-close-modal="deleteModal" aria-label="닫기">×</button>
+      </div>
+      <p style="margin:0 0 12px;font-size:13.5px;color:var(--color-text-secondary);line-height:1.5;">
+        <strong style="color:var(--color-text-primary);" id="deleteTargetName"></strong> 항목을 내 관심 목록에서 삭제할까요?
+      </p>
+      <div class="dialog-actions">
+        <button type="button" class="btn btn-subtle" data-close-modal="deleteModal">유지</button>
+        <button type="button" class="btn btn-danger-soft" id="btnConfirmDelete">삭제하기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom Modal: Share / Sync Request -->
+  <div class="dialog-backdrop" id="shareReqModal" role="dialog" aria-modal="true" aria-labelledby="shareModalTitle">
+    <div class="dialog-panel">
+      <div class="dialog-header">
+        <h2 class="dialog-title" id="shareModalTitle">정기 자동 추적 연결</h2>
+        <button type="button" class="dialog-close" data-close-modal="shareReqModal" aria-label="닫기">×</button>
+      </div>
+      <p style="margin:0 0 10px;font-size:13px;color:var(--color-text-secondary);line-height:1.5;">
+        아래 요청 문구를 복사해 피클 채팅에 붙여 주시거나 GitHub 이슈로 등록하시면, 매주 월·목 쿠팡 로그인 브라우저 점검 목록에 바로 합쳐 드려요.
+      </p>
+      <div class="code-preview tnum" id="shareReqPreview"></div>
+      <div class="dialog-actions">
+        <button type="button" class="btn btn-subtle" data-close-modal="shareReqModal">닫기</button>
+        <a class="btn btn-subtle" id="btnOpenGhIssue" href="#" target="_blank" rel="noopener noreferrer">GitHub 이슈 등록</a>
+        <button type="button" class="btn btn-primary" id="btnCopyShareReq">문구 복사</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="app-toast" id="appToast" role="status" aria-live="polite"></div>
+
+  <script>
+    window.__INITIAL_PRODUCTS__ = [
+  {
+    "id": "gomgom-milk",
+    "title": "곰곰 신선한 1A 우유 (900ml×2 환산)",
+    "category": "신선·식품",
+    "unitLabel": "900ml×2 (1.8L)",
+    "cycleDays": 11,
+    "nextDate": "2026-11-29",
+    "targetPrice": 3690,
+    "livePrice": 3690,
+    "liveDate": "2026-11-18",
+    "url": "https://mc.coupang.com/ssr/sdp/link?vendorItemId=70187605147",
+    "count": 25,
+    "minPrice": 3690,
+    "maxPrice": 4680,
+    "avgPrice": 3750,
+    "lastPrice": 3690,
+    "lastDate": "2026-11-18",
+    "history": [
+      {
+        "date": "2025-09-15",
+        "price": 4680,
+        "rawPrice": 5980,
+        "note": "2.3L→1.8L 환산"
+      },
+      {
+        "date": "2025-09-26",
+        "price": 3741,
+        "rawPrice": 4780,
+        "note": "2.3L→1.8L 환산"
+      },
+      {
+        "date": "2025-10-02",
+        "price": 3741,
+        "rawPrice": 4780,
+        "note": "2.3L→1.8L 환산"
+      },
+      {
+        "date": "2025-10-12",
+        "price": 3741,
+        "rawPrice": 4780,
+        "note": "2.3L→1.8L 환산"
+      },
+      {
+        "date": "2025-10-31",
+        "price": 3741,
+        "rawPrice": 4780,
+        "note": "2.3L→1.8L 환산"
+      },
+      {
+        "date": "2025-12-26",
+        "price": 3741,
+        "rawPrice": 4780,
+        "note": "2.3L→1.8L 환산"
+      },
+      {
+        "date": "2026-01-08",
+        "price": 3741,
+        "rawPrice": 4780,
+        "note": "2.3L→1.8L 환산"
+      },
+      {
+        "date": "2026-01-23",
+        "price": 3741,
+        "rawPrice": 4780,
+        "note": "2.3L→1.8L 환산"
+      },
+      {
+        "date": "2026-02-22",
+        "price": 3741,
+        "rawPrice": 4780,
+        "note": "2.3L→1.8L 환산"
+      },
+      {
+        "date": "2026-03-04",
+        "price": 3741,
+        "rawPrice": 4780,
+        "note": "2.3L→1.8L 환산"
+      },
+      {
+        "date": "2026-03-15",
+        "price": 3690,
+        "rawPrice": 3690,
+        "note": "900ml×2"
+      },
+      {
+        "date": "2026-06-30",
+        "price": 3741,
+        "rawPrice": 4780,
+        "note": "2.3L→1.8L 환산"
+      },
+      {
+        "date": "2026-07-10",
+        "price": 3690,
+        "rawPrice": 3690,
+        "note": "900ml×2"
+      },
+      {
+        "date": "2026-07-27",
+        "price": 3690,
+        "rawPrice": 3690,
+        "note": "900ml×2"
+      },
+      {
+        "date": "2026-08-04",
+        "price": 3690,
+        "rawPrice": 3690,
+        "note": "900ml×2"
+      },
+      {
+        "date": "2026-08-10",
+        "price": 3690,
+        "rawPrice": 3690,
+        "note": "900ml×2"
+      },
+      {
+        "date": "2026-08-21",
+        "price": 3690,
+        "rawPrice": 3690,
+        "note": "900ml×2"
+      },
+      {
+        "date": "2026-08-23",
+        "price": 3690,
+        "rawPrice": 3690,
+        "note": "900ml×2"
+      },
+      {
+        "date": "2026-09-13",
+        "price": 3690,
+        "rawPrice": 3690,
+        "note": "900ml×2"
+      },
+      {
+        "date": "2026-09-21",
+        "price": 3690,
+        "rawPrice": 3690,
+        "note": "900ml×2"
+      },
+      {
+        "date": "2026-09-27",
+        "price": 3690,
+        "rawPrice": 3690,
+        "note": "900ml×2"
+      },
+      {
+        "date": "2026-10-06",
+        "price": 3690,
+        "rawPrice": 3690,
+        "note": "900ml×2"
+      },
+      {
+        "date": "2026-11-02",
+        "price": 3690,
+        "rawPrice": 3690,
+        "note": "900ml×2"
+      },
+      {
+        "date": "2026-11-14",
+        "price": 3690,
+        "rawPrice": 3690,
+        "note": "900ml×2"
+      },
+      {
+        "date": "2026-11-18",
+        "price": 3690,
+        "rawPrice": 3690,
+        "note": "900ml×2"
+      }
+    ]
+  },
+  {
+    "id": "pong-churu",
+    "title": "이나바 고양이 퐁츄르 간식 (700g 환산)",
+    "category": "반려동물",
+    "unitLabel": "35g×20개 (700g)",
+    "cycleDays": 24,
+    "nextDate": "2026-11-30",
+    "targetPrice": 16000,
+    "livePrice": null,
+    "liveDate": null,
+    "url": "https://mc.coupang.com/ssr/sdp/link?vendorItemId=83511460503",
+    "count": 23,
+    "minPrice": 7650,
+    "maxPrice": 19800,
+    "avgPrice": 17086,
+    "lastPrice": 19780,
+    "lastDate": "2026-11-06",
+    "history": [
+      {
+        "date": "2026-03-10",
+        "price": 15200,
+        "rawPrice": 15200,
+        "note": "700g (35g×20)"
+      },
+      {
+        "date": "2026-03-17",
+        "price": 17300,
+        "rawPrice": 51900,
+        "note": "700g×3→1박스 환산"
+      },
+      {
+        "date": "2026-04-13",
+        "price": 16180,
+        "rawPrice": 16180,
+        "note": "700g (35g×20)"
+      },
+      {
+        "date": "2026-04-13",
+        "price": 17500,
+        "rawPrice": 17500,
+        "note": "700g (35g×20)"
+      },
+      {
+        "date": "2026-04-25",
+        "price": 17460,
+        "rawPrice": 17460,
+        "note": "700g (35g×20)"
+      },
+      {
+        "date": "2026-04-25",
+        "price": 18200,
+        "rawPrice": 18200,
+        "note": "700g (35g×20)"
+      },
+      {
+        "date": "2026-04-25",
+        "price": 16530,
+        "rawPrice": 16530,
+        "note": "700g (35g×20)"
+      },
+      {
+        "date": "2026-05-19",
+        "price": 17290,
+        "rawPrice": 17290,
+        "note": "700g (35g×20)"
+      },
+      {
+        "date": "2026-05-19",
+        "price": 17570,
+        "rawPrice": 17570,
+        "note": "700g (35g×20)"
+      },
+      {
+        "date": "2026-07-18",
+        "price": 17390,
+        "rawPrice": 17390,
+        "note": "700g (35g×20)"
+      },
+      {
+        "date": "2026-07-18",
+        "price": 17590,
+        "rawPrice": 17590,
+        "note": "700g (35g×20)"
+      },
+      {
+        "date": "2026-07-18",
+        "price": 18200,
+        "rawPrice": 18200,
+        "note": "700g (35g×20)"
+      },
+      {
+        "date": "2026-08-10",
+        "price": 7650,
+        "rawPrice": 7650,
+        "note": "700g (35g×20)"
+      },
+      {
+        "date": "2026-08-10",
+        "price": 8440,
+        "rawPrice": 8440,
+        "note": "700g (35g×20)"
+      },
+      {
+        "date": "2026-09-04",
+        "price": 17740,
+        "rawPrice": 17740,
+        "note": "700g (35g×20)"
+      },
+      {
+        "date": "2026-09-04",
+        "price": 18900,
+        "rawPrice": 18900,
+        "note": "700g (35g×20)"
+      },
+      {
+        "date": "2026-09-17",
+        "price": 17653,
+        "rawPrice": 26480,
+        "note": "1.05kg→700g 환산"
+      },
+      {
+        "date": "2026-09-29",
+        "price": 18720,
+        "rawPrice": 18720,
+        "note": "700g (35g×20)"
+      },
+      {
+        "date": "2026-09-29",
+        "price": 19400,
+        "rawPrice": 19400,
+        "note": "700g (35g×20)"
+      },
+      {
+        "date": "2026-10-16",
+        "price": 19780,
+        "rawPrice": 19780,
+        "note": "700g (35g×20)"
+      },
+      {
+        "date": "2026-10-16",
+        "price": 18700,
+        "rawPrice": 18700,
+        "note": "700g (35g×20)"
+      },
+      {
+        "date": "2026-11-06",
+        "price": 19800,
+        "rawPrice": 19800,
+        "note": "700g (35g×20)"
+      },
+      {
+        "date": "2026-11-06",
+        "price": 19780,
+        "rawPrice": 19780,
+        "note": "700g (35g×20)"
+      }
+    ]
+  },
+  {
+    "id": "shin-ramyun",
+    "title": "농심 신라면 120g (5개입 환산)",
+    "category": "신선·식품",
+    "unitLabel": "5개입 기준",
+    "cycleDays": 32,
+    "nextDate": "2026-12-20",
+    "targetPrice": 3950,
+    "livePrice": 4150,
+    "liveDate": "2026-11-18",
+    "url": "https://mc.coupang.com/ssr/sdp/link?vendorItemId=84566941756",
+    "count": 19,
+    "minPrice": 3510,
+    "maxPrice": 4150,
+    "avgPrice": 3942,
+    "lastPrice": 3735,
+    "lastDate": "2026-11-14",
+    "history": [
+      {
+        "date": "2024-11-01",
+        "price": 3900,
+        "rawPrice": 7800,
+        "note": "10개입→5개 환산"
+      },
+      {
+        "date": "2025-01-31",
+        "price": 3900,
+        "rawPrice": 3900,
+        "note": "5개입"
+      },
+      {
+        "date": "2025-02-15",
+        "price": 3900,
+        "rawPrice": 3900,
+        "note": "5개입"
+      },
+      {
+        "date": "2025-03-16",
+        "price": 3510,
+        "rawPrice": 7020,
+        "note": "10개입→5개 환산"
+      },
+      {
+        "date": "2025-03-28",
+        "price": 4150,
+        "rawPrice": 4150,
+        "note": "5개입"
+      },
+      {
+        "date": "2025-06-06",
+        "price": 4070,
+        "rawPrice": 4070,
+        "note": "5개입"
+      },
+      {
+        "date": "2025-09-17",
+        "price": 4150,
+        "rawPrice": 4150,
+        "note": "5개입"
+      },
+      {
+        "date": "2025-09-26",
+        "price": 4150,
+        "rawPrice": 4150,
+        "note": "5개입"
+      },
+      {
+        "date": "2025-10-07",
+        "price": 3735,
+        "rawPrice": 7470,
+        "note": "10개입→5개 환산"
+      },
+      {
+        "date": "2026-01-03",
+        "price": 3735,
+        "rawPrice": 7470,
+        "note": "10개입→5개 환산"
+      },
+      {
+        "date": "2026-02-03",
+        "price": 4150,
+        "rawPrice": 4150,
+        "note": "5개입"
+      },
+      {
+        "date": "2026-02-08",
+        "price": 4150,
+        "rawPrice": 4150,
+        "note": "5개입"
+      },
+      {
+        "date": "2026-03-15",
+        "price": 3735,
+        "rawPrice": 7470,
+        "note": "10개입→5개 환산"
+      },
+      {
+        "date": "2026-04-18",
+        "price": 4150,
+        "rawPrice": 4150,
+        "note": "5개입"
+      },
+      {
+        "date": "2026-05-18",
+        "price": 4150,
+        "rawPrice": 8300,
+        "note": "10개입→5개 환산"
+      },
+      {
+        "date": "2026-06-23",
+        "price": 3735,
+        "rawPrice": 7470,
+        "note": "10개입→5개 환산"
+      },
+      {
+        "date": "2026-08-30",
+        "price": 4150,
+        "rawPrice": 8300,
+        "note": "10개입→5개 환산"
+      },
+      {
+        "date": "2026-09-27",
+        "price": 3735,
+        "rawPrice": 7470,
+        "note": "10개입→5개 환산"
+      },
+      {
+        "date": "2026-11-14",
+        "price": 3735,
+        "rawPrice": 7470,
+        "note": "10개입→5개 환산"
+      }
+    ]
+  },
+  {
+    "id": "beansprout",
+    "title": "곰곰 아삭한 콩나물 (500g 기준)",
+    "category": "신선·식품",
+    "unitLabel": "500g 1봉",
+    "cycleDays": 22,
+    "nextDate": "2026-12-10",
+    "targetPrice": 1000,
+    "livePrice": 1090,
+    "liveDate": "2026-11-18",
+    "url": "https://mc.coupang.com/ssr/sdp/link?vendorItemId=70278175584",
+    "count": 20,
+    "minPrice": 970,
+    "maxPrice": 1633,
+    "avgPrice": 1053,
+    "lastPrice": 1633,
+    "lastDate": "2026-11-18",
+    "history": [
+      {
+        "date": "2024-11-10",
+        "price": 1000,
+        "rawPrice": 1000,
+        "note": "500g"
+      },
+      {
+        "date": "2024-12-09",
+        "price": 1000,
+        "rawPrice": 1000,
+        "note": "500g"
+      },
+      {
+        "date": "2024-12-16",
+        "price": 1000,
+        "rawPrice": 1000,
+        "note": "500g"
+      },
+      {
+        "date": "2024-12-24",
+        "price": 1000,
+        "rawPrice": 1000,
+        "note": "500g"
+      },
+      {
+        "date": "2025-01-06",
+        "price": 1000,
+        "rawPrice": 1000,
+        "note": "500g"
+      },
+      {
+        "date": "2025-01-31",
+        "price": 1000,
+        "rawPrice": 1000,
+        "note": "500g"
+      },
+      {
+        "date": "2025-02-16",
+        "price": 1000,
+        "rawPrice": 1000,
+        "note": "500g"
+      },
+      {
+        "date": "2025-03-02",
+        "price": 1000,
+        "rawPrice": 1000,
+        "note": "500g"
+      },
+      {
+        "date": "2025-03-16",
+        "price": 1090,
+        "rawPrice": 1090,
+        "note": "500g"
+      },
+      {
+        "date": "2025-04-07",
+        "price": 1000,
+        "rawPrice": 1000,
+        "note": "500g"
+      },
+      {
+        "date": "2025-07-01",
+        "price": 1000,
+        "rawPrice": 1000,
+        "note": "500g"
+      },
+      {
+        "date": "2025-10-21",
+        "price": 1000,
+        "rawPrice": 1000,
+        "note": "500g"
+      },
+      {
+        "date": "2025-10-31",
+        "price": 1000,
+        "rawPrice": 1000,
+        "note": "500g"
+      },
+      {
+        "date": "2025-11-26",
+        "price": 970,
+        "rawPrice": 1940,
+        "note": "500g×2→1봉 환산"
+      },
+      {
+        "date": "2025-12-26",
+        "price": 1000,
+        "rawPrice": 1000,
+        "note": "500g"
+      },
+      {
+        "date": "2026-02-09",
+        "price": 1100,
+        "rawPrice": 1100,
+        "note": "500g"
+      },
+      {
+        "date": "2026-06-14",
+        "price": 1090,
+        "rawPrice": 1090,
+        "note": "500g"
+      },
+      {
+        "date": "2026-07-01",
+        "price": 1090,
+        "rawPrice": 1090,
+        "note": "500g"
+      },
+      {
+        "date": "2026-11-13",
+        "price": 1090,
+        "rawPrice": 1090,
+        "note": "500g"
+      },
+      {
+        "date": "2026-11-18",
+        "price": 1633,
+        "rawPrice": 980,
+        "note": "300g→500g 환산"
+      }
+    ]
+  },
+  {
+    "id": "shine-muscat",
+    "title": "당도선별 샤인머스캣 2kg",
+    "category": "신선·식품",
+    "unitLabel": "2kg 1박스",
+    "cycleDays": 12,
+    "nextDate": "2026-11-24",
+    "targetPrice": 10900,
+    "livePrice": null,
+    "liveDate": null,
+    "url": "https://mc.coupang.com/ssr/sdp/link?vendorItemId=77583447249",
+    "count": 7,
+    "minPrice": 9900,
+    "maxPrice": 17900,
+    "avgPrice": 13986,
+    "lastPrice": 9900,
+    "lastDate": "2026-11-15",
+    "history": [
+      {
+        "date": "2026-08-08",
+        "price": 17900,
+        "rawPrice": 17900,
+        "note": "2kg"
+      },
+      {
+        "date": "2026-08-11",
+        "price": 17900,
+        "rawPrice": 17900,
+        "note": "2kg"
+      },
+      {
+        "date": "2026-08-21",
+        "price": 13800,
+        "rawPrice": 13800,
+        "note": "2kg"
+      },
+      {
+        "date": "2026-08-23",
+        "price": 13800,
+        "rawPrice": 13800,
+        "note": "2kg"
+      },
+      {
+        "date": "2026-09-13",
+        "price": 12800,
+        "rawPrice": 12800,
+        "note": "2kg"
+      },
+      {
+        "date": "2026-09-21",
+        "price": 11800,
+        "rawPrice": 11800,
+        "note": "2kg"
+      },
+      {
+        "date": "2026-11-15",
+        "price": 9900,
+        "rawPrice": 9900,
+        "note": "2kg"
+      }
+    ]
+  },
+  {
+    "id": "eggs-30",
+    "title": "곰곰 무항생제 신선한 특란 (30구 환산)",
+    "category": "신선·식품",
+    "unitLabel": "30구",
+    "cycleDays": 51,
+    "nextDate": "2026-12-29",
+    "targetPrice": 8000,
+    "livePrice": null,
+    "liveDate": null,
+    "url": "https://mc.coupang.com/ssr/sdp/link?vendorItemId=70272921457",
+    "count": 7,
+    "minPrice": 7990,
+    "maxPrice": 12780,
+    "avgPrice": 9496,
+    "lastPrice": 7990,
+    "lastDate": "2026-11-08",
+    "history": [
+      {
+        "date": "2025-07-06",
+        "price": 10180,
+        "rawPrice": 10180,
+        "note": "30구"
+      },
+      {
+        "date": "2025-12-04",
+        "price": 12780,
+        "rawPrice": 6390,
+        "note": "15구→30구 환산"
+      },
+      {
+        "date": "2026-02-08",
+        "price": 9270,
+        "rawPrice": 9270,
+        "note": "30구"
+      },
+      {
+        "date": "2026-02-27",
+        "price": 9270,
+        "rawPrice": 9270,
+        "note": "30구"
+      },
+      {
+        "date": "2026-09-27",
+        "price": 8990,
+        "rawPrice": 8990,
+        "note": "30구"
+      },
+      {
+        "date": "2026-11-02",
+        "price": 7990,
+        "rawPrice": 7990,
+        "note": "30구"
+      },
+      {
+        "date": "2026-11-08",
+        "price": 7990,
+        "rawPrice": 7990,
+        "note": "30구"
+      }
+    ]
+  },
+  {
+    "id": "oiocha",
+    "title": "오이오차 녹차 525ml (24개입 환산)",
+    "category": "음료·커피",
+    "unitLabel": "525ml×24개",
+    "cycleDays": 28,
+    "nextDate": "2026-11-19",
+    "targetPrice": 23500,
+    "livePrice": null,
+    "liveDate": null,
+    "url": "https://mc.coupang.com/ssr/sdp/link?vendorItemId=3000937145",
+    "count": 10,
+    "minPrice": 14420,
+    "maxPrice": 30520,
+    "avgPrice": 23312,
+    "lastPrice": 29900,
+    "lastDate": "2026-10-05",
+    "history": [
+      {
+        "date": "2025-10-07",
+        "price": 30520,
+        "rawPrice": 7630,
+        "note": "6개입→24개 환산"
+      },
+      {
+        "date": "2025-10-17",
+        "price": 15260,
+        "rawPrice": 3815,
+        "note": "6개입→24개 환산"
+      },
+      {
+        "date": "2025-10-31",
+        "price": 14420,
+        "rawPrice": 3605,
+        "note": "6개입→24개 환산"
+      },
+      {
+        "date": "2026-02-13",
+        "price": 14800,
+        "rawPrice": 3700,
+        "note": "6개입→24개 환산"
+      },
+      {
+        "date": "2026-06-14",
+        "price": 27640,
+        "rawPrice": 6910,
+        "note": "6개입→24개 환산"
+      },
+      {
+        "date": "2026-06-15",
+        "price": 23050,
+        "rawPrice": 23050,
+        "note": "24개입"
+      },
+      {
+        "date": "2026-07-29",
+        "price": 25300,
+        "rawPrice": 25300,
+        "note": "24개입"
+      },
+      {
+        "date": "2026-08-08",
+        "price": 25300,
+        "rawPrice": 25300,
+        "note": "24개입"
+      },
+      {
+        "date": "2026-09-17",
+        "price": 26930,
+        "rawPrice": 26930,
+        "note": "24개입"
+      },
+      {
+        "date": "2026-10-05",
+        "price": 29900,
+        "rawPrice": 29900,
+        "note": "24개입"
+      }
+    ]
+  },
+  {
+    "id": "top-coffee",
+    "title": "티오피 TOP 커피음료 275ml 18개입",
+    "category": "음료·커피",
+    "unitLabel": "275ml×18개",
+    "cycleDays": 32,
+    "nextDate": "2026-11-19",
+    "targetPrice": 24500,
+    "livePrice": null,
+    "liveDate": null,
+    "url": "https://mc.coupang.com/ssr/sdp/link?vendorItemId=92608438454",
+    "count": 8,
+    "minPrice": 24000,
+    "maxPrice": 29980,
+    "avgPrice": 27654,
+    "lastPrice": 24000,
+    "lastDate": "2026-10-05",
+    "history": [
+      {
+        "date": "2025-09-09",
+        "price": 27980,
+        "rawPrice": 27980,
+        "note": "18개입 기획"
+      },
+      {
+        "date": "2025-09-25",
+        "price": 27980,
+        "rawPrice": 27980,
+        "note": "18개입 기획"
+      },
+      {
+        "date": "2025-10-12",
+        "price": 27980,
+        "rawPrice": 27980,
+        "note": "18개입 기획"
+      },
+      {
+        "date": "2025-12-07",
+        "price": 29980,
+        "rawPrice": 29980,
+        "note": "18개입 기획"
+      },
+      {
+        "date": "2025-12-26",
+        "price": 29980,
+        "rawPrice": 29980,
+        "note": "18개입 기획"
+      },
+      {
+        "date": "2026-08-08",
+        "price": 28980,
+        "rawPrice": 28980,
+        "note": "18개입 기획"
+      },
+      {
+        "date": "2026-09-21",
+        "price": 24350,
+        "rawPrice": 24350,
+        "note": "18개입 기획"
+      },
+      {
+        "date": "2026-10-05",
+        "price": 24000,
+        "rawPrice": 24000,
+        "note": "18개입 기획"
+      }
+    ]
+  },
+  {
+    "id": "frosch",
+    "title": "프로쉬 독일 식기세척기세제 540g×2",
+    "category": "생활·영양",
+    "unitLabel": "540g×2개",
+    "cycleDays": 58,
+    "nextDate": "2026-12-15",
+    "targetPrice": 19200,
+    "livePrice": null,
+    "liveDate": null,
+    "url": "https://mc.coupang.com/ssr/sdp/link?vendorItemId=92411542361",
+    "count": 5,
+    "minPrice": 17850,
+    "maxPrice": 23490,
+    "avgPrice": 19874,
+    "lastPrice": 23490,
+    "lastDate": "2026-10-18",
+    "history": [
+      {
+        "date": "2026-01-31",
+        "price": 19500,
+        "rawPrice": 19500,
+        "note": "2개입"
+      },
+      {
+        "date": "2026-03-25",
+        "price": 17850,
+        "rawPrice": 17850,
+        "note": "2개입"
+      },
+      {
+        "date": "2026-07-02",
+        "price": 19330,
+        "rawPrice": 19330,
+        "note": "2개입"
+      },
+      {
+        "date": "2026-08-29",
+        "price": 19200,
+        "rawPrice": 19200,
+        "note": "2개입"
+      },
+      {
+        "date": "2026-10-18",
+        "price": 23490,
+        "rawPrice": 23490,
+        "note": "2개입"
+      }
+    ]
+  },
+  {
+    "id": "tofu-litter",
+    "title": "탐사 고양이 두부모래 7L×6",
+    "category": "반려동물",
+    "unitLabel": "7L×6개",
+    "cycleDays": 120,
+    "nextDate": "2026-12-27",
+    "targetPrice": 26000,
+    "livePrice": null,
+    "liveDate": null,
+    "url": "https://mc.coupang.com/ssr/sdp/link?vendorItemId=4543610007",
+    "count": 6,
+    "minPrice": 25820,
+    "maxPrice": 27990,
+    "avgPrice": 26962,
+    "lastPrice": 26990,
+    "lastDate": "2026-08-29",
+    "history": [
+      {
+        "date": "2024-12-22",
+        "price": 25820,
+        "rawPrice": 25820,
+        "note": "7L×6"
+      },
+      {
+        "date": "2025-05-06",
+        "price": 27990,
+        "rawPrice": 27990,
+        "note": "7L×6"
+      },
+      {
+        "date": "2025-09-04",
+        "price": 26990,
+        "rawPrice": 26990,
+        "note": "7L×6"
+      },
+      {
+        "date": "2026-01-15",
+        "price": 26990,
+        "rawPrice": 26990,
+        "note": "7L×6"
+      },
+      {
+        "date": "2026-05-10",
+        "price": 26990,
+        "rawPrice": 26990,
+        "note": "7L×6"
+      },
+      {
+        "date": "2026-08-29",
+        "price": 26990,
+        "rawPrice": 26990,
+        "note": "7L×6"
+      }
+    ]
+  },
+  {
+    "id": "onion",
+    "title": "친정엄마꾸러미 뚝딱 양파 500g×2",
+    "category": "신선·식품",
+    "unitLabel": "500g×2개",
+    "cycleDays": 26,
+    "nextDate": "2026-12-11",
+    "targetPrice": 3900,
+    "livePrice": null,
+    "liveDate": null,
+    "url": "https://mc.coupang.com/ssr/sdp/link?vendorItemId=91772599788",
+    "count": 7,
+    "minPrice": 2560,
+    "maxPrice": 5680,
+    "avgPrice": 4076,
+    "lastPrice": 3860,
+    "lastDate": "2026-11-16",
+    "history": [
+      {
+        "date": "2025-10-21",
+        "price": 2800,
+        "rawPrice": 2800,
+        "note": "2개입"
+      },
+      {
+        "date": "2025-10-28",
+        "price": 4830,
+        "rawPrice": 4830,
+        "note": "2개입"
+      },
+      {
+        "date": "2025-11-17",
+        "price": 5120,
+        "rawPrice": 5120,
+        "note": "2개입"
+      },
+      {
+        "date": "2025-12-05",
+        "price": 2560,
+        "rawPrice": 2560,
+        "note": "2개입"
+      },
+      {
+        "date": "2026-07-27",
+        "price": 5680,
+        "rawPrice": 5680,
+        "note": "2개입"
+      },
+      {
+        "date": "2026-08-27",
+        "price": 3680,
+        "rawPrice": 3680,
+        "note": "2개입"
+      },
+      {
+        "date": "2026-11-16",
+        "price": 3860,
+        "rawPrice": 3860,
+        "note": "2개입"
+      }
+    ]
+  },
+  {
+    "id": "albaegi",
+    "title": "국내산 알배기 1통",
+    "category": "신선·식품",
+    "unitLabel": "1개입",
+    "cycleDays": 54,
+    "nextDate": "2027-01-06",
+    "targetPrice": 2200,
+    "livePrice": null,
+    "liveDate": null,
+    "url": "https://mc.coupang.com/ssr/sdp/link?vendorItemId=71797311591",
+    "count": 7,
+    "minPrice": 1990,
+    "maxPrice": 3590,
+    "avgPrice": 2546,
+    "lastPrice": 2580,
+    "lastDate": "2026-11-13",
+    "history": [
+      {
+        "date": "2025-02-11",
+        "price": 2690,
+        "rawPrice": 2690,
+        "note": "1개입"
+      },
+      {
+        "date": "2025-02-16",
+        "price": 3590,
+        "rawPrice": 3590,
+        "note": "1개입"
+      },
+      {
+        "date": "2025-02-28",
+        "price": 1990,
+        "rawPrice": 1990,
+        "note": "1개입"
+      },
+      {
+        "date": "2025-03-05",
+        "price": 1990,
+        "rawPrice": 1990,
+        "note": "1개입"
+      },
+      {
+        "date": "2025-06-09",
+        "price": 1990,
+        "rawPrice": 1990,
+        "note": "1개입"
+      },
+      {
+        "date": "2026-01-23",
+        "price": 2990,
+        "rawPrice": 2990,
+        "note": "1개입"
+      },
+      {
+        "date": "2026-11-13",
+        "price": 2580,
+        "rawPrice": 2580,
+        "note": "1개입"
+      }
+    ]
+  },
+  {
+    "id": "multivitamin",
+    "title": "닥터브라이언 멀티비타민 구미",
+    "category": "생활·영양",
+    "unitLabel": "1병",
+    "cycleDays": 70,
+    "nextDate": "2026-12-29",
+    "targetPrice": 14800,
+    "livePrice": null,
+    "liveDate": null,
+    "url": "https://mc.coupang.com/ssr/sdp/link?vendorItemId=91109293970",
+    "count": 7,
+    "minPrice": 13900,
+    "maxPrice": 27110,
+    "avgPrice": 16769,
+    "lastPrice": 14610,
+    "lastDate": "2026-10-21",
+    "history": [
+      {
+        "date": "2025-07-17",
+        "price": 15500,
+        "rawPrice": 15500,
+        "note": "1병"
+      },
+      {
+        "date": "2025-10-25",
+        "price": 15600,
+        "rawPrice": 15600,
+        "note": "1병"
+      },
+      {
+        "date": "2025-12-01",
+        "price": 15600,
+        "rawPrice": 15600,
+        "note": "1병"
+      },
+      {
+        "date": "2026-01-23",
+        "price": 27110,
+        "rawPrice": 27110,
+        "note": "1병"
+      },
+      {
+        "date": "2026-06-04",
+        "price": 13900,
+        "rawPrice": 13900,
+        "note": "1병"
+      },
+      {
+        "date": "2026-08-23",
+        "price": 15060,
+        "rawPrice": 15060,
+        "note": "1병"
+      },
+      {
+        "date": "2026-10-21",
+        "price": 14610,
+        "rawPrice": 14610,
+        "note": "1병"
+      }
+    ]
+  },
+  {
+    "id": "white-kimchi",
+    "title": "비비고 우리아이 한입 백김치 270g×2",
+    "category": "신선·식품",
+    "unitLabel": "270g×2개",
+    "cycleDays": 15,
+    "nextDate": "비정기",
+    "targetPrice": 7700,
+    "livePrice": null,
+    "liveDate": null,
+    "url": "https://mc.coupang.com/ssr/sdp/link?vendorItemId=90965101041",
+    "count": 11,
+    "minPrice": 7360,
+    "maxPrice": 8340,
+    "avgPrice": 7816,
+    "lastPrice": 8340,
+    "lastDate": "2026-02-03",
+    "history": [
+      {
+        "date": "2025-07-01",
+        "price": 7360,
+        "rawPrice": 3680,
+        "note": "1개→2개 환산"
+      },
+      {
+        "date": "2025-07-26",
+        "price": 7720,
+        "rawPrice": 7720,
+        "note": "2개입"
+      },
+      {
+        "date": "2025-08-07",
+        "price": 7720,
+        "rawPrice": 7720,
+        "note": "2개입"
+      },
+      {
+        "date": "2025-08-19",
+        "price": 7720,
+        "rawPrice": 7720,
+        "note": "2개입"
+      },
+      {
+        "date": "2025-09-03",
+        "price": 7720,
+        "rawPrice": 7720,
+        "note": "2개입"
+      },
+      {
+        "date": "2025-09-15",
+        "price": 7720,
+        "rawPrice": 7720,
+        "note": "2개입"
+      },
+      {
+        "date": "2025-10-16",
+        "price": 8140,
+        "rawPrice": 8140,
+        "note": "2개입"
+      },
+      {
+        "date": "2025-10-31",
+        "price": 7740,
+        "rawPrice": 7740,
+        "note": "2개입"
+      },
+      {
+        "date": "2025-11-14",
+        "price": 8140,
+        "rawPrice": 8140,
+        "note": "2개입"
+      },
+      {
+        "date": "2025-12-26",
+        "price": 7660,
+        "rawPrice": 7660,
+        "note": "2개입"
+      },
+      {
+        "date": "2026-02-03",
+        "price": 8340,
+        "rawPrice": 8340,
+        "note": "2개입"
+      }
+    ]
+  },
+  {
+    "id": "yogurt",
+    "title": "파스퇴르 요구하이 145ml×8",
+    "category": "음료·커피",
+    "unitLabel": "145ml×8개",
+    "cycleDays": 22,
+    "nextDate": "비정기",
+    "targetPrice": 3200,
+    "livePrice": null,
+    "liveDate": null,
+    "url": "https://mc.coupang.com/ssr/sdp/link?vendorItemId=3850251194",
+    "count": 10,
+    "minPrice": 2920,
+    "maxPrice": 4800,
+    "avgPrice": 3651,
+    "lastPrice": 3140,
+    "lastDate": "2026-07-08",
+    "history": [
+      {
+        "date": "2024-12-24",
+        "price": 4320,
+        "rawPrice": 4320,
+        "note": "8개입"
+      },
+      {
+        "date": "2025-01-15",
+        "price": 2980,
+        "rawPrice": 2980,
+        "note": "8개입"
+      },
+      {
+        "date": "2025-01-26",
+        "price": 3510,
+        "rawPrice": 3510,
+        "note": "8개입"
+      },
+      {
+        "date": "2025-02-07",
+        "price": 2980,
+        "rawPrice": 2980,
+        "note": "8개입"
+      },
+      {
+        "date": "2025-02-15",
+        "price": 2920,
+        "rawPrice": 5840,
+        "note": "16개→8개 환산"
+      },
+      {
+        "date": "2025-03-02",
+        "price": 2980,
+        "rawPrice": 2980,
+        "note": "8개입"
+      },
+      {
+        "date": "2025-04-07",
+        "price": 4800,
+        "rawPrice": 9600,
+        "note": "16개→8개 환산"
+      },
+      {
+        "date": "2025-10-25",
+        "price": 4480,
+        "rawPrice": 4480,
+        "note": "8개입"
+      },
+      {
+        "date": "2025-12-31",
+        "price": 4400,
+        "rawPrice": 4400,
+        "note": "8개입"
+      },
+      {
+        "date": "2026-07-08",
+        "price": 3140,
+        "rawPrice": 3140,
+        "note": "8개입"
+      }
+    ]
+  }
+];
+    window.__GITHUB_REPO__ = 'pyw31337/coupang';
+  </script>
+  <script src="app.js"></script>
+</body>
+</html>

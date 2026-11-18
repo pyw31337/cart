@@ -1,0 +1,76 @@
+/* Coupang Price Tracker Design Tokens (TDS & SEED Inspired) */
+:root {
+  color-scheme: light only;
+
+  /* Typography */
+  --font-sans: 'Pretendard Variable', 'Pretendard', 'Noto Sans KR', sans-serif;
+
+  /* Neutral Palette */
+  --color-bg-canvas: #f4f6f9;
+  --color-bg-surface: #ffffff;
+  --color-bg-subtle: #f8f9fb;
+  --color-bg-hover: #eef1f6;
+  --color-bg-pressed: #e5e8eb;
+  --color-border-default: #e5e8eb;
+  --color-border-strong: #d1d6db;
+
+  --color-text-primary: #191f28;
+  --color-text-secondary: #4e5968;
+  --color-text-tertiary: #8b95a1;
+  --color-text-inverse: #ffffff;
+
+  /* Brand & Semantic */
+  --color-brand: #3182f6;
+  --color-brand-hover: #1b64da;
+  --color-brand-weak: #e8f3ff;
+
+  --color-success: #0ca678;
+  --color-success-text: #087f5b;
+  --color-success-weak: #e6fcf5;
+
+  --color-warning: #f08c00;
+  --color-warning-text: #d9480f;
+  --color-warning-weak: #fff4e6;
+
+  --color-danger: #f03e3e;
+  --color-danger-text: #c92a2a;
+  --color-danger-weak: #fff5f5;
+
+  /* Spacing (4px base grid) */
+  --space-1: 4px;
+  --space-1_5: 6px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  /* Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 22px;
+  --radius-pill: 9999px;
+
+  /* Elevation */
+  --shadow-card: 0 2px 10px rgba(25, 31, 40, 0.045);
+  --shadow-modal: 0 16px 40px rgba(25, 31, 40, 0.16);
+  --shadow-toast: 0 8px 24px rgba(25, 31, 40, 0.22);
+
+  /* Layout */
+  --container-max: 1200px;
+  --gutter: 12px;
+}
+
+@media (min-width: 375px) {
+  :root {
+    --gutter: 16px;
+  }
+}
+
+@media (min-width: 768px) {
+  :root {
+    --gutter: 24px;
+  }
+}
