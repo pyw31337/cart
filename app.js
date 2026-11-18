@@ -313,7 +313,7 @@
         '  </div>' +
         '  <h2 class="product-title">' + esc(p.title) + '</h2>' +
         '  <div class="product-meta">' + esc(p.unitLabel) + (p.cycleDays ? ' · 평균 ' + p.cycleDays + '일 주기 (' + p.count + '회 구매)' : (p.count ? ' · ' + p.count + '회 구매' : '')) + '</div>' +
-        (p.crossNote ? '  <p class="cross-note"><span class="cross-note-label">타 플랫폼</span>' + esc(p.crossNote) + '</p>' : '') +
+        (p.crossNote ? '  <p class="cross-note"><span class="cross-note-label">' + (isCross ? '타 플랫폼' : '참고') + '</span>' + esc(p.crossNote) + '</p>' : '') +
         '  <div class="price-block">' +
         '    <span class="price-current tnum">' + (shown ? esc(fmt(shown)) : '확인 전') + '</span>' +
         '    <span class="price-source">' + shownLabel + '</span>' +
