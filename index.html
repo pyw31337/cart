@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="color-scheme" content="light only" />
-  <title>쿠팡 가격 트래커 · Smart Price Watch</title>
+  <title>통합 가격 트래커 · 쿠팡 · 컬리 · 지마켓 · 네이버쇼핑</title>
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -17,9 +17,9 @@
   <main class="app-shell">
     <header class="app-header">
       <div class="brand-wrap">
-        <div class="brand-kicker"><span class="brand-dot"></span>자동 가격 추적 · 매일 09:00</div>
-        <h1 class="app-title">쿠팡 가격 트래커</h1>
-        <p class="app-subtitle">2024.09~2026.11 구매이력 기반 · 단위 보정 최저가·재구매 주기 모니터</p>
+        <div class="brand-kicker"><span class="brand-dot"></span>4개 플랫폼 통합 · 자동 가격 추적</div>
+        <h1 class="app-title">통합 가격 트래커</h1>
+        <p class="app-subtitle">쿠팡 · 컬리 · 지마켓 · 네이버쇼핑 구매이력 기반 · 단위 보정 최저가·재구매 주기 모니터</p>
       </div>
       <div class="header-actions">
         <button type="button" class="btn btn-primary" id="btnOpenAdd">+ 관심 상품 추가</button>
@@ -27,12 +27,12 @@
     </header>
 
     <section class="status-banner" aria-label="동작 안내">
-      <strong>서비스 안내:</strong> 쿠팡은 외부 직접 크롤링을 차단하므로, 실제 현재가는 피클의 쿠팡 로그인 브라우저가 매일 오전 9시에 자동 수집해 반영합니다. 새로 추가한 상품은 현재 기기에 즉시 저장되며, 카드의 <strong>추적 요청</strong>을 누르면 자동 수집 목록에도 바로 연결할 수 있습니다.
+      <strong>서비스 안내:</strong> 쿠팡 · 컬리 · 지마켓 · 네이버쇼핑 4개 플랫폼의 구매이력을 단위 기준으로 통합했습니다. 쿠팡은 로그인 브라우저가 매일 오전 9시에 자동 수집하고, 컬리 · 지마켓 · 네이버쇼핑 가격은 <strong>2026-11-19 확인가</strong>를 기준으로 같은 점검 목록에서 함께 최신화합니다. 새로 추가한 상품은 현재 기기에 즉시 저장되며, 카드의 <strong>추적 요청</strong>을 누르면 플랫폼과 함께 자동 수집 목록에 연결할 수 있습니다.
     </section>
 
     <section class="kpi-grid" aria-label="요약 지표">
       <div class="kpi-card kpi-lead">
-        <div class="kpi-label">전체 추적 품목</div>
+        <div class="kpi-label">전체 추적 품목 · 4개 플랫폼</div>
         <div class="kpi-value tnum" id="kpiTotal">-</div>
       </div>
       <div class="kpi-card">
@@ -45,13 +45,17 @@
       </div>
     </section>
 
+    <section class="platform-bar" aria-label="플랫폼 필터">
+      <div class="platform-tabs" id="platformTabs" role="tablist" aria-label="플랫폼 선택"></div>
+    </section>
+
     <section class="toolbar" aria-label="검색 및 필터">
       <div class="search-wrap">
         <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <circle cx="11" cy="11" r="8"></circle>
           <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
         </svg>
-        <input type="text" class="search-input" id="searchInput" placeholder="상품명·카테고리 검색 (예: 우유, 퐁츄르)" autocomplete="off" />
+        <input type="text" class="search-input" id="searchInput" placeholder="상품명·플랫폼 검색 (예: 우유, 컬리)" autocomplete="off" />
         <button type="button" class="search-clear" id="searchClear" aria-label="검색어 지우기">×</button>
       </div>
       <div class="chips-scroll" id="chipsScroll" role="tablist" aria-label="카테고리 필터"></div>
@@ -64,12 +68,16 @@
   <div class="dialog-backdrop" id="addModal" role="dialog" aria-modal="true" aria-labelledby="addModalTitle">
     <div class="dialog-panel">
       <div class="dialog-header">
-        <h2 class="dialog-title" id="addModalTitle">관심 쿠팡 상품 추가</h2>
+        <h2 class="dialog-title" id="addModalTitle">관심 상품 추가</h2>
         <button type="button" class="dialog-close" data-close-modal="addModal" aria-label="닫기">×</button>
       </div>
       <div class="form-group">
-        <label class="form-label" for="fUrl">쿠팡 상품 URL *</label>
-        <input type="url" class="form-input" id="fUrl" placeholder="https://www.coupang.com/vp/products/..." />
+        <span class="form-label">플랫폼 선택</span>
+        <div class="custom-picker" id="addPlatformPicker"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="fUrl">상품 URL *</label>
+        <input type="url" class="form-input" id="fUrl" placeholder="https:// (쿠팡·컬리·지마켓·네이버 상품 페이지)" />
       </div>
       <div class="form-group">
         <label class="form-label" for="fTitle">상품명 *</label>
@@ -140,7 +148,7 @@
         <button type="button" class="dialog-close" data-close-modal="shareReqModal" aria-label="닫기">×</button>
       </div>
       <p style="margin:0 0 10px;font-size:13px;color:var(--color-text-secondary);line-height:1.5;">
-        아래 요청 문구를 복사해 피클 채팅에 붙여 주시거나 GitHub 이슈로 등록하시면, 매일 오전 9시 쿠팡 로그인 브라우저 점검 목록에 바로 합쳐 드려요.
+        아래 요청 문구를 복사해 피클 채팅에 붙여 주시거나 GitHub 이슈로 등록하시면, 매일 오전 9시 4개 플랫폼 로그인 브라우저 점검 목록에 바로 합쳐 드려요.
       </p>
       <div class="code-preview tnum" id="shareReqPreview"></div>
       <div class="dialog-actions">
@@ -323,6 +331,13 @@
         "rawPrice": 3690,
         "note": "900ml×2"
       }
+    ],
+    "platform": "coupang",
+    "platformLabel": "쿠팡",
+    "crossNote": "컬리도 서울우유 나100% 2.3L 7,580원·1.8L 5,980원에 2회씩 구매. 100ml당 곰곰 205원 vs 컬리 1.8L 332원 → 곰곰이 단위가 우위",
+    "crossPlatforms": [
+      "쿠팡",
+      "컬리"
     ]
   },
   {
@@ -481,7 +496,9 @@
         "rawPrice": 19780,
         "note": "700g (35g×20)"
       }
-    ]
+    ],
+    "platform": "coupang",
+    "platformLabel": "쿠팡"
   },
   {
     "id": "shin-ramyun",
@@ -615,6 +632,14 @@
         "rawPrice": 7470,
         "note": "10개입→5개 환산"
       }
+    ],
+    "platform": "coupang",
+    "platformLabel": "쿠팡",
+    "crossNote": "컬리 신라면 멀티 5입 3개 11,400원(2025-06, 3,800원/5입), 지마켓 신라면10+안성탕면5+너구리5 20봉 13,800원(2026-10)",
+    "crossPlatforms": [
+      "쿠팡",
+      "컬리",
+      "지마켓"
     ]
   },
   {
@@ -755,7 +780,9 @@
         "rawPrice": 980,
         "note": "300g→500g 환산"
       }
-    ]
+    ],
+    "platform": "coupang",
+    "platformLabel": "쿠팡"
   },
   {
     "id": "shine-muscat",
@@ -817,7 +844,9 @@
         "rawPrice": 9900,
         "note": "2kg"
       }
-    ]
+    ],
+    "platform": "coupang",
+    "platformLabel": "쿠팡"
   },
   {
     "id": "eggs-30",
@@ -879,6 +908,13 @@
         "rawPrice": 7990,
         "note": "30구"
       }
+    ],
+    "platform": "coupang",
+    "platformLabel": "쿠팡",
+    "crossNote": "컬리에 1+등급 무항생제 특란 20구 6,429원(2024-10) 1회 구매 — 30구 환산 9,644원으로 쿠팡 7,990원보다 비쌈",
+    "crossPlatforms": [
+      "쿠팡",
+      "컬리"
     ]
   },
   {
@@ -959,7 +995,9 @@
         "rawPrice": 29900,
         "note": "24개입"
       }
-    ]
+    ],
+    "platform": "coupang",
+    "platformLabel": "쿠팡"
   },
   {
     "id": "top-coffee",
@@ -1027,7 +1065,9 @@
         "rawPrice": 24000,
         "note": "18개입 기획"
       }
-    ]
+    ],
+    "platform": "coupang",
+    "platformLabel": "쿠팡"
   },
   {
     "id": "frosch",
@@ -1077,7 +1117,9 @@
         "rawPrice": 23490,
         "note": "2개입"
       }
-    ]
+    ],
+    "platform": "coupang",
+    "platformLabel": "쿠팡"
   },
   {
     "id": "tofu-litter",
@@ -1133,7 +1175,9 @@
         "rawPrice": 26990,
         "note": "7L×6"
       }
-    ]
+    ],
+    "platform": "coupang",
+    "platformLabel": "쿠팡"
   },
   {
     "id": "onion",
@@ -1195,7 +1239,10 @@
         "rawPrice": 3860,
         "note": "2개입"
       }
-    ]
+    ],
+    "platform": "coupang",
+    "platformLabel": "쿠팡",
+    "crossNote": "컬리·지마켓·네이버에 양파 단독 구매 이력은 없고, 쿠팡에서만 반복 구매"
   },
   {
     "id": "albaegi",
@@ -1257,7 +1304,9 @@
         "rawPrice": 2580,
         "note": "1개입"
       }
-    ]
+    ],
+    "platform": "coupang",
+    "platformLabel": "쿠팡"
   },
   {
     "id": "multivitamin",
@@ -1319,6 +1368,14 @@
         "rawPrice": 14610,
         "note": "1병"
       }
+    ],
+    "platform": "coupang",
+    "platformLabel": "쿠팡",
+    "crossNote": "컬리 복숭아맛 구미 비타민C&D 2회(13,900~17,800원, 2026-11-19 확인 16,800원). 네이버는 2025-12-03 2개월분 118,500원 주문 1건이 있으나 취소완료",
+    "crossPlatforms": [
+      "쿠팡",
+      "컬리",
+      "네이버쇼핑"
     ]
   },
   {
@@ -1405,7 +1462,9 @@
         "rawPrice": 8340,
         "note": "2개입"
       }
-    ]
+    ],
+    "platform": "coupang",
+    "platformLabel": "쿠팡"
   },
   {
     "id": "yogurt",
@@ -1485,7 +1544,971 @@
         "rawPrice": 3140,
         "note": "8개입"
       }
+    ],
+    "platform": "coupang",
+    "platformLabel": "쿠팡"
+  },
+  {
+    "id": "kurly-5085771",
+    "platform": "kurly",
+    "platformLabel": "컬리",
+    "title": "[KF365] 춘천식 닭갈비 1kg (냉장)",
+    "category": "신선·식품",
+    "unitLabel": "1kg 1팩",
+    "cycleDays": 416,
+    "nextDate": "2027-12-31",
+    "targetPrice": 11352,
+    "livePrice": 14190,
+    "liveDate": "2026-11-19",
+    "url": "https://www.kurly.com/goods/5085771",
+    "count": 4,
+    "history": [
+      {
+        "date": "2024-02-23",
+        "price": 13490
+      },
+      {
+        "date": "2024-04-04",
+        "price": 13490
+      },
+      {
+        "date": "2025-09-20",
+        "price": 14350,
+        "note": "정가 17,990원"
+      },
+      {
+        "date": "2026-11-10",
+        "price": 11352,
+        "note": "정가 17,990원"
+      }
+    ],
+    "purchaseDates": [
+      "2024-02-23",
+      "2024-04-04",
+      "2025-09-20",
+      "2026-11-10"
+    ],
+    "note": "컬리 라인 결제가 기준(장바구니 쿠폰·포인트 적용 전)",
+    "minPrice": 11352,
+    "maxPrice": 14350,
+    "avgPrice": 13170,
+    "lastPrice": 11352,
+    "lastDate": "2026-11-10"
+  },
+  {
+    "id": "kurly-5085769",
+    "platform": "kurly",
+    "platformLabel": "컬리",
+    "title": "[KF365] 한돈 고추장양념 돼지불고기 1kg (냉장)",
+    "category": "신선·식품",
+    "unitLabel": "1kg 1팩",
+    "cycleDays": 146,
+    "nextDate": "2026-11-25",
+    "targetPrice": 12140,
+    "livePrice": 12990,
+    "liveDate": "2026-11-19",
+    "url": "https://www.kurly.com/goods/5085769",
+    "count": 4,
+    "history": [
+      {
+        "date": "2024-02-23",
+        "price": 13490
+      },
+      {
+        "date": "2024-04-04",
+        "price": 13490
+      },
+      {
+        "date": "2024-08-28",
+        "price": 12140,
+        "note": "정가 13,490원"
+      },
+      {
+        "date": "2026-07-02",
+        "price": 12500,
+        "note": "정가 15,290원"
+      }
+    ],
+    "purchaseDates": [
+      "2024-02-23",
+      "2024-04-04",
+      "2024-08-28",
+      "2026-07-02"
+    ],
+    "note": "컬리 라인 결제가 기준(장바구니 쿠폰·포인트 적용 전)",
+    "minPrice": 12140,
+    "maxPrice": 13490,
+    "avgPrice": 12905,
+    "lastPrice": 12500,
+    "lastDate": "2026-07-02"
+  },
+  {
+    "id": "kurly-1000128745",
+    "platform": "kurly",
+    "platformLabel": "컬리",
+    "title": "[Kim's butcher] 돌돌말이 대패 삼겹살 1kg(냉동)",
+    "category": "신선·식품",
+    "unitLabel": "1kg 1팩",
+    "cycleDays": 125,
+    "nextDate": "2027-03-15",
+    "targetPrice": 11890,
+    "livePrice": 12900,
+    "liveDate": "2026-11-19",
+    "url": "https://www.kurly.com/goods/1000128745",
+    "count": 4,
+    "history": [
+      {
+        "date": "2024-04-04",
+        "price": 11990,
+        "note": "정가 15,990원"
+      },
+      {
+        "date": "2024-05-21",
+        "price": 11990,
+        "note": "정가 15,990원"
+      },
+      {
+        "date": "2024-09-23",
+        "price": 11890,
+        "note": "정가 16,990원"
+      },
+      {
+        "date": "2026-11-10",
+        "price": 12900,
+        "note": "정가 16,990원"
+      }
+    ],
+    "purchaseDates": [
+      "2024-04-04",
+      "2024-05-21",
+      "2024-09-23",
+      "2026-11-10"
+    ],
+    "note": "컬리 라인 결제가 기준(장바구니 쿠폰·포인트 적용 전)",
+    "minPrice": 11890,
+    "maxPrice": 12900,
+    "avgPrice": 12192,
+    "lastPrice": 12900,
+    "lastDate": "2026-11-10"
+  },
+  {
+    "id": "kurly-5109945",
+    "platform": "kurly",
+    "platformLabel": "컬리",
+    "title": "[도제식빵] 촉촉한 생식빵 1.5cm 600g",
+    "category": "신선·식품",
+    "unitLabel": "600g 1봉",
+    "cycleDays": 47,
+    "nextDate": "비정기",
+    "targetPrice": 6072,
+    "livePrice": 5592,
+    "liveDate": "2026-11-19",
+    "url": "https://www.kurly.com/goods/5109945",
+    "count": 4,
+    "history": [
+      {
+        "date": "2024-02-23",
+        "price": 6210,
+        "note": "정가 6,900원"
+      },
+      {
+        "date": "2024-04-04",
+        "price": 6900
+      },
+      {
+        "date": "2024-05-21",
+        "price": 6072,
+        "note": "정가 6,900원"
+      },
+      {
+        "date": "2025-09-20",
+        "price": 6291,
+        "note": "정가 6,990원"
+      }
+    ],
+    "purchaseDates": [
+      "2024-02-23",
+      "2024-04-04",
+      "2024-05-21",
+      "2025-09-20"
+    ],
+    "note": "컬리 라인 결제가 기준(장바구니 쿠폰·포인트 적용 전)",
+    "minPrice": 6072,
+    "maxPrice": 6900,
+    "avgPrice": 6368,
+    "lastPrice": 6291,
+    "lastDate": "2025-09-20"
+  },
+  {
+    "id": "kurly-5056344",
+    "platform": "kurly",
+    "platformLabel": "컬리",
+    "title": "[Kurly's] 간편하게 바삭, 유린기",
+    "category": "신선·식품",
+    "unitLabel": "1팩",
+    "cycleDays": 29,
+    "nextDate": "비정기",
+    "targetPrice": 8550,
+    "livePrice": 8050,
+    "liveDate": "2026-11-19",
+    "url": "https://www.kurly.com/goods/5056344",
+    "count": 3,
+    "history": [
+      {
+        "date": "2026-01-21",
+        "price": 8990,
+        "note": "정가 9,500원"
+      },
+      {
+        "date": "2026-02-26",
+        "price": 9500
+      },
+      {
+        "date": "2026-03-20",
+        "price": 8550,
+        "note": "x2"
+      }
+    ],
+    "purchaseDates": [
+      "2026-01-21",
+      "2026-02-26",
+      "2026-03-20"
+    ],
+    "note": "컬리 라인 결제가 기준(장바구니 쿠폰·포인트 적용 전)",
+    "liveStatus": "품절",
+    "liveStatusDetail": "품절(Coming Soon·재입고 알림)",
+    "minPrice": 8550,
+    "maxPrice": 9500,
+    "avgPrice": 9013,
+    "lastPrice": 8550,
+    "lastDate": "2026-03-20"
+  },
+  {
+    "id": "kurly-1000304161",
+    "platform": "kurly",
+    "platformLabel": "컬리",
+    "title": "[KF365] 에어프라이어용 미니 돈까스 500g",
+    "category": "신선·식품",
+    "unitLabel": "500g 1봉",
+    "cycleDays": 393,
+    "nextDate": "2027-09-03",
+    "targetPrice": 6390,
+    "livePrice": 7990,
+    "liveDate": "2026-11-19",
+    "url": "https://www.kurly.com/goods/1000304161",
+    "count": 3,
+    "history": [
+      {
+        "date": "2024-06-11",
+        "price": 7990,
+        "note": "정가 9,990원"
+      },
+      {
+        "date": "2026-01-21",
+        "price": 6390,
+        "note": "정가 9,990원"
+      },
+      {
+        "date": "2026-08-06",
+        "price": 7990,
+        "note": "x2"
+      }
+    ],
+    "purchaseDates": [
+      "2024-06-11",
+      "2026-01-21",
+      "2026-08-06"
+    ],
+    "note": "컬리 라인 결제가 기준(장바구니 쿠폰·포인트 적용 전)",
+    "minPrice": 6390,
+    "maxPrice": 7990,
+    "avgPrice": 7457,
+    "lastPrice": 7990,
+    "lastDate": "2026-08-06"
+  },
+  {
+    "id": "kurly-5144844",
+    "platform": "kurly",
+    "platformLabel": "컬리",
+    "title": "[닥터브라이언] 복숭아맛구미 비타민C&D 3000 (33일분)",
+    "category": "생활·영양",
+    "unitLabel": "1병 (33일분)",
+    "cycleDays": 28,
+    "nextDate": "비정기",
+    "targetPrice": 14800,
+    "livePrice": 16800,
+    "liveDate": "2026-11-19",
+    "url": "https://www.kurly.com/goods/5144844",
+    "count": 2,
+    "history": [
+      {
+        "date": "2025-01-07",
+        "price": 13900,
+        "note": "정가 25,000원"
+      },
+      {
+        "date": "2025-02-04",
+        "price": 17800,
+        "note": "정가 25,000원"
+      }
+    ],
+    "purchaseDates": [
+      "2025-01-07",
+      "2025-02-04"
+    ],
+    "note": "컬리 라인 결제가 기준(장바구니 쿠폰·포인트 적용 전)",
+    "minPrice": 13900,
+    "maxPrice": 17800,
+    "avgPrice": 15850,
+    "lastPrice": 17800,
+    "lastDate": "2025-02-04",
+    "crossNote": "쿠팡 닥터브라이언 멀티비타민 구미 7회(13,900~27,110원, 목표 14,800원)와 같은 브랜드·같은 복숭아맛 계열. 2026-11-19 컬리 16,800원은 쿠팡 목표가보다 2,000원 비쌈",
+    "crossPlatforms": [
+      "컬리",
+      "쿠팡",
+      "네이버쇼핑"
     ]
+  },
+  {
+    "id": "kurly-5095355",
+    "platform": "kurly",
+    "platformLabel": "컬리",
+    "title": "[KF365] 당도선별 제주 감귤 2.5kg (로얄과)",
+    "category": "신선·식품",
+    "unitLabel": "2.5kg 1박스",
+    "cycleDays": 293,
+    "nextDate": "2027-08-30",
+    "targetPrice": 13900,
+    "livePrice": 14400,
+    "liveDate": "2026-11-19",
+    "url": "https://www.kurly.com/goods/5095355",
+    "count": 2,
+    "history": [
+      {
+        "date": "2026-01-21",
+        "price": 15900,
+        "note": "정가 20,900원"
+      },
+      {
+        "date": "2026-11-10",
+        "price": 13900,
+        "note": "정가 17,900원"
+      }
+    ],
+    "purchaseDates": [
+      "2026-01-21",
+      "2026-11-10"
+    ],
+    "note": "컬리 라인 결제가 기준(장바구니 쿠폰·포인트 적용 전)",
+    "minPrice": 13900,
+    "maxPrice": 15900,
+    "avgPrice": 14900,
+    "lastPrice": 13900,
+    "lastDate": "2026-11-10"
+  },
+  {
+    "id": "kurly-1000811962",
+    "platform": "kurly",
+    "platformLabel": "컬리",
+    "title": "[일상식탁] 부산식 얼큰 낙곱새",
+    "category": "신선·식품",
+    "unitLabel": "1팩 (2인분)",
+    "cycleDays": 36,
+    "nextDate": "비정기",
+    "targetPrice": 14175,
+    "livePrice": 16900,
+    "liveDate": "2026-11-19",
+    "url": "https://www.kurly.com/goods/1000811962",
+    "count": 2,
+    "history": [
+      {
+        "date": "2026-01-21",
+        "price": 14175,
+        "note": "정가 18,900원"
+      },
+      {
+        "date": "2026-02-26",
+        "price": 15120,
+        "note": "정가 18,900원"
+      }
+    ],
+    "purchaseDates": [
+      "2026-01-21",
+      "2026-02-26"
+    ],
+    "note": "컬리 라인 결제가 기준(장바구니 쿠폰·포인트 적용 전)",
+    "minPrice": 14175,
+    "maxPrice": 15120,
+    "avgPrice": 14648,
+    "lastPrice": 15120,
+    "lastDate": "2026-02-26"
+  },
+  {
+    "id": "kurly-1001530446",
+    "platform": "kurly",
+    "platformLabel": "컬리",
+    "title": "[KF365] 에어프라이어용 오징어튀김",
+    "category": "신선·식품",
+    "unitLabel": "1봉",
+    "cycleDays": 161,
+    "nextDate": "2026-10-07",
+    "targetPrice": 8850,
+    "livePrice": 10500,
+    "liveDate": "2026-11-19",
+    "url": "https://www.kurly.com/goods/1001530446",
+    "count": 2,
+    "history": [
+      {
+        "date": "2025-11-19",
+        "price": 9900,
+        "note": "x2"
+      },
+      {
+        "date": "2026-04-29",
+        "price": 8850,
+        "note": "정가 13,500원"
+      }
+    ],
+    "purchaseDates": [
+      "2025-11-19",
+      "2026-04-29"
+    ],
+    "note": "컬리 라인 결제가 기준(장바구니 쿠폰·포인트 적용 전)",
+    "minPrice": 8850,
+    "maxPrice": 9900,
+    "avgPrice": 9375,
+    "lastPrice": 8850,
+    "lastDate": "2026-04-29"
+  },
+  {
+    "id": "kurly-1000085434",
+    "platform": "kurly",
+    "platformLabel": "컬리",
+    "title": "[밀클레버] 단팥 미니붕어빵 400g",
+    "category": "신선·식품",
+    "unitLabel": "400g 1봉",
+    "cycleDays": 348,
+    "nextDate": "2026-11-02",
+    "targetPrice": 5925,
+    "livePrice": 6320,
+    "liveDate": "2026-11-19",
+    "url": "https://www.kurly.com/goods/1000085434",
+    "count": 2,
+    "history": [
+      {
+        "date": "2024-12-06",
+        "price": 5925,
+        "note": "정가 7,900원"
+      },
+      {
+        "date": "2024-12-06",
+        "price": 5925,
+        "note": "정가 7,900원"
+      },
+      {
+        "date": "2025-11-19",
+        "price": 7900
+      }
+    ],
+    "purchaseDates": [
+      "2024-12-06",
+      "2025-11-19"
+    ],
+    "note": "컬리 라인 결제가 기준(장바구니 쿠폰·포인트 적용 전)",
+    "minPrice": 5925,
+    "maxPrice": 7900,
+    "avgPrice": 6583,
+    "lastPrice": 7900,
+    "lastDate": "2025-11-19"
+  },
+  {
+    "id": "kurly-1000200844",
+    "platform": "kurly",
+    "platformLabel": "컬리",
+    "title": "[키친고메] 굳지 않는 오색 꿀방울떡",
+    "category": "신선·식품",
+    "unitLabel": "1팩",
+    "cycleDays": 28,
+    "nextDate": "비정기",
+    "targetPrice": 8118,
+    "livePrice": 9810,
+    "liveDate": "2026-11-19",
+    "url": "https://www.kurly.com/goods/1000200844",
+    "count": 2,
+    "history": [
+      {
+        "date": "2024-11-08",
+        "price": 9900
+      },
+      {
+        "date": "2024-12-06",
+        "price": 8118,
+        "note": "정가 9,900원"
+      }
+    ],
+    "purchaseDates": [
+      "2024-11-08",
+      "2024-12-06"
+    ],
+    "note": "컬리 라인 결제가 기준(장바구니 쿠폰·포인트 적용 전)",
+    "minPrice": 8118,
+    "maxPrice": 9900,
+    "avgPrice": 9009,
+    "lastPrice": 8118,
+    "lastDate": "2024-12-06"
+  },
+  {
+    "id": "kurly-1000765126",
+    "platform": "kurly",
+    "platformLabel": "컬리",
+    "title": "[제일맞게컬리] 육즙+왕교자 1.01kg",
+    "category": "신선·식품",
+    "unitLabel": "1.01kg 1봉",
+    "cycleDays": 316,
+    "nextDate": "2027-03-11",
+    "targetPrice": 7980,
+    "livePrice": 9480,
+    "liveDate": "2026-11-19",
+    "url": "https://www.kurly.com/goods/1000765126",
+    "count": 2,
+    "history": [
+      {
+        "date": "2025-06-17",
+        "price": 7980,
+        "note": "정가 9,980원"
+      },
+      {
+        "date": "2026-04-29",
+        "price": 9680,
+        "note": "정가 10,480원"
+      }
+    ],
+    "purchaseDates": [
+      "2025-06-17",
+      "2026-04-29"
+    ],
+    "note": "컬리 라인 결제가 기준(장바구니 쿠폰·포인트 적용 전)",
+    "minPrice": 7980,
+    "maxPrice": 9680,
+    "avgPrice": 8830,
+    "lastPrice": 9680,
+    "lastDate": "2026-04-29"
+  },
+  {
+    "id": "kurly-1001363780",
+    "platform": "kurly",
+    "platformLabel": "컬리",
+    "title": "[차려낸] 비법 간장 양념 메추리알 장조림 1kg",
+    "category": "신선·식품",
+    "unitLabel": "1kg 1팩",
+    "cycleDays": 23,
+    "nextDate": "비정기",
+    "targetPrice": 7900,
+    "livePrice": 7900,
+    "liveDate": "2026-11-19",
+    "url": "https://www.kurly.com/goods/1001363780",
+    "count": 2,
+    "history": [
+      {
+        "date": "2025-07-24",
+        "price": 7900,
+        "note": "정가 9,900원"
+      },
+      {
+        "date": "2025-08-16",
+        "price": 8900,
+        "note": "정가 9,900원"
+      }
+    ],
+    "purchaseDates": [
+      "2025-07-24",
+      "2025-08-16"
+    ],
+    "note": "컬리 라인 결제가 기준(장바구니 쿠폰·포인트 적용 전)",
+    "minPrice": 7900,
+    "maxPrice": 8900,
+    "avgPrice": 8400,
+    "lastPrice": 8900,
+    "lastDate": "2025-08-16"
+  },
+  {
+    "id": "kurly-1001110351",
+    "platform": "kurly",
+    "platformLabel": "컬리",
+    "title": "[서울우유] 나 100% 우유 2.3L 오리지널",
+    "category": "신선·식품",
+    "unitLabel": "2.3L 1개",
+    "cycleDays": 330,
+    "nextDate": "2027-01-22",
+    "targetPrice": 7580,
+    "livePrice": 7580,
+    "liveDate": "2026-11-19",
+    "url": "https://www.kurly.com/goods/1001110351",
+    "count": 2,
+    "history": [
+      {
+        "date": "2025-04-02",
+        "price": 7580
+      },
+      {
+        "date": "2026-02-26",
+        "price": 7580
+      }
+    ],
+    "purchaseDates": [
+      "2025-04-02",
+      "2026-02-26"
+    ],
+    "note": "컬리 라인 결제가 기준(장바구니 쿠폰·포인트 적용 전)",
+    "minPrice": 7580,
+    "maxPrice": 7580,
+    "avgPrice": 7580,
+    "lastPrice": 7580,
+    "lastDate": "2026-02-26",
+    "crossNote": "쿠팡은 서울우유 1급A 41회(5,890~8,190원) → 2025-09부터 곰곰 신선한 1A 900ml×2(3,690원, 100ml당 205원)로 전환. 컬리 2.3L 7,580원은 100ml당 330원",
+    "crossPlatforms": [
+      "컬리",
+      "쿠팡"
+    ]
+  },
+  {
+    "id": "kurly-5049727",
+    "platform": "kurly",
+    "platformLabel": "컬리",
+    "title": "[서울우유] 나 100% 우유 1.8L",
+    "category": "신선·식품",
+    "unitLabel": "1.8L 1개",
+    "cycleDays": 49,
+    "nextDate": "비정기",
+    "targetPrice": 5980,
+    "livePrice": 5980,
+    "liveDate": "2026-11-19",
+    "url": "https://www.kurly.com/goods/5049727",
+    "count": 2,
+    "history": [
+      {
+        "date": "2024-10-18",
+        "price": 5980
+      },
+      {
+        "date": "2024-12-06",
+        "price": 5980
+      }
+    ],
+    "purchaseDates": [
+      "2024-10-18",
+      "2024-12-06"
+    ],
+    "note": "컬리 라인 결제가 기준(장바구니 쿠폰·포인트 적용 전)",
+    "minPrice": 5980,
+    "maxPrice": 5980,
+    "avgPrice": 5980,
+    "lastPrice": 5980,
+    "lastDate": "2024-12-06",
+    "crossNote": "컬리 1.8L 5,980원은 100ml당 332원 — 쿠팡 곰곰 1.8L 환산 3,690원(205원/100ml)보다 62% 비쌈",
+    "crossPlatforms": [
+      "컬리",
+      "쿠팡"
+    ]
+  },
+  {
+    "id": "kurly-5042318",
+    "platform": "kurly",
+    "platformLabel": "컬리",
+    "title": "[쉐푸드] B.E.L.T 샌드위치",
+    "category": "신선·식품",
+    "unitLabel": "1개",
+    "cycleDays": 166,
+    "nextDate": "비정기",
+    "targetPrice": 4275,
+    "livePrice": 4900,
+    "liveDate": "2026-11-19",
+    "url": "https://www.kurly.com/goods/5042318",
+    "count": 2,
+    "history": [
+      {
+        "date": "2024-10-18",
+        "price": 4275,
+        "note": "정가 4,500원"
+      },
+      {
+        "date": "2025-04-02",
+        "price": 4700
+      }
+    ],
+    "purchaseDates": [
+      "2024-10-18",
+      "2025-04-02"
+    ],
+    "note": "컬리 라인 결제가 기준(장바구니 쿠폰·포인트 적용 전)",
+    "minPrice": 4275,
+    "maxPrice": 4700,
+    "avgPrice": 4488,
+    "lastPrice": 4700,
+    "lastDate": "2025-04-02"
+  },
+  {
+    "id": "kurly-5031442",
+    "platform": "kurly",
+    "platformLabel": "컬리",
+    "title": "[Dole] 스위티오 바나나 1kg내외",
+    "category": "신선·식품",
+    "unitLabel": "1kg 내외",
+    "cycleDays": 229,
+    "nextDate": "2027-05-30",
+    "targetPrice": 3990,
+    "livePrice": 4200,
+    "liveDate": "2026-11-19",
+    "url": "https://www.kurly.com/goods/5031442",
+    "count": 2,
+    "history": [
+      {
+        "date": "2026-02-26",
+        "price": 3990,
+        "note": "정가 5,290원"
+      },
+      {
+        "date": "2026-10-13",
+        "price": 4200,
+        "note": "정가 4,590원"
+      }
+    ],
+    "purchaseDates": [
+      "2026-02-26",
+      "2026-10-13"
+    ],
+    "note": "컬리 라인 결제가 기준(장바구니 쿠폰·포인트 적용 전)",
+    "minPrice": 3990,
+    "maxPrice": 4200,
+    "avgPrice": 4095,
+    "lastPrice": 4200,
+    "lastDate": "2026-10-13",
+    "crossNote": "쿠팡은 돌 스위티오 바나나 2회(2026-06-08)·돌 코리아 바나나 4회(2,990~3,490원)로 바나나를 6회 이상 구매. 컬리 현재 4,200원",
+    "crossPlatforms": [
+      "컬리",
+      "쿠팡"
+    ]
+  },
+  {
+    "id": "gmarket-tuna",
+    "platform": "gmarket",
+    "platformLabel": "지마켓",
+    "title": "동원 라이트 스탠다드 참치 150g 원터치 (12캔 환산)",
+    "category": "신선·식품",
+    "unitLabel": "150g×12캔",
+    "cycleDays": null,
+    "nextDate": "비정기",
+    "targetPrice": 21000,
+    "livePrice": 29270,
+    "liveDate": "2026-11-19",
+    "url": "https://item.gmarket.co.kr/Item?goodscode=1579104167",
+    "count": 2,
+    "purchaseDates": [
+      "2022-11-05",
+      "2023-05-08"
+    ],
+    "history": [
+      {
+        "date": "2022-11-05",
+        "price": 19512,
+        "rawPrice": 16260,
+        "note": "10개입 16,260원 → 12캔 환산"
+      },
+      {
+        "date": "2023-05-08",
+        "price": 21144,
+        "rawPrice": 17620,
+        "note": "10개입 17,620원 → 12캔 환산"
+      }
+    ],
+    "minPrice": 19512,
+    "maxPrice": 21144,
+    "avgPrice": 20328,
+    "lastPrice": 21144,
+    "lastDate": "2023-05-08",
+    "crossNote": "구성이 10개입→12개입으로 변경됨(캔당 1,626→1,762→2,439원, +38%). 무료배송·11/20 도착예정"
+  },
+  {
+    "id": "gmarket-chadol",
+    "platform": "gmarket",
+    "platformLabel": "지마켓",
+    "title": "(신선집중) 청정우 차돌박이 250g×6팩 (1.5kg)",
+    "category": "신선·식품",
+    "unitLabel": "1.5kg (250g×6)",
+    "cycleDays": null,
+    "nextDate": "비정기",
+    "targetPrice": 26700,
+    "livePrice": 36500,
+    "liveDate": "2026-11-19",
+    "url": "https://item.gmarket.co.kr/Item?goodscode=1566708507",
+    "count": 2,
+    "purchaseDates": [
+      "2022-06-03",
+      "2026-01-22"
+    ],
+    "history": [
+      {
+        "date": "2022-06-03",
+        "price": 21930
+      },
+      {
+        "date": "2026-01-22",
+        "price": 26700
+      }
+    ],
+    "minPrice": 21930,
+    "maxPrice": 26700,
+    "avgPrice": 24315,
+    "lastPrice": 26700,
+    "lastDate": "2026-01-22",
+    "crossNote": "직전 결제가(2026-01)보다 +36.7% — 지금은 목표가(26,700원) 대기 구간. 무료배송"
+  },
+  {
+    "id": "gmarket-georgia",
+    "platform": "gmarket",
+    "platformLabel": "지마켓",
+    "title": "조지아 오리지널 240ml 30CAN (승계상품)",
+    "category": "음료·커피",
+    "unitLabel": "240ml×30캔",
+    "cycleDays": null,
+    "nextDate": "비정기",
+    "targetPrice": 14000,
+    "livePrice": 16340,
+    "liveDate": "2026-11-19",
+    "url": "https://item.gmarket.co.kr/Item?goodscode=4140822301",
+    "count": 2,
+    "purchaseDates": [
+      "2022-02-25",
+      "2022-04-21"
+    ],
+    "history": [
+      {
+        "date": "2022-02-25",
+        "price": 13730
+      },
+      {
+        "date": "2022-04-21",
+        "price": 13870
+      }
+    ],
+    "minPrice": 13730,
+    "maxPrice": 13870,
+    "avgPrice": 13800,
+    "lastPrice": 13870,
+    "lastDate": "2022-04-21",
+    "crossNote": "원 상품(1789345236)은 판매종료 → 승계상품 4140822301을 추적. 2022년 결제가 대비 +18%"
+  },
+  {
+    "id": "naver-chino",
+    "platform": "naver",
+    "platformLabel": "네이버쇼핑",
+    "title": "남자 면바지 스판 밴딩 빅사이즈 치노 팬츠",
+    "category": "생활·패션",
+    "unitLabel": "1개",
+    "cycleDays": null,
+    "nextDate": "비정기",
+    "targetPrice": 17500,
+    "livePrice": 17800,
+    "liveDate": "2026-11-19",
+    "liveStatus": null,
+    "url": "https://smartstore.naver.com/gammiroun/products/5163218942",
+    "count": 2,
+    "purchaseDates": [
+      "2023-04-03",
+      "2023-04-05"
+    ],
+    "history": [
+      {
+        "date": "2023-04-03",
+        "price": 19800,
+        "rawPrice": 39600,
+        "note": "2개"
+      },
+      {
+        "date": "2023-04-05",
+        "price": 16800,
+        "rawPrice": 67200,
+        "note": "4개"
+      }
+    ],
+    "minPrice": 16800,
+    "maxPrice": 19800,
+    "avgPrice": 18300,
+    "lastPrice": 16800,
+    "lastDate": "2023-04-05",
+    "crossNote": "2023년 단가 19,800→16,800원 → 현재 17,800원. 감미로운 · 평점 4.66(리뷰 19,906) · 배송 3,000원(7만원 이상 무료)"
+  },
+  {
+    "id": "naver-kara-tee",
+    "platform": "naver",
+    "platformLabel": "네이버쇼핑",
+    "title": "카라 무지 남자 기능성 반팔 티셔츠 빅사이즈",
+    "category": "생활·패션",
+    "unitLabel": "1개",
+    "cycleDays": null,
+    "nextDate": "비정기",
+    "targetPrice": 8000,
+    "livePrice": 8000,
+    "liveDate": "2026-11-19",
+    "url": "https://smartstore.naver.com/bkcompany2021/products/6577156346",
+    "count": 2,
+    "purchaseDates": [
+      "2023-04-06",
+      "2023-04-12"
+    ],
+    "history": [
+      {
+        "date": "2023-04-06",
+        "price": 9750,
+        "rawPrice": 39000,
+        "note": "4개"
+      },
+      {
+        "date": "2023-04-12",
+        "price": 9000,
+        "rawPrice": 18000,
+        "note": "2개"
+      }
+    ],
+    "minPrice": 9000,
+    "maxPrice": 9750,
+    "avgPrice": 9375,
+    "lastPrice": 9000,
+    "lastDate": "2023-04-12",
+    "crossNote": "2023년 단가 9,000~9,750원 → 현재 8,000원(-11~18%), 정가 12,000원 33% 할인. 비케이 쇼핑"
+  },
+  {
+    "id": "naver-saiki-mochi",
+    "platform": "naver",
+    "platformLabel": "네이버쇼핑",
+    "title": "세이키 딸기 모찌 스탠드팩 130g",
+    "category": "신선·식품",
+    "unitLabel": "130g 1팩",
+    "cycleDays": null,
+    "nextDate": "비정기",
+    "targetPrice": 4500,
+    "livePrice": 4500,
+    "liveDate": "2026-11-19",
+    "liveStatus": "품절",
+    "liveStatusDetail": "품절(재입고 대기)",
+    "url": "https://smartstore.naver.com/main/products/11288963539",
+    "count": 1,
+    "purchaseDates": [
+      "2025-01-03"
+    ],
+    "history": [
+      {
+        "date": "2025-01-03",
+        "price": 5690,
+        "note": "아달당 · 묶음주문 10건 중 1건"
+      }
+    ],
+    "minPrice": 5690,
+    "maxPrice": 5690,
+    "avgPrice": 5690,
+    "lastPrice": 5690,
+    "lastDate": "2025-01-03",
+    "crossNote": "2025-01 실구매 5,690원 → 현재 4,500원(-21%)이나 품절(재입고 대기). 재입고 시 목표가 도달"
   }
 ];
     window.__GITHUB_REPO__ = 'pyw31337/coupang';

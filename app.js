@@ -1,12 +1,24 @@
-/* Coupang Price Tracker App (Zero System UI) */
+/* 통합 가격 트래커 App (Zero System UI) — 쿠팡 · 컬리 · 지마켓 · 네이버쇼핑 */
 (function () {
   const LS_CUSTOM = 'coupang_tracker_custom_v2';
   const LS_TARGETS = 'coupang_tracker_targets_v2';
-  const CATEGORIES = ['내가 추가한 상품', '신선·식품', '음료·커피', '반려동물', '생활·영양'];
+
+  const PLATFORMS = [
+    { key: 'coupang', label: '쿠팡' },
+    { key: 'kurly', label: '컬리' },
+    { key: 'gmarket', label: '지마켓' },
+    { key: 'naver', label: '네이버쇼핑' }
+  ];
+  const PLATFORM_LABEL = { coupang: '쿠팡', kurly: '컬리', gmarket: '지마켓', naver: '네이버쇼핑' };
+  const CTA_LABEL = { coupang: '쿠팡에서 보기', kurly: '컬리에서 보기', gmarket: '지마켓에서 보기', naver: '네이버에서 보기' };
+  const ADD_CATEGORIES = ['신선·식품', '음료·커피', '반려동물', '생활·영양', '생활·패션', '내가 추가한 상품'];
+  const CATEGORY_ORDER = ['신선·식품', '음료·커피', '반려동물', '생활·영양', '생활·패션'];
 
   let baseProducts = Array.isArray(window.__INITIAL_PRODUCTS__) ? window.__INITIAL_PRODUCTS__ : [];
   let activeFilter = '전체';
-  let selectedAddCat = '내가 추가한 상품';
+  let activePlatform = '전체';
+  let selectedAddCat = '신선·식품';
+  let selectedAddPlatform = 'coupang';
   let pendingEditId = null;
   let pendingDeleteId = null;
   let pendingShareText = '';
@@ -23,6 +35,14 @@
     return Number(n).toLocaleString('ko-KR') + '원';
   }
 
+  function platformKey(p) {
+    return p.platform && PLATFORM_LABEL[p.platform] ? p.platform : 'coupang';
+  }
+
+  function platformLabel(p) {
+    return PLATFORM_LABEL[platformKey(p)];
+  }
+
   function daysUntil(dateStr) {
     if (!dateStr || dateStr === '비정기') return null;
     const now = new Date();
@@ -32,6 +52,11 @@
     const t1 = new Date(dateStr + 'T00:00:00Z').getTime();
     if (isNaN(t1)) return null;
     return Math.round((t1 - t0) / 86400000);
+  }
+
+  function isDueSoon(p) {
+    const d = daysUntil(p.nextDate);
+    return d !== null && d <= 14 && d >= -120;
   }
 
   function showToast(msg) {
@@ -67,12 +92,20 @@
     const customs = getCustoms();
     return customs.concat(baseProducts).map(function (p) {
       return Object.assign({}, p, {
+        platform: platformKey(p),
+        platformLabel: platformLabel(p),
         targetPrice: targets[p.id] !== undefined ? targets[p.id] : p.targetPrice
       });
     });
   }
 
   function getStatus(p) {
+    if (p.liveStatus === '품절') {
+      return { cls: 'badge-soldout', key: 'soldout', text: '품절 · 재입고 대기' };
+    }
+    if (p.liveStatus === '판매중지') {
+      return { cls: 'badge-soldout', key: 'stopped', text: '판매 중지' };
+    }
     const ref = p.livePrice !== null && p.livePrice !== undefined ? p.livePrice : p.lastPrice;
     if (!ref) return { cls: 'badge-wait', key: 'wait', text: '가격 수집 대기' };
     if (ref <= p.targetPrice) {
@@ -160,11 +193,53 @@
     );
   }
 
+  function renderPlatformTabs(all) {
+    const box = document.getElementById('platformTabs');
+    if (!box) return;
+    const counts = { '전체': all.length };
+    PLATFORMS.forEach(function (pf) { counts[pf.label] = 0; });
+    all.forEach(function (p) { counts[platformLabel(p)] = (counts[platformLabel(p)] || 0) + 1; });
+
+    const tabs = [{ key: '전체', label: '전체', cls: 'is-all', dot: null }].concat(PLATFORMS.map(function (pf) {
+      return { key: pf.label, label: pf.label, cls: 'is-' + pf.key, dot: pf.key };
+    }));
+
+    box.innerHTML = tabs.map(function (t) {
+      return '<button type="button" class="platform-tab ' + t.cls + (activePlatform === t.key ? ' is-active' : '') + '" data-platform="' + esc(t.key) + '" role="tab" aria-selected="' + (activePlatform === t.key) + '">' +
+        (t.dot ? '<span class="platform-dot dot-' + esc(t.dot) + '"></span>' : '') +
+        '<span>' + esc(t.label) + '</span>' +
+        '<span class="platform-count tnum">' + (counts[t.key] || 0) + '</span>' +
+        '</button>';
+    }).join('');
+  }
+
+  function renderChips(all) {
+    const present = {};
+    all.forEach(function (p) { if (p.category) present[p.category] = true; });
+    const cats = CATEGORY_ORDER.filter(function (c) { return present[c]; });
+    Object.keys(present).forEach(function (c) {
+      if (cats.indexOf(c) === -1) cats.push(c);
+    });
+    const filters = ['전체', '최저가 적기', '재구매 임박', '교차구매', '내가 추가한 상품'].concat(cats);
+    document.getElementById('chipsScroll').innerHTML = filters.map(function (f) {
+      return '<button type="button" class="chip ' + (activeFilter === f ? 'is-active' : '') + '" data-filter="' + esc(f) + '">' + esc(f) + '</button>';
+    }).join('');
+  }
+
   function renderCategoryPicker() {
     const box = document.getElementById('addCategoryPicker');
     if (!box) return;
-    box.innerHTML = CATEGORIES.map(function (c) {
+    box.innerHTML = ADD_CATEGORIES.map(function (c) {
       return '<button type="button" class="picker-option ' + (selectedAddCat === c ? 'is-selected' : '') + '" data-pick-cat="' + esc(c) + '">' + esc(c) + '</button>';
+    }).join('');
+  }
+
+  function renderPlatformPicker() {
+    const box = document.getElementById('addPlatformPicker');
+    if (!box) return;
+    box.innerHTML = PLATFORMS.map(function (pf) {
+      return '<button type="button" class="picker-option is-platform ' + (selectedAddPlatform === pf.key ? 'is-selected' : '') + '" data-pick-platform="' + esc(pf.key) + '">' +
+        '<span class="platform-dot dot-' + pf.key + '"></span>' + esc(pf.label) + '</button>';
     }).join('');
   }
 
@@ -177,24 +252,27 @@
 
     document.getElementById('kpiTotal').textContent = all.length + '개';
     document.getElementById('kpiBuy').textContent = all.filter(function (p) { return getStatus(p).key === 'buy'; }).length + '개';
-    document.getElementById('kpiDue').textContent = all.filter(function (p) {
-      const d = daysUntil(p.nextDate);
-      return d !== null && d <= 14;
-    }).length + '개';
+    document.getElementById('kpiDue').textContent = all.filter(isDueSoon).length + '개';
+    const platformKpi = document.getElementById('kpiPlatforms');
+    if (platformKpi) {
+      platformKpi.textContent = PLATFORMS.filter(function (pf) {
+        return all.some(function (p) { return platformLabel(p) === pf.label; });
+      }).length + '개';
+    }
 
-    const filters = ['전체', '최저가 적기', '재구매 임박', '내가 추가한 상품', '신선·식품', '반려동물', '음료·커피', '생활·영양'];
-    document.getElementById('chipsScroll').innerHTML = filters.map(function (f) {
-      return '<button type="button" class="chip ' + (activeFilter === f ? 'is-active' : '') + '" data-filter="' + esc(f) + '">' + esc(f) + '</button>';
-    }).join('');
+    renderPlatformTabs(all);
+    renderChips(all);
 
     const filtered = all.filter(function (p) {
-      if (q && p.title.toLowerCase().indexOf(q) === -1 && p.category.toLowerCase().indexOf(q) === -1) return false;
+      if (activePlatform !== '전체' && platformLabel(p) !== activePlatform) return false;
+      if (q) {
+        const hay = (p.title + ' ' + p.category + ' ' + platformLabel(p) + ' ' + (p.unitLabel || '')).toLowerCase();
+        if (hay.indexOf(q) === -1) return false;
+      }
       if (activeFilter === '전체') return true;
       if (activeFilter === '최저가 적기') return getStatus(p).key === 'buy';
-      if (activeFilter === '재구매 임박') {
-        const d = daysUntil(p.nextDate);
-        return d !== null && d <= 14;
-      }
+      if (activeFilter === '재구매 임박') return isDueSoon(p);
+      if (activeFilter === '교차구매') return !!(p.crossPlatforms && p.crossPlatforms.length > 1);
       if (activeFilter === '내가 추가한 상품') return !!p.custom;
       return p.category === activeFilter;
     });
@@ -217,17 +295,25 @@
             : '<span class="badge tnum">다음 ' + esc(p.nextDate) + '</span>'));
 
       const shown = p.livePrice !== null && p.livePrice !== undefined ? p.livePrice : p.lastPrice;
-      const shownLabel = p.livePrice ? '실시간 확인가 (' + esc(p.liveDate) + ')' : (p.lastDate ? '직전 구매가 (' + esc(p.lastDate) + ')' : '수집 대기');
+      const shownLabel = p.livePrice
+        ? '실시간 확인가 (' + esc(p.liveDate) + ')' + (p.liveStatus ? ' · ' + esc(p.liveStatus) : '')
+        : (p.lastDate ? '직전 구매가 (' + esc(p.lastDate) + ')' : '수집 대기');
+
+      const pk = platformKey(p);
+      const isCross = !!(p.crossPlatforms && p.crossPlatforms.length > 1);
 
       return (
-        '<article class="product-card">' +
+        '<article class="product-card" data-platform-card="' + esc(pk) + '">' +
         '  <div class="badges-row">' +
+        '    <span class="badge badge-platform platform-' + esc(pk) + '"><span class="platform-dot dot-' + esc(pk) + '"></span>' + esc(platformLabel(p)) + '</span>' +
         '    <span class="badge ' + st.cls + '">' + esc(st.text) + '</span>' +
         (p.custom ? '<span class="badge badge-custom">내가 추가함</span>' : '<span class="badge">' + esc(p.category) + '</span>') +
+        (isCross ? '<span class="badge badge-cross">교차구매</span>' : '') +
         dueBadge +
         '  </div>' +
         '  <h2 class="product-title">' + esc(p.title) + '</h2>' +
-        '  <div class="product-meta">' + esc(p.unitLabel) + (p.cycleDays ? ' · 평균 ' + p.cycleDays + '일 주기 (' + p.count + '회 구매)' : '') + '</div>' +
+        '  <div class="product-meta">' + esc(p.unitLabel) + (p.cycleDays ? ' · 평균 ' + p.cycleDays + '일 주기 (' + p.count + '회 구매)' : (p.count ? ' · ' + p.count + '회 구매' : '')) + '</div>' +
+        (p.crossNote ? '  <p class="cross-note"><span class="cross-note-label">타 플랫폼</span>' + esc(p.crossNote) + '</p>' : '') +
         '  <div class="price-block">' +
         '    <span class="price-current tnum">' + (shown ? esc(fmt(shown)) : '확인 전') + '</span>' +
         '    <span class="price-source">' + shownLabel + '</span>' +
@@ -245,7 +331,7 @@
         (p.custom ? '<button type="button" class="btn btn-subtle btn-sm" data-share-req="' + esc(p.id) + '">추적 요청</button>' : '') +
         (p.custom ? '<button type="button" class="btn btn-danger-soft btn-sm" data-ask-del="' + esc(p.id) + '">삭제</button>' : '') +
         '    </div>' +
-        '    <a class="btn btn-primary btn-sm" href="' + esc(p.url) + '" target="_blank" rel="noopener noreferrer">쿠팡에서 보기</a>' +
+        '    <a class="btn btn-primary btn-sm" href="' + esc(p.url) + '" target="_blank" rel="noopener noreferrer">' + esc(CTA_LABEL[pk]) + '</a>' +
         '  </div>' +
         '</article>'
       );
@@ -265,6 +351,7 @@
   function setupEvents() {
     document.getElementById('btnOpenAdd').addEventListener('click', function () {
       document.getElementById('addError').classList.remove('visible');
+      renderPlatformPicker();
       renderCategoryPicker();
       openModal('addModal');
     });
@@ -287,10 +374,24 @@
         return;
       }
 
+      const platformBtn = e.target.closest('[data-platform]');
+      if (platformBtn) {
+        activePlatform = platformBtn.getAttribute('data-platform');
+        render();
+        return;
+      }
+
       const filterBtn = e.target.closest('[data-filter]');
       if (filterBtn) {
         activeFilter = filterBtn.getAttribute('data-filter');
         render();
+        return;
+      }
+
+      const pickPlatform = e.target.closest('[data-pick-platform]');
+      if (pickPlatform) {
+        selectedAddPlatform = pickPlatform.getAttribute('data-pick-platform');
+        renderPlatformPicker();
         return;
       }
 
@@ -330,12 +431,13 @@
         const id = shareBtn.getAttribute('data-share-req');
         const p = getAllProducts().find(function (x) { return x.id === id; });
         if (!p) return;
-        pendingShareText = '쿠팡 가격 트래커에 이 상품 추가해줘: ' + p.title + ' | ' + p.url + ' | 목표가 ' + fmt(p.targetPrice);
+        const plat = platformLabel(p);
+        pendingShareText = '[' + plat + '] 가격 트래커에 이 상품 추가해줘: ' + p.title + ' | ' + p.url + ' | 목표가 ' + fmt(p.targetPrice);
         document.getElementById('shareReqPreview').textContent = pendingShareText;
         const ghBtn = document.getElementById('btnOpenGhIssue');
         if (ghBtn && window.__GITHUB_REPO__) {
-          const issueTitle = '[추적 추가] ' + p.title;
-          const issueBody = '상품명: ' + p.title + '\nURL: ' + p.url + '\n목표가: ' + fmt(p.targetPrice) + '\n카테고리: ' + p.category;
+          const issueTitle = '[추적 추가] [' + plat + '] ' + p.title;
+          const issueBody = '플랫폼: ' + plat + '\n상품명: ' + p.title + '\nURL: ' + p.url + '\n목표가: ' + fmt(p.targetPrice) + '\n카테고리: ' + p.category;
           ghBtn.href = 'https://github.com/' + window.__GITHUB_REPO__ + '/issues/new?title=' + encodeURIComponent(issueTitle) + '&body=' + encodeURIComponent(issueBody) + '&labels=track-request';
         }
         openModal('shareReqModal');
@@ -369,9 +471,10 @@
       const liveRaw = document.getElementById('fLive').value.replace(/[^0-9]/g, '');
       const livePrice = liveRaw ? parseInt(liveRaw, 10) : null;
       const errEl = document.getElementById('addError');
+      const plat = PLATFORM_LABEL[selectedAddPlatform];
 
       if (!url || !/^https?:\/\//i.test(url)) {
-        errEl.textContent = '올바른 쿠팡 상품 URL(https://...)을 입력해 주세요.';
+        errEl.textContent = '올바른 상품 URL(https://...)을 입력해 주세요.';
         errEl.classList.add('visible');
         return;
       }
@@ -390,6 +493,8 @@
       const item = {
         id: 'custom-' + Date.now(),
         custom: true,
+        platform: selectedAddPlatform,
+        platformLabel: plat,
         title: title,
         category: selectedAddCat,
         unitLabel: '직접 추가',
@@ -416,7 +521,7 @@
       document.getElementById('fLive').value = '';
       closeModal('addModal');
       activeFilter = '전체';
-      showToast('관심 상품을 추가했어요');
+      showToast(plat + ' 상품을 추가했어요');
       render();
     });
 
