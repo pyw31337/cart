@@ -31,11 +31,17 @@
   var INNER = /\(\s*(\d+(?:\.\d+)?)\s*(g|ml)\s*[x×]\s*(\d+)\s*(?:p|개|입)\s*\)/i;
   function unitOf(name) {
     var n = String(name || "").replace(/<[^>]+>/g, "").replace(/,/g, " ");
+    n = n.replace(/[xX×]/g, " x ");
     if (!n) return null;
     if (/롤/.test(n)) {
       var rolls = n.match(/(\d{1,3})\s*롤/);
       var packs = n.match(/\((\d{1,2})\s*팩\)/);
-      var cnt = (rolls ? +rolls[1] : 1) * (packs ? +packs[1] : 1);
+      var cnt = (rolls ? +rolls[1] : 1);
+      if (!rolls) {
+        var ip = n.match(/(\d{1,3})\s*개입/);
+        if (ip) cnt = +ip[1];
+      }
+      cnt *= (packs ? +packs[1] : 1);
       return { kind: "roll", qty: cnt, per: 1, label: "1롤당", text: cnt + "롤" };
     }
     if (/물티슈/.test(n) && /매/.test(n)) {
@@ -61,7 +67,7 @@
       } else {
         var tail = n.slice(m.index + m[0].length, m.index + m[0].length + 30);
         var pm = tail.match(/\(\s*(\d{1,3})\s*(?:개|팩|봉|병|캔|입)\s*\)/) ||
-                 tail.match(/[x×]\s*(\d{1,3})\s*(?:개|팩|봉|병|캔|입|p)\b/) ||
+                 tail.match(/[xX×]\s*(\d{1,3})\s*(?:개|팩|봉|병|캔|입|p)\b/i) ||
                  tail.match(/(\d{1,3})\s*(?:개입|개|입|팩|봉|병|캔)(?![가-힣])/);
         if (pm) packs2 = parseInt(pm[1], 10);
       }
@@ -69,7 +75,7 @@
       return { kind: kind, qty: total, per: 100, label: "100" + kind + "당",
         text: (total >= 10 ? Math.round(total) : Math.round(total * 10) / 10) + kind };
     }
-    var pc = n.match(/(\d{1,3})\s*(?:개입|개|입|정|캡슐)(?![가-힣])/g);
+    var pc = n.match(/(\d{1,3})\s*(?:개입|개|입|정|캡슐)(?![가-힣])/g) || n.match(/(\d{1,3})\s*P(?![A-Za-z])/gi);
     if (pc) {
       var c3 = 1;
       pc.slice(0, 3).forEach(function (x) { c3 *= parseInt(x, 10); });
@@ -87,6 +93,8 @@
   function matches(order, group) {
     var keys = group.match || [];
     var n = String(order.name || "");
+    var ex = group.exclude || [];
+    for (var j = 0; j < ex.length; j++) if (n.indexOf(ex[j]) >= 0) return false;
     for (var i = 0; i < keys.length; i++) if (n.indexOf(keys[i]) >= 0) return true;
     return false;
   }

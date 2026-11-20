@@ -26,12 +26,14 @@ export async function onRequestGet(context) {
       const keys = (g.match || []).filter(Boolean).slice(0, 4);
       if (!keys.length) return null;
       const where = keys.map(() => 'i.product_raw LIKE ?').join(' OR ');
+      const ex = (g.exclude || []).slice(0, 4);
+      const not = ex.map(() => 'i.product_raw NOT LIKE ?').join(' AND ');
       return db.prepare(
         `SELECT o.order_date AS d, i.product_raw AS n, i.paid_krw AS p, i.qty AS q, o.market_code AS m
            FROM order_items i JOIN orders o ON o.order_id = i.order_id
-          WHERE i.valid = 1 AND i.paid_krw > 0 AND (${where})
+          WHERE i.valid = 1 AND i.paid_krw > 0 AND (${where})${not ? ' AND ' + not : ''}
           ORDER BY o.order_date DESC LIMIT 24`
-      ).bind(...keys.map((k) => `%${k}%`));
+      ).bind(...keys.map((k) => `%${k}%`), ...ex.map((k) => `%${k}%`));
     });
     const results = await db.batch(stmts.filter(Boolean));
 
