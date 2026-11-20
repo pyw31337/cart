@@ -23,8 +23,8 @@
         { date: ago(130), name: "농심 신라면 120g 40개입", price: 27800, qty: 1, mall: "쿠팡" },
         { date: ago(105), name: "농심 신라면 120g 40개입", price: 27400, qty: 1, mall: "쿠팡" },
         { date: ago(82), name: "농심 신라면 120g 40개입", price: 28900, qty: 1, mall: "네이버페이" },
-        { date: ago(10), name: "농심 신라면 120g 40개입", price: 26900, qty: 1, mall: "쿠팡" },
-        { date: ago(10), name: "농심 신라면 120g 40개입", price: 28200, qty: 1, mall: "G마켓" },
+        { date: ago(58), name: "농심 신라면 120g 40개입", price: 26900, qty: 1, mall: "쿠팡" },
+        { date: ago(33), name: "농심 신라면 120g 40개입", price: 28200, qty: 1, mall: "G마켓" },
         { date: ago(10), name: "농심 신라면 120g 40개입", price: 27100, qty: 1, mall: "쿠팡" }
       ]
     },
@@ -175,14 +175,25 @@
     show(ids[0]);
   }
 
+  function step(name, fn) {
+    try { fn(); } catch (e) {
+      window.__lcErr = (window.__lcErr || "") + name + ": " + ((e && e.stack) || e) + "\n";
+      if (window.console && console.error) console.error("[letscart]", name, e);
+    }
+  }
+
   function boot() {
     LCV.load().then(function (d) {
       groups = d.groups || [];
-      renderStats();
-      renderBoard(HERO_TABS[0].id);
-      renderStrip();
-      renderSample();
-      LC.paintIcons();
+      step("stats", renderStats);
+      step("board", function () { renderBoard(HERO_TABS[0].id); });
+      step("strip", renderStrip);
+      step("sample", renderSample);
+      step("icons", function () { LC.paintIcons(); });
+      if (window.__lcErr) {
+        var hint = $("rivalHint");
+        if (hint) hint.textContent = "일부 데이터를 표시하지 못했습니다";
+      }
     }).catch(function (e) {
       var hint = $("rivalHint");
       if (hint) hint.textContent = "라이벌 데이터를 불러오지 못했습니다 (" + ((e && e.message) || e) + ")";

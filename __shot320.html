@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<title>__shot320</title>
+<style>
+  html,body{margin:0;background:#c9ccc3;font:11px/1.4 -apple-system,sans-serif;color:#111}
+  .wrap{display:flex;gap:10px;padding:10px;align-items:flex-start}
+  .col{background:#fff}
+  .lbl{padding:4px 6px;font-weight:700;background:#111315;color:#fff}
+  .m{padding:3px 6px;font-weight:700}
+  iframe{border:0;display:block;background:#fff}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="col">
+    <div class="lbl">320 · /</div>
+    <iframe id="a" src="./?xh=320" width="320" height="2100" scrolling="no"></iframe>
+    <div class="m" id="ma">–</div>
+  </div>
+  <div class="col">
+    <div class="lbl">320 · /local/?demo=1</div>
+    <iframe id="b" src="./local/?demo=1&xh=320" width="320" height="2100" scrolling="no"></iframe>
+    <div class="m" id="mb">–</div>
+  </div>
+</div>
+<script>
+  function measure(id, out) {
+    var f = document.getElementById(id), o = document.getElementById(out);
+    function run() {
+      try {
+        var d = f.contentDocument, de = d && d.documentElement;
+        if (!de) { o.textContent = '접근 불가'; return; }
+        var over = [];
+        d.querySelectorAll('body *').forEach(function (el) {
+          var r = el.getBoundingClientRect();
+          if (r.right > de.clientWidth + 1 && r.width > 0) over.push(el.tagName + '.' + (el.className || '').toString().slice(0, 24));
+        });
+        o.textContent = 'client ' + de.clientWidth + ' / scroll ' + de.scrollWidth +
+          (de.scrollWidth > de.clientWidth ? '  ⚠ 넘침' : '  ✓ 넘침 0') +
+          (over.length ? ' · ' + over.slice(0, 4).join(' | ') : '');
+      } catch (e) { o.textContent = '측정 실패: ' + e.message; }
+    }
+    f.addEventListener('load', function () { setTimeout(run, 2600); });
+    setTimeout(run, 4200);
+  }
+  measure('a', 'ma'); measure('b', 'mb');
+</script>
+</body>
+</html>
