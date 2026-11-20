@@ -230,7 +230,7 @@
       '<button class="btn btn-ghost btn-sm" id="btnPing">' + LC.icon("refresh", "icon-sm") + "연결 자가진단</button>" +
       '<a class="btn btn-ghost btn-sm" href="' + ZIP + '" download>' + LC.icon("box", "icon-sm") + "확장 ZIP</a>" +
       "</div>" +
-      '<div class="notice" style="margin-top:8px">설치: ZIP 압축을 푼 뒤 크롬 <b>chrome://extensions</b> → 개발자 모드 → “압축해제된 확장 프로그램 로드”에서 폴더를 고릅니다.</div>';
+      '<div class="ext-hint" style="margin-top:8px">설치 방법 ' + LC.tip("ZIP 압축을 푼 뒤 크롬 chrome://extensions → 개발자 모드 → ‘압축해제된 확장 프로그램 로드’에서 폴더를 고릅니다.", "확장 설치 방법") + '</div>';
 
     $("extPanel").innerHTML = rows + actions;
     $("extDiag").innerHTML = rows + actions;

@@ -378,7 +378,7 @@
     var box = $("dueBoard");
     if (!box) return;
     if (!state.rebuy) {
-      box.innerHTML = '<div class="empty" style="padding:22px 12px">재구매 데이터를 불러오지 못했습니다. D1이 잠시 응답하지 않을 수 있습니다 — 잠시 후 다시 열어 주세요.</div>';
+      box.innerHTML = '<div class="empty" style="padding:22px 12px">재구매 데이터 일시 불가 · 잠시 후 자동 갱신</div>';
       return;
     }
     var rows = state.rebuy.rows.slice();

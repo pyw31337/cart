@@ -262,3 +262,5 @@
 .rv-mode { display: flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 700;
   color: var(--c-text-3); margin: -2px 0 12px; }
 .rv-mode b { color: var(--c-text); font-weight: 800; }
+.start-grid { align-items: start; }
+.ext-hint { display: flex; align-items: center; gap: 4px; font-size: 11.5px; font-weight: 700; color: var(--c-text-3); }
