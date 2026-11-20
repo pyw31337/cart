@@ -20,30 +20,30 @@
     ramen: {
       title: "라면",
       orders: [
-        { date: ago(156), name: "농심 신라면 120g 40개입", price: 27800, qty: 1, mall: "쿠팡" },
-        { date: ago(131), name: "농심 신라면 120g 40개입", price: 27400, qty: 1, mall: "쿠팡" },
-        { date: ago(108), name: "농심 신라면 120g 40개입", price: 28900, qty: 1, mall: "네이버페이" },
-        { date: ago(83), name: "농심 신라면 120g 40개입", price: 26900, qty: 1, mall: "쿠팡" },
-        { date: ago(58), name: "농심 신라면 120g 40개입", price: 28200, qty: 1, mall: "G마켓" },
-        { date: ago(33), name: "농심 신라면 120g 40개입", price: 27100, qty: 1, mall: "쿠팡" }
+        { date: ago(130), name: "농심 신라면 120g 40개입", price: 27800, qty: 1, mall: "쿠팡" },
+        { date: ago(105), name: "농심 신라면 120g 40개입", price: 27400, qty: 1, mall: "쿠팡" },
+        { date: ago(82), name: "농심 신라면 120g 40개입", price: 28900, qty: 1, mall: "네이버페이" },
+        { date: ago(10), name: "농심 신라면 120g 40개입", price: 26900, qty: 1, mall: "쿠팡" },
+        { date: ago(10), name: "농심 신라면 120g 40개입", price: 28200, qty: 1, mall: "G마켓" },
+        { date: ago(10), name: "농심 신라면 120g 40개입", price: 27100, qty: 1, mall: "쿠팡" }
       ]
     },
     dumpling: {
       title: "만두",
       orders: [
-        { date: ago(120), name: "비비고 물만두 1kg", price: 13760, qty: 1, mall: "쿠팡" },
-        { date: ago(90), name: "비비고 물만두 1kg", price: 12900, qty: 1, mall: "쿠팡" },
-        { date: ago(60), name: "비비고 물만두 1kg", price: 14200, qty: 1, mall: "마켓컬리" },
-        { date: ago(30), name: "비비고 물만두 1kg", price: 13100, qty: 1, mall: "쿠팡" }
+        { date: ago(110), name: "비비고 물만두 1kg", price: 13760, qty: 1, mall: "쿠팡" },
+        { date: ago(80), name: "비비고 물만두 1kg", price: 12900, qty: 1, mall: "쿠팡" },
+        { date: ago(50), name: "비비고 물만두 1kg", price: 14200, qty: 1, mall: "마켓컬리" },
+        { date: ago(20), name: "비비고 물만두 1kg", price: 13100, qty: 1, mall: "쿠팡" }
       ]
     },
     tissue: {
       title: "화장지",
       orders: [
-        { date: ago(244), name: "깨끗한나라 순수 프리미엄 화장지 30m 30롤 (3팩)", price: 38900, qty: 1, mall: "쿠팡" },
-        { date: ago(183), name: "깨끗한나라 순수 프리미엄 화장지 30m 30롤 (3팩)", price: 37900, qty: 1, mall: "쿠팡" },
-        { date: ago(122), name: "깨끗한나라 순수 프리미엄 화장지 30m 30롤 (3팩)", price: 39500, qty: 1, mall: "G마켓" },
-        { date: ago(61), name: "깨끗한나라 순수 프리미엄 화장지 30m 30롤 (3팩)", price: 38490, qty: 1, mall: "쿠팡" }
+        { date: ago(234), name: "깨끗한나라 순수 프리미엄 화장지 30m 30롤 (3팩)", price: 38900, qty: 1, mall: "쿠팡" },
+        { date: ago(173), name: "깨끗한나라 순수 프리미엄 화장지 30m 30롤 (3팩)", price: 37900, qty: 1, mall: "쿠팡" },
+        { date: ago(112), name: "깨끗한나라 순수 프리미엄 화장지 30m 30롤 (3팩)", price: 39500, qty: 1, mall: "G마켓" },
+        { date: ago(51), name: "깨끗한나라 순수 프리미엄 화장지 30m 30롤 (3팩)", price: 38490, qty: 1, mall: "쿠팡" }
       ]
     }
   };
@@ -151,7 +151,7 @@
       var my = LCV.myStats(SAMPLES[id].orders, g);
       return '<button type="button" class="sample-item" data-sample="' + id + '" aria-pressed="' + (ids[0] === id) + '">' +
         (g.products[0].image ? '<img src="' + LC.esc(g.products[0].image) + '" alt="" width="120" height="120" loading="lazy" />' : "") +
-        '<span><span class="sample-t">' + LC.esc(SAMPLES[id].title) + '</span>' +
+        '<span class="sample-cap"><span class="sample-t">' + LC.esc(SAMPLES[id].title) + '</span>' +
         '<span class="sample-s">' + my.buys + '회 · ' + (my.cycle || "-") + '일</span></span></button>';
     }).join("");
 

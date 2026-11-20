@@ -429,8 +429,9 @@
       '</span>' +
       '<span class="rv-tile-body">' +
         '<span class="rv-tile-name">' + esc(group.short || group.label) + '</span>' +
-        '<span class="rv-tile-price"><b class="tnum">' + num(myUnit) + '</b><span aria-hidden="true">→</span>' +
-          '<b class="tnum best">' + num(best.unitPrice) + '</b><i>' + esc(group.unitLabel) + '</i></span>' +
+        '<span class="rv-tile-price"><b class="tnum' + (c.diff > 0 ? " best" : "") + '">' + num(myUnit) + '</b>' +
+          '<b class="tnum' + (c.diff > 0 ? "" : " best") + '">' + num(best.unitPrice) + '</b>' +
+          '<i>' + esc(group.unitLabel) + '</i></span>' +
         (my && my.buys ? '<span class="rv-tile-mine">내 기록 ' + my.buys + '회</span>' : "") +
       '</span></button>';
   }

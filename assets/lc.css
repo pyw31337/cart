@@ -612,6 +612,7 @@ a:hover { text-decoration: underline; text-underline-offset: 2px; }
 .rv-tile-price { display: flex; align-items: baseline; gap: 4px; font-size: 11px; font-weight: 700;
   color: var(--c-text-3); min-width: 0; }
 .rv-tile-price b { font-size: 15px; font-weight: 900; letter-spacing: -.03em; color: var(--c-text); }
+.rv-tile-price b + b { border-left: 1px solid var(--c-border-strong); padding-left: 6px; }
 .rv-tile-price b.best { color: var(--c-lime-text); }
 .rv-tile-price i { font-style: normal; font-size: 9px; font-weight: 700; color: var(--c-text-3);
   margin-left: auto; white-space: nowrap; }
@@ -671,3 +672,20 @@ a:hover { text-decoration: underline; text-underline-offset: 2px; }
 .shot .thumb-ph { height: auto; aspect-ratio: 1 / 1; border-radius: 8px; }
 .footer a { color: var(--c-text-2); }
 @media (max-width: 899px) { .topnav { display: none; } }
+
+/* v3.1 — 시트 안 사진 크기·샘플 문구 */
+.sheet-head .grab { margin: 0 auto 7px; }
+.sheet .rv-hero .shot img { height: 150px; width: 100%; aspect-ratio: auto; }
+.sheet .rv-hero-stage { max-width: 100%; }
+.sheet .rv-cards { grid-template-columns: minmax(0, 1fr); }
+.sheet .rv-card { display: grid; grid-template-columns: 104px minmax(0, 1fr); align-items: stretch; }
+.sheet .rv-card-shot { aspect-ratio: auto; height: 100%; min-height: 104px; border-bottom: 0;
+  border-right: 1px solid var(--c-border); }
+.sheet .rv-card-body { padding: 9px 11px 10px; }
+.sheet .rv-card-name { font-size: 12px; }
+.sheet .rv-card-price .v { font-size: 16px; }
+.sample-canvas .rv-hero-stage { max-width: 440px; }
+.sample-canvas .rv-hero .shot img { height: 170px; width: 100%; aspect-ratio: auto; }
+.sample-cap { display: flex; flex-direction: column; min-width: 0; }
+.sample-t, .sample-s { display: block; }
+.sample-canvas .rv-cards { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }

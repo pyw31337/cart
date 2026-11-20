@@ -172,12 +172,14 @@
     el.setAttribute("aria-label", opts.title || "상세");
     el.innerHTML =
       '<div class="sheet-head">' +
-        '<div style="flex:1 1 auto;min-width:0">' +
-          '<div class="grab"></div>' +
-          '<h2 class="sheet-title">' + LC.esc(opts.title || "") + "</h2>" +
-          (opts.subtitle ? '<div class="muted" style="font-size:12px;font-weight:600;margin-top:2px">' + LC.esc(opts.subtitle) + "</div>" : "") +
+        '<div class="grab"></div>' +
+        '<div class="sheet-headrow">' +
+          '<div style="flex:1 1 auto;min-width:0">' +
+            '<h2 class="sheet-title">' + LC.esc(opts.title || "") + "</h2>" +
+            (opts.subtitle ? '<div class="muted" style="font-size:11.5px;font-weight:600;margin-top:2px">' + LC.esc(opts.subtitle) + "</div>" : "") +
+          "</div>" +
+          '<button type="button" class="sheet-close" aria-label="닫기">' + LC.icon("close") + "</button>" +
         "</div>" +
-        '<button type="button" class="sheet-close" aria-label="닫기">' + LC.icon("close") + "</button>" +
       "</div>" +
       '<div class="sheet-body"></div>' +
       (opts.footer ? '<div class="sheet-foot"></div>' : "");
