@@ -267,6 +267,11 @@ a:hover { text-decoration: underline; }
   display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 10px;
   width: 100%; text-align: left; padding: 10px; align-items: start;
 }
+/* 320px 가로형 카드: 썸네일이 본문 높이에 맞춰 채워지도록(아래 빈 공간 방지) */
+@media (max-width: 429px) {
+  .card-hit { align-items: stretch; }
+  .card-hit .thumb { aspect-ratio: auto; height: 100%; min-height: 92px; max-height: 148px; }
+}
 @media (min-width: 430px) {
   .card-hit { grid-template-columns: minmax(0, 1fr); gap: 0; padding: 0; }
 }
