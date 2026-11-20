@@ -290,7 +290,7 @@
       '<div class="rv-card-body">' +
         '<div class="rv-card-name">' + esc(r.name) + '</div>' +
         '<div class="rv-card-price"><span class="v tnum">' + (isMine && r.p ? num(r.p) : won(p.price)) + '</span>' +
-          '<span class="u">' + (isMine && r.p ? "내 평균가" : "다나와 최저") + '</span></div>' +
+          '<span class="u">' + (isMine && c.hasMine && r.p ? "내 평균가" : "다나와 최저") + '</span></div>' +
         '<div class="rv-card-unit"><b class="tnum">' + (r.up ? num(r.up) + "원" : "-") + '</b><span>' +
           esc(group.unitLabel) + '</span>' +
           (!isMine && d != null ? '<span class="rv-delta ' + cls + '" style="margin-left:auto">' +
