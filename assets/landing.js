@@ -113,11 +113,16 @@
         '<span class="badge badge-blue">예시 구매 ' + my.buys + '회</span>' +
         '<span class="badge">' + LC.esc(my.cycle ? "주기 " + my.cycle + "일" : "") + '</span>' +
         '<span class="badge badge-green">' + LC.esc(g.products.length) + '종 비교</span></div>' +
-        LCV.compareHTML(g, my, { range: 90 });
+        LCV.compareHTML(g, my, { range: 90, compact: true }) +
+        '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px">' +
+        '<button type="button" class="btn btn-dark btn-sm" data-sample-open>스펙 표까지 전체 비교</button>' +
+        '<span class="hb-note" style="color:var(--c-text-3);font-size:10.5px">다나와 실측 · ' + LC.esc(g.observedAt) + '</span></div>';
       list.querySelectorAll("[data-sample]").forEach(function (b) {
         b.setAttribute("aria-pressed", String(b.dataset.sample === id));
       });
       LCV.bindRanges(canvas, g, my);
+      var ob = canvas.querySelector("[data-sample-open]");
+      if (ob) ob.addEventListener("click", function () { LCV.open(g, my, { range: 90 }); });
     }
     list.querySelectorAll("[data-sample]").forEach(function (b) {
       b.addEventListener("click", function () { show(b.dataset.sample); });

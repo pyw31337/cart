@@ -174,8 +174,8 @@
       var v = lo + (hi - lo) * (i / 3), y = Y(v);
       g.push('<line x1="' + PAD.l + '" x2="' + (W - PAD.r) + '" y1="' + y.toFixed(1) + '" y2="' + y.toFixed(1) +
         '" stroke="#E3E6DB" stroke-width="1"/>');
-      g.push('<text x="' + (PAD.l - 6) + '" y="' + (y + 3).toFixed(1) + '" text-anchor="end" font-size="10" fill="#7C827A" font-weight="700">' +
-        compact(Math.round(v)) + '</text>');
+      g.push('<text x="' + (PAD.l - 6) + '" y="' + (y + 3).toFixed(1) + '" text-anchor="end" font-size="9.5" fill="#7C827A" font-weight="700">' +
+        compact(Math.round(v)) + '원</text>');
     }
     var paths = series.map(function (s) {
       var pts = s.points.slice().sort(function (a, b) { return a.d < b.d ? -1 : 1; });
@@ -222,7 +222,8 @@
         var u = p.unit ? { qty: p.unit.qty, per: p.unit.per } : null;
         return { d: x.d, v: u ? Math.round(x.p / u.qty * u.per) : x.p };
       });
-      series.push({ name: (p.brand || "라이벌") + " · " + p.name.split(" ").slice(-1)[0], color: colors[i % 3], width: 1.8, dash: "4 4", dot: 2.1, points: pts });
+      var lead = p.name.split(" ")[0].replace(/[(),]/g, "");
+      series.push({ name: lead + (p.unit ? " · " + p.unit.text : ""), color: colors[i % 3], width: 1.8, dash: "4 4", dot: 2.1, points: pts });
     });
     if (my && my.points && my.points.length) {
       series.push({ name: "내가 낸 단위가격", color: "#F0335F", width: 2.4, dot: 3, points: my.points.filter(function (p) { return p.d >= cut; }) });
@@ -332,14 +333,14 @@
       '<div class="section"><div class="section-head"><h3>내 상품 vs 라이벌 ' + c.rivals.length + '종</h3>' +
         '<span class="hint">' + esc((my && my.name) ? "내가 마지막으로 산 이름" : base.name.slice(0, 18)) + '</span></div>' +
         '<div class="rv-cards">' + cards + '</div></div>' +
-      table +
+      (opts.compact ? "" : table) +
       '<div class="section"><div class="section-head"><h3>가격 추이 비교</h3><span class="hint">' + esc(group.unitLabel) + ' 환산</span></div>' +
         '<div class="rv-range" data-rv-ranges>' + rangeChips + '</div>' +
         '<div style="margin-top:8px" data-rv-chart>' + chart(series, { note: trendNote, label: group.label + " 가격 추이" }) + '</div></div>' +
-      '<div class="note" style="margin-top:12px">' +
+      (opts.compact ? "" : '<div class="note" style="margin-top:12px">' +
         '가격은 수집 시점의 다나와 최저가, 추이는 다나와 최저가 추이(주간)입니다. 단위가격은 상품명의 용량·수량으로 계산했고, ' +
         '내 단위가격은 내가 실제 결제한 금액을 같은 방식으로 환산한 값입니다. 판매처·쿠폰에 따라 달라질 수 있습니다.' +
-      '</div>';
+      '</div>');
   }
 
   function bindRanges(box, group, my) {
