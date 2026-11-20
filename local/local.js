@@ -101,6 +101,13 @@
     if (!key) return "";
     return '<img src="../assets/logos/' + key + '.webp" alt="" width="' + (size || 15) + '" height="' + (size || 15) + '" loading="lazy" style="width:' + (size || 15) + "px;height:" + (size || 15) + 'px" />';
   }
+  var MARKET_COLOR = {
+    "쿠팡": "#E52528", "네이버페이": "#03C75A", "네이버": "#03C75A", "G마켓": "#0B8A4B", "지마켓": "#0B8A4B",
+    "옥션": "#E5261F", "11번가": "#FF0038", "SSG": "#C8102E", "마켓컬리": "#6B21A8", "컬리": "#6B21A8",
+    "롯데ON": "#E60013", "오늘의집": "#00A5AD", "메가마트": "#0B5AA5", "배민": "#2AC1BC",
+    "다나와": "#1b64da", "에누리": "#0F766E"
+  };
+  function marketColor(name) { return MARKET_COLOR[name] || "#8B95A1"; }
   function marketOf(x) { return x.src || String(x.mall || "").replace(/\s*최저$/, ""); }
   function ddayLabel(n) {
     if (n === null || n === undefined || n === 9999) return "";
@@ -114,7 +121,16 @@
   }
   function spark(points, w, h, color) {
     w = w || 74; h = h || 26;
-    var v = points.map(function (x) { return x.price; });
+    // 74px 폭에는 점을 14개까지 줄여 그린다(일별 값을 그대로 그리면 빗살처럼 보인다).
+    var raw = points.map(function (x) { return x.price; });
+    var v = raw.length <= 14 ? raw : (function () {
+      var out = [], step = raw.length / 14;
+      for (var i = 0; i < 14; i++) {
+        var a = Math.floor(i * step), b = Math.max(a + 1, Math.floor((i + 1) * step));
+        out.push(Math.min.apply(null, raw.slice(a, b)));
+      }
+      return out;
+    })();
     if (v.length < 2) return '<svg class="spk" viewBox="0 0 ' + w + " " + h + '" aria-hidden="true"></svg>';
     var mn = Math.min.apply(null, v), mx = Math.max.apply(null, v);
     var x = function (i) { return (i / (v.length - 1) * (w - 2) + 1).toFixed(1); };
@@ -149,7 +165,7 @@
     var hasData = state.demo || store.orders.length;
     aside.innerHTML =
       '<div class="aside-row"><div class="aside-ico" style="background:var(--c-blue-weak);color:var(--c-blue)">' + LC.icon("lock") + "</div>" +
-        '<div><div class="aside-k">데이터가 나가는 곳</div><div class="aside-v">없음<small>이 브라우저</small></div></div></div>' +
+        '<div><div class="aside-k">데이터가 나가는 곳</div><div class="aside-v">없음<small>· 이 브라우저</small></div></div></div>' +
       '<div class="aside-row"><div class="aside-ico" style="background:var(--c-green-weak);color:var(--c-green-text)">' + LC.icon("tag") + "</div>" +
         '<div><div class="aside-k">지금 사면 좋은 품목</div><div class="aside-v tnum">' + nb + "<small>개</small></div></div></div>" +
       '<div class="aside-row"><div class="aside-ico" style="background:var(--c-red-weak);color:var(--c-red-text)">' + LC.icon("clock") + "</div>" +
@@ -346,13 +362,13 @@
       '<span class="thumb">' + thumbImg(p) + "</span>" +
       '<span class="scard-main">' +
         '<span class="scard-top">' + actBadge(p.verdict) +
-          (p.count >= 2 ? '<span class="scard-meta">' + ddayLabel(p.daysLeft) + "</span>" : "") + "</span>" +
+          (p.count >= 2 && p.verdict.k !== "due" ? '<span class="scard-meta">' + ddayLabel(p.daysLeft) + "</span>" : "") + "</span>" +
         '<span class="scard-name">' + LC.text(p.name) + "</span>" +
         '<span class="scard-meta">' + p.count + "회 · 마지막 " + (p.myLast ? LC.won(p.myLast.price) : "–") +
           (p.avgGap ? " · 주기 " + p.avgGap + "일" : "") + "</span>" +
         '<span class="scard-price">' +
           (price ? '<b class="tnum">' + LC.num(price) + "</b>" +
-            (p.now ? '<small>' + logo(p.now.src, 14) + " " + LC.esc(p.now.src) + " 지금</small>" : '<small>내 마지막</small>')
+            (p.now ? '<small><i class="mdot" style="background:' + marketColor(p.now.src) + '"></i>' + LC.esc(p.now.src) + " 지금</small>" : '<small>내 마지막</small>')
             : '<b class="tnum">가격 모으는 중</b>') +
         "</span>" +
         '<span class="scard-foot">' + spark(sp, 74, 26, p.verdict.k === "buy" ? "#0ca678" : p.verdict.k === "wait" ? "#f08c00" : "#3182f6") +
@@ -519,12 +535,15 @@
       : '<div class="notice">같은 값에 용량이 줄어든 품목은 아직 없습니다. (468g → 444g 같은 변화를 잡아냅니다)</div>';
 
     // 가격 변화
+    var counts = {};
+    (A.items || []).forEach(function (it) { counts[it.key] = it.count; });
     var ch = A.changes.slice().sort(function (a, b) { return Math.abs(b.pct) - Math.abs(a.pct); }).slice(0, 10);
     $("changeList").innerHTML = ch.length
       ? '<div class="mini-list">' + ch.map(function (c) {
         var up = c.pct > 0;
+        var n = counts[c.key];
         return '<div class="mini"><span><span class="mini-t">' + LC.text(c.name) + "</span>" +
-          '<span class="mini-s">' + LC.won(c.p0) + " → " + LC.won(c.p1) + " · " + c.count + "회 · " + LC.date(c.from) + "~" + LC.date(c.to) + "</span></span>" +
+          '<span class="mini-s">' + LC.won(c.p0) + " → " + LC.won(c.p1) + (n ? " · " + n + "회" : "") + " · " + LC.date(c.from) + "~" + LC.date(c.to) + "</span></span>" +
           '<span class="mini-v" style="color:' + (up ? "var(--c-red-text)" : "var(--c-green-text)") + '">' + (up ? "+" : "") + c.pct + "%</span></div>";
       }).join("") + "</div>"
       : '<div class="notice">가격이 3회 이상 기록된 품목이 아직 없습니다.</div>';

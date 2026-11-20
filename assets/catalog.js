@@ -245,7 +245,7 @@
           "매칭 신뢰도가 낮은 상품은 이름·구매 이력만 보여 줍니다.</div>" +
           '<div class="section"><div class="section-head"><h3>지원 마켓</h3><span class="hint">로고: 렛츠바이 자산 WebP</span></div>' +
           '<div class="mkt-support">' + (state.marketList || []).map(function (m) {
-            return '<span>' + logoHtml(m.code, m.name, 14) + LC.esc(m.name) + "</span>";
+            return '<span>' + logoHtml(m.code, m.name, 22) + LC.esc(m.name) + "</span>";
           }).join("") + "</div></div>";
       },
       footer: '<button class="btn btn-ghost" data-act="reset">초기화</button>' +
@@ -384,7 +384,7 @@
     if (!a) return "";
     var cells = [];
     if (a.unit) cells.push([a.unit.label, LC.won(a.unit.value)]);
-    if (a.count >= 2) cells.push(["사는 주기", a.avgGap + "일"]);
+    if (a.count >= 2 && a.avgGap > 0) cells.push(["사는 주기", a.avgGap + "일"]);
     if (a.daysLeft !== 9999 && a.daysLeft !== undefined) cells.push(["다음 구매", LC.ddayLabel(a.daysLeft)]);
     if (a.nextDip) cells.push(["할인 주기", a.nextDip.gap + "일마다 · " + LC.shortDate(a.nextDip.date)]);
     if (a.avg) cells.push(["최근 평균", LC.won(a.avg)]);
@@ -529,7 +529,7 @@
     var rows = p.markets.map(function (m) {
       var mk = (state.marketMap || {})[m.code] || {};
       return '<a class="mkt-row" href="' + LC.esc(m.url || "#") + '" target="_blank" rel="noopener">' +
-        (logoHtml(m.code, m.label, 16) || '<span class="mkt-dot" style="--dc:' + (mk.color || "#8B95A1") + '"></span>') +
+        (logoHtml(m.code, m.label, 20) || '<span class="mkt-dot" style="--dc:' + (mk.color || "#8B95A1") + '"></span>') +
         '<span><span class="mkt-name">' + LC.esc(m.label || m.code) + "</span>" +
         '<span class="mkt-date"> · ' + LC.date(m.date) + (m.status && m.status !== "판매중" ? " · " + LC.esc(m.status) : "") + "</span></span>" +
         '<span class="mkt-price tnum">' + LC.num(m.price) + "원</span></a>";
