@@ -1,0 +1,68 @@
+const assert = require('assert');
+const fs = require('fs');
+const LetsBuy = require('../assets/engine/core.js');
+
+// 가격 검색 결과에는 매칭 근거를 남기고, 낮은 유사도는 강한 구매 추천을 막는다.
+const high = LetsBuy.bestMatch('코디 데코 화장지 30m 30롤', [
+  { title: '코디 데코 화장지 30m 30롤', price: 15900 }
+]);
+assert.strictEqual(high.matchLevel, 'high');
+assert(high.matchScore >= .8);
+
+global.LetsBuy = LetsBuy;
+global.LetsBuyInsights = require('../assets/engine/insights.js');
+const Products = require('../assets/engine/action.js');
+const orders = [
+  { name: '테스트 화장지 30롤', mall: '쿠팡', date: '2026-01-01', price: 18000 },
+  { name: '테스트 화장지 30롤', mall: '쿠팡', date: '2026-02-01', price: 18000 },
+  { name: '테스트 화장지 30롤', mall: '쿠팡', date: '2026-03-01', price: 18000 }
+];
+const key = LetsBuy.analyze(orders, '2026-03-05', {}, { all: true })[0].key;
+const product = Products.build({ orders, aliases: {}, today: '2026-03-05', prices: {
+  [key]: [{ date: '2026-03-05', price: 8900, src: '네이버', title: '비슷하지만 다른 구성', matchLevel: 'low' }]
+} })[0];
+assert.strictEqual(product.verdict.t, '상품 확인 필요');
+const app = fs.readFileSync(require('path').join(__dirname, '../local/local.js'), 'utf8');
+assert(/const REQUIRED_EXTENSION_VERSION = '0\.\d+\.\d+'/.test(app), '웹이 필요한 확장 버전을 명시한다');
+assert(app.includes('function versionAtLeast(actual, required)'), '구버전 연결을 판별한다');
+assert(app.includes('확장 업데이트 필요'), '구버전의 업데이트 안내를 표시한다');
+const background = fs.readFileSync(require('path').join(__dirname, '../extension/background.js'), 'utf8');
+assert(background.includes("THUMB_ALARM = 'thumb-resume'"), '사진 채우기 대기열을 저장한다');
+assert(background.includes('thumbSearchText'), '사진 검색 요청에 시간 제한을 둔다');
+assert(background.includes('error: message'), '사진 수집 오류를 진행 상태에 남긴다');
+assert(background.includes('SOURCE_FAILURE_LIMIT = 3'), '검색원 장애를 개별적으로 제한한다');
+assert(background.includes('if (off[s.name] >= SOURCE_FAILURE_LIMIT) { stat.skipped++; continue; }'), '막힌 검색원을 건너뛰고 다음 검색원을 시도한다');
+assert(!background.includes('if (blob || off[s.name] >= 3) break;'), '한 검색원 실패가 전체 검색을 중단하지 않는다');
+assert(background.includes('openOrderPhotoPages'), '실제 주문 사진 수집 탭을 연다');
+assert(background.includes('mergeOrderMedia') && background.includes('mediaMatch'), '주문 행 파서와 별개로 실제 카드 사진을 기존 구매명에 대조한다');
+assert(background.includes('www.coupang.com/np/mycoupang/orderlist') && !background.includes('mc.coupang.com/ssr/desktop/mycoupang/orders/list'), '차단되는 쿠팡 SSR 대신 일반 주문목록을 연다');
+assert(background.includes('resumeThumbJob') && background.includes("chrome.alarms.create('thumb-resume'"), '업데이트 뒤에도 멈춘 사진 대기열을 재개한다');
+assert(background.includes('profileWithCategory') && background.includes('policyVersion: 2'), '사진·가격·알림 대상을 품목 정책에 따라 제한한다');
+// 렛츠카트 /local 화면은 '실물 소모품만 판정, 정산·결제·디지털은 분리'를 화면 문구와 필터로 드러낸다.
+assert(app.includes('실물') && app.includes('정산·결제') && app.includes('디지털·서비스'), '판정 대상 범위를 실물 상품으로 명시하고 정산·디지털을 분리한다');
+assert(/["']review["']/.test(app) && app.includes('검토 필요'), '자동 추정 품목을 별도 검토하는 흐름을 제공한다');
+const orderList = fs.readFileSync(require('path').join(__dirname, '../extension/order-list.js'), 'utf8');
+assert(orderList.includes('visibleMedia') && orderList.includes("type: 'orderMedia'"), '주문목록의 실제 이미지와 링크를 수집한다');
+assert(orderList.includes('!rows.length && !media.length'), '주문 텍스트 행이 없어도 실제 카드 사진 수집을 계속한다');
+assert(orderList.includes('yearNodes') && orderList.includes('pagerNodes') && /MAX_VIEWS = \d+/.test(orderList), '실제 주문 화면의 연도·페이지를 순차 수집한다');
+assert(app.includes('연결 자가진단') && app.includes('확장 연결'), '확장 연결이 끊겼을 때 상태와 자가진단을 화면에 보여준다');
+const actualOrder = LetsBuy.dedupe([
+  { name: '테스트 화장지 30롤', mall: '쿠팡', date: '2026-03-01', price: 18000, source: 'mail' },
+  { name: '테스트 화장지 30롤', mall: '쿠팡', date: '2026-03-01', price: 18000, source: 'orderpage', img: 'https://img.example/item.webp', url: 'https://shop.example/item' }
+]);
+assert.strictEqual(actualOrder[0].img, 'https://img.example/item.webp');
+assert.strictEqual(actualOrder[0].url, 'https://shop.example/item');
+
+// v0.18.3: 수집 안전장치 및 분석 품질 고도화 검증
+assert(LetsBuy.isProductName('[로켓배송] 삼다수 2L 6개입'), '로켓배송 상품명을 정상 품목으로 인식한다');
+assert(LetsBuy.isProductName('로켓배송 삼다수 2L 6개입'), '접두사 없는 로켓배송 상품명을 정상 품목으로 인식한다');
+assert(LetsBuy.isProductName('(새벽배송) 신선 대란 30구'), '새벽배송 괄호 상품명을 정상 품목으로 인식한다');
+assert(LetsBuy.itemProfile('크리넥스 3겹 키친타월 6롤').recommend, '키친타월 등 확장된 생활 소모품을 재구매 후보로 판정한다');
+assert(LetsBuy.itemProfile('삼육두유 검은콩 190ml 24팩').recommend, '두유/음료 소모품을 재구매 후보로 판정한다');
+assert(LetsBuy.itemProfile('반려견 배변패드 100매').recommend, '반려동물 소모품을 재구매 후보로 판정한다');
+
+assert(orderList.includes('isBlocked') && orderList.includes('findNextPagerNode'), '주문목록 순회 시 보안 차단 감지 및 안전 페이지네이션 탐색을 수행한다');
+const widget = fs.readFileSync(require('path').join(__dirname, '../extension/widget.js'), 'utf8');
+assert(widget.includes('moved permanently') && widget.includes('cloudfront') && widget.includes('isCoupangProd'), '위젯이 에러 화면에서 오작동하지 않고 상품 상세에서만 동작한다');
+
+console.log('V15 SAFETY PASS');

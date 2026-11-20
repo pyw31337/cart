@@ -297,6 +297,7 @@ a:hover { text-decoration: underline; }
 .card-price em { font-style: normal; font-size: 11.5px; font-weight: 700; color: var(--c-green-text);
   background: var(--c-green-weak); padding: 2px 6px; border-radius: 6px; }
 .card-price small { font-size: 11.5px; color: var(--c-text-3); font-weight: 600; }
+.card-unit { font-size: 10.5px; font-weight: 700; color: var(--c-text-2); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .card-badges { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 7px; }
 .badge {
   display: inline-flex; align-items: center; gap: 3px; height: 21px; padding: 0 7px;
@@ -444,7 +445,34 @@ a:hover { text-decoration: underline; }
 @keyframes fadein { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 .divider { height: 1px; background: var(--c-border); margin: 16px 0; }
 .mono { font-variant-numeric: tabular-nums; }
+/* 행동 판정 배지 (지금 사세요 · 곧 떨어져요 · 기다리세요 · 살 때 됐어요) */
+.act { display: inline-flex; align-items: center; gap: 4px; font-size: 10.5px; font-weight: 800;
+  padding: 3px 7px; border-radius: 7px; border: 1px solid var(--c-border); background: var(--c-subtle);
+  color: var(--c-text-2); white-space: nowrap; letter-spacing: -.01em; }
+.act::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+.act-buy { background: var(--c-green-weak); color: var(--c-green-text); border-color: #c3f0e2; }
+.act-soon { background: var(--c-blue-weak); color: #1b64da; border-color: #d3e6ff; }
+.act-due { background: var(--c-red-weak); color: var(--c-red-text); border-color: #ffd8d8; }
+.act-wait { background: var(--c-amber-weak); color: var(--c-amber-text); border-color: #ffe0bf; }
+.act-ok { background: var(--c-subtle); color: var(--c-text-2); }
+.act-lg { font-size: 11.5px; padding: 4px 9px; border-radius: 8px; }
+.act-block { background: var(--c-subtle); border: 1px solid var(--c-border); border-radius: var(--r-md);
+  padding: 11px 12px; margin-top: 10px; }
+.act-block .act-line { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.act-block .act-say { font-size: 12px; color: var(--c-text-2); font-weight: 600; line-height: 1.5; margin: 7px 0 0; }
+.act-cells { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px 10px; margin-top: 9px; }
+@media (min-width: 420px) { .act-cells { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.mkt-logo { width: 16px; height: 16px; border-radius: 3px; object-fit: contain; flex: 0 0 auto; }
+.mkt-support { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.mkt-support span { display: inline-flex; align-items: center; gap: 4px; font-size: 10.5px; font-weight: 700;
+  color: var(--c-text-2); background: var(--c-surface); border: 1px solid var(--c-border);
+  border-radius: 9999px; padding: 3px 8px; }
+
 .muted { color: var(--c-text-3); }
+.hide-xs { display: inline; }
+@media (max-width: 430px) { .hide-xs { display: none; } }
+.hero-cta { display: flex; gap: 6px; flex-wrap: wrap; margin: 12px 0 4px; }
+.hero-cta .btn { height: 34px; }
 .nowrap { white-space: nowrap; }
 .footer { padding: 28px 0 36px; color: var(--c-text-3); font-size: 11.5px; line-height: 1.7; }
 .footer a { color: var(--c-text-2); font-weight: 600; }

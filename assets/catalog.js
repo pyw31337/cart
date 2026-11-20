@@ -3,6 +3,34 @@
   "use strict";
   var LC = window.LC;
   var REPO = "pyw31337/cart";
+  var ACT = window.LetsCartAction || null;
+  var TODAY = LC.today();
+  var actCache = {};
+
+  var MARKET_LOGO = {
+    coupang: "coupang", kurly: "kurly", gmarket: "gmarket", naver: "naver", npay: "npay",
+    "11st": "11st", lotteon: "lotteon", ohou: "ohou", ssg: "ssg", auction: "auction",
+    megamart: "megamart", baemin: "baemin", danawa: "danawa", enuri: "enuri"
+  };
+  function logoHtml(code, name, size) {
+    var f = MARKET_LOGO[code] || MARKET_LOGO[String(name || "").toLowerCase()];
+    if (!f) return "";
+    var px = size || 16;
+    return '<img class="mkt-logo" src="assets/logos/' + f + '.webp" alt="" width="' + px + '" height="' + px +
+      '" loading="lazy" style="width:' + px + "px;height:" + px + 'px" />';
+  }
+  function actionOf(p) {
+    if (!ACT) return null;
+    if (actCache[p.id]) return actCache[p.id];
+    var r = null;
+    try { r = ACT.judgeCatalog(p, TODAY); } catch (e) { r = null; }
+    actCache[p.id] = r;
+    return r;
+  }
+  function actBadge(a, big) {
+    if (!a || !a.meta) return "";
+    return '<span class="act ' + a.meta.cls + (big ? " act-lg" : "") + '">' + LC.esc(a.meta.label) + "</span>";
+  }
 
   var state = {
     data: null,
@@ -35,6 +63,7 @@
     .then(function (d) {
       state.data = d.products;
       state.mediaBase = d.mediaBase;
+      state.marketList = d.markets || [];
       buildHero(d.stats);
       buildCats(d.categories);
       wireUI();
@@ -213,7 +242,11 @@
           '<button class="chip" data-value="rebuy" aria-pressed="' + (state.rebuy ? "true" : "false") + '">반복구매 상품</button>' +
           "</div></div>" +
           '<div class="note" style="margin-top:6px">평점·스펙은 다나와 매칭이 확인된 상품에만 표시됩니다. ' +
-          "매칭 신뢰도가 낮은 상품은 이름·구매 이력만 보여 줍니다.</div>";
+          "매칭 신뢰도가 낮은 상품은 이름·구매 이력만 보여 줍니다.</div>" +
+          '<div class="section"><div class="section-head"><h3>지원 마켓</h3><span class="hint">로고: 렛츠바이 자산 WebP</span></div>' +
+          '<div class="mkt-support">' + (state.marketList || []).map(function (m) {
+            return '<span>' + logoHtml(m.code, m.name, 14) + LC.esc(m.name) + "</span>";
+          }).join("") + "</div></div>";
       },
       footer: '<button class="btn btn-ghost" data-act="reset">초기화</button>' +
               '<button class="btn btn-primary" data-act="apply">적용</button>',
@@ -312,6 +345,8 @@
         '" loading="lazy" decoding="async" width="240" height="240" onerror="this.style.display=\'none\';this.parentNode.classList.add(\'noimg\')" />'
       : "";
     var badges = [];
+    var a = actionOf(p);
+    if (a) badges.push(actBadge(a));
     if (p.tracked) badges.push('<span class="badge badge-blue">추적 중</span>');
     if (p.rebuy && p.rebuy.next && LC.dday(p.rebuy.next) >= -30) {
       var dd = LC.dday(p.rebuy.next);
@@ -336,12 +371,38 @@
           '<div class="card-rating">' + (p.rating ? LC.rating(p.rating, p.reviews) : '<span class="muted">스펙 미매칭</span>') + "</div>" +
           '<div class="card-price"><b class="tnum">' + LC.num(price) + "</b><small>원</small>" +
             (p.price ? '<small>다나와 최저</small>' : "") + "</div>" +
+          (a && a.unit ? '<div class="card-unit"><span>' + LC.esc(a.unit.label) + " " + LC.won(a.unit.value) + "</span></div>" : "") +
           '<div class="card-badges">' + badges.join("") + "</div>" +
         "</div>" +
       "</div></article>";
   }
 
   /* ---------------------------------------------------------------- detail */
+  /* 4단 행동 판정 + 단위가격 + 할인 주기 + 슈링크플레이션 */
+  function actBlock(p) {
+    var a = actionOf(p);
+    if (!a) return "";
+    var cells = [];
+    if (a.unit) cells.push([a.unit.label, LC.won(a.unit.value)]);
+    if (a.count >= 2) cells.push(["사는 주기", a.avgGap + "일"]);
+    if (a.daysLeft !== 9999 && a.daysLeft !== undefined) cells.push(["다음 구매", LC.ddayLabel(a.daysLeft)]);
+    if (a.nextDip) cells.push(["할인 주기", a.nextDip.gap + "일마다 · " + LC.shortDate(a.nextDip.date)]);
+    if (a.avg) cells.push(["최근 평균", LC.won(a.avg)]);
+    if (!cells.length) cells.push(["내 구매", a.count ? a.count + "회" : "기록 없음"]);
+    return '<div class="act-block">' +
+      '<div class="act-line">' + actBadge(a, true) +
+        (a.verdict.basis ? '<span class="badge">' + LC.esc(a.verdict.basis) + "</span>" : "") +
+        (a.target ? '<span class="badge badge-green">목표가 ' + LC.won(a.target) + "</span>" : "") +
+      "</div>" +
+      (a.say ? '<p class="act-say">' + LC.esc(a.say) + "</p>" : "") +
+      '<div class="act-cells">' + cells.slice(0, 4).map(function (c) {
+        return '<div class="cell"><div class="cell-k">' + LC.esc(c[0]) + '</div><div class="cell-v tnum">' + c[1] + "</div></div>";
+      }).join("") + "</div>" +
+      (a.shrink ? '<div class="note" style="margin-top:9px;background:var(--c-amber-weak);border-color:#ffe0bf;color:var(--c-amber-text)"><b>슈링크플레이션 ' +
+        "−" + a.shrink.pct + "%</b> — 다나와에 지금 등록된 규격이 내가 산 것보다 작습니다.</div>" : "") +
+      "</div>";
+  }
+
   function openDetail(p) {
     var price = priceOf(p);
     var s = LC.sheet({
@@ -389,6 +450,7 @@
               "다음 구매 예상 " + LC.date(p.rebuy.next) + " · " +
               (dd >= 0 ? LC.ddayLabel(dd) : Math.abs(dd) + "일 경과") + "</div>" : "") +
           "</div>" +
+          actBlock(p) +
           (p.rebuy && p.rebuy.avg && p.rebuy.min && p.rebuy.avg > p.rebuy.min
             ? '<div class="note" style="margin-top:12px">평균 구매가 <b>' + LC.num(p.rebuy.avg) + "원</b> vs 최저 구매가 <b>" +
               LC.num(p.rebuy.min) + "원</b> — 회당 <b>" + LC.num(p.rebuy.avg - p.rebuy.min) + "원(" +
@@ -467,7 +529,7 @@
     var rows = p.markets.map(function (m) {
       var mk = (state.marketMap || {})[m.code] || {};
       return '<a class="mkt-row" href="' + LC.esc(m.url || "#") + '" target="_blank" rel="noopener">' +
-        '<span class="mkt-dot" style="--dc:' + (mk.color || "#8B95A1") + '"></span>' +
+        (logoHtml(m.code, m.label, 16) || '<span class="mkt-dot" style="--dc:' + (mk.color || "#8B95A1") + '"></span>') +
         '<span><span class="mkt-name">' + LC.esc(m.label || m.code) + "</span>" +
         '<span class="mkt-date"> · ' + LC.date(m.date) + (m.status && m.status !== "판매중" ? " · " + LC.esc(m.status) : "") + "</span></span>" +
         '<span class="mkt-price tnum">' + LC.num(m.price) + "원</span></a>";

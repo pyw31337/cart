@@ -63,6 +63,24 @@
             <div class="panel-body" id="collection"></div>
           </div>
         </div>
+        <div class="cols">
+          <div class="panel">
+            <div class="panel-head"><h3>살 때 판정</h3><span class="hint" id="actHint">재구매 알림 기준</span></div>
+            <div class="panel-body">
+              <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:9px">
+                <div class="seg" id="dashSplit" role="group" aria-label="정산·디지털 분리">
+                  <button data-value="split" aria-pressed="true">정산·디지털 분리</button>
+                  <button data-value="raw" aria-pressed="false">전체</button>
+                </div>
+              </div>
+              <div id="actSummary"></div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h3>단위가격·슈링크플레이션</h3><span class="hint">내가 낸 가격 기준</span></div>
+            <div class="panel-body" id="unitPanel"></div>
+          </div>
+        </div>
       </section>
 
       <section id="view-orders" hidden>
@@ -116,6 +134,13 @@
       </section>
 
       <section id="view-rebuy" hidden>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:4px 0 10px">
+          <div class="seg" id="rebuySplit" role="group" aria-label="정산·디지털 분리">
+            <button data-value="split" aria-pressed="true">정산·디지털 분리</button>
+            <button data-value="raw" aria-pressed="false">전체</button>
+          </div>
+          <span id="rebuySplitHint" style="font-size:11.5px;color:var(--c-text-3);font-weight:600"></span>
+        </div>
         <div class="panel" style="margin-bottom:12px">
           <div class="panel-head"><h3>재구매 요약</h3><span class="hint" id="rebuyHint"></span></div>
           <div class="panel-body" id="rebuySummary"></div>
@@ -136,6 +161,9 @@
   </main>
 
   <script src="../assets/lc.js"></script>
+  <script src="../assets/engine/core.js"></script>
+  <script src="../assets/engine/insights.js"></script>
+  <script src="../assets/engine/action.js"></script>
   <script src="my.js"></script>
 </body>
 </html>

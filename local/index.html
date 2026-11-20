@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light only" />
+  <meta name="theme-color" content="#ffffff" />
+  <title>내 브라우저에서 시작하기 · 렛츠카트</title>
+  <meta name="description" content="로그인 없이 내 브라우저에서만 도는 렛츠카트 — 크롬 확장·.eml·메일 붙여넣기로 구매 기록을 모아 살 때를 판정합니다." />
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+  <link rel="stylesheet" href="../assets/lc.css" />
+  <link rel="stylesheet" href="local.css" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%233182F6'/%3E%3Cpath d='M6 7h2l1.6 7.4a1 1 0 0 0 1 .8h6.2a1 1 0 0 0 1-.7L19 10H8' stroke='white' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E" />
+</head>
+<body>
+  <a href="#tabBody" class="sr-only">본문으로 이동</a>
+
+  <header class="topbar">
+    <div class="shell topbar-in">
+      <a class="brand" href="../" style="color:inherit">
+        <div class="brand-mark" data-icon="cart" data-icon-class="icon-lg"></div>
+        <div class="brand-text">
+          <span class="brand-name">렛츠카트</span>
+          <span class="brand-sub">내 브라우저에서 시작하기</span>
+        </div>
+      </a>
+      <div class="topbar-spacer"></div>
+      <div class="topbar-actions">
+        <span class="link-pill" id="extPill" data-state="off">
+          <i class="led"></i><span id="extPillText">확장 확인 중</span>
+        </span>
+        <a class="btn btn-ghost btn-sm" href="../my/"><span data-icon="wallet" data-icon-class="icon-sm"></span><span class="nowrap">내 지출</span></a>
+        <a class="btn btn-primary btn-sm" href="../"><span data-icon="search" data-icon-class="icon-sm"></span><span class="nowrap">카탈로그</span></a>
+      </div>
+    </div>
+  </header>
+
+  <section class="shell hero">
+    <div class="hero-card">
+      <div class="hero-copy">
+        <div class="hero-kicker"><span data-icon="lock" data-icon-class="icon-sm"></span>로그인·Access 없이 · 데이터는 이 브라우저에만</div>
+        <h1>내 구매 기록으로<br class="br-m" /> 살 때를 판정합니다.</h1>
+        <p>확장을 붙이면 메일·주문목록에서 구매 기록을 모으고, 없으면 받은 메일(.eml)이나 붙여넣은 영수증으로 시작합니다. 주문·메일 원문은 이 브라우저를 벗어나지 않습니다.</p>
+        <div class="hero-stats" id="heroStats">
+          <div class="hstat"><div class="hstat-label">구매 기록</div><div class="hstat-value tnum" id="hsOrders">–</div></div>
+          <div class="hstat"><div class="hstat-label">품목</div><div class="hstat-value tnum" id="hsItems">–</div></div>
+          <div class="hstat"><div class="hstat-label">가격 추이</div><div class="hstat-value tnum" id="hsPrices">–</div></div>
+          <div class="hstat"><div class="hstat-label">살 때 판정</div><div class="hstat-value tnum" id="hsVerdicts">–</div></div>
+        </div>
+      </div>
+      <div class="hero-aside" id="heroAside" aria-label="지금 시작할 일"></div>
+    </div>
+  </section>
+
+  <section class="shell start">
+    <div class="start-grid">
+      <div class="panel start-main">
+        <div class="panel-head">
+          <h2>시작하기</h2>
+          <span class="hint" id="startHint">확장 · .eml · 메일 붙여넣기 · 백업 JSON</span>
+        </div>
+        <div class="step-grid">
+          <div class="step">
+            <div class="step-top"><span class="step-n">1</span><b>확장 설치</b></div>
+            <p>크롬·엣지에 <b>렛츠카트 수집기 v0.19.0</b>을 압축해제 방식으로 설치합니다. 메일함·주문목록에 로그인된 상태에서 아이콘을 한 번 누르면 수집됩니다.</p>
+            <a class="btn btn-primary btn-sm" id="btnZip" href="../assets/letscart-extension-v0.19.0.zip" download><span data-icon="arrow" data-icon-class="icon-sm"></span>확장 ZIP 받기</a>
+          </div>
+          <div class="step">
+            <div class="step-top"><span class="step-n">2</span><b>기록 가져오기</b></div>
+            <p>아래 영역에 <b>.eml 파일을 끌어다 놓거나</b>, 메일 본문을 붙여넣고, 예전 <b>렛츠바이 백업 JSON</b>도 그대로 불러올 수 있습니다.</p>
+            <div class="step-actions">
+              <button type="button" class="btn btn-ghost btn-sm" id="btnPaste"><span data-icon="plus" data-icon-class="icon-sm"></span>메일 붙여넣기</button>
+              <button type="button" class="btn btn-ghost btn-sm" id="btnJson"><span data-icon="box" data-icon-class="icon-sm"></span>백업 불러오기</button>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-top"><span class="step-n">3</span><b>살 때 판정</b></div>
+            <p>내가 낸 가격·구매 주기·최근 최저가를 비교해 <b>지금 사세요 · 곧 떨어져요 · 기다리세요 · 살 때 됐어요</b>로 나눕니다. 판단 근거도 함께 적습니다.</p>
+            <button type="button" class="btn btn-ghost btn-sm" id="btnDemo"><span data-icon="trend" data-icon-class="icon-sm"></span>데모로 먼저 보기</button>
+          </div>
+        </div>
+
+        <div class="drop" id="drop" tabindex="0" role="button" aria-label=".eml 파일 끌어다 놓기 또는 선택">
+          <div class="drop-ico" data-icon="receipt" data-icon-class="icon-lg"></div>
+          <div class="drop-text">
+            <b>.eml 파일을 여기에 끌어다 놓으세요</b>
+            <span>또는 눌러서 파일 선택 · 최대 50개 · 파일은 서버로 전송되지 않습니다</span>
+          </div>
+          <span class="drop-msg" id="dropMsg"></span>
+          <input type="file" id="fileEml" accept=".eml,message/rfc822" multiple hidden />
+        </div>
+        <div class="drop-note" id="dropNote" aria-live="polite"></div>
+      </div>
+
+      <div class="panel start-side">
+        <div class="panel-head"><h2>확장 연결</h2><span class="hint" id="extVer">확인 중</span></div>
+        <div class="panel-body" id="extPanel"></div>
+        <div class="divider"></div>
+        <div class="panel-head"><h2>이 브라우저에 저장된 양</h2></div>
+        <div class="panel-body" id="storePanel"></div>
+      </div>
+    </div>
+  </section>
+
+  <nav class="shell tabs-wrap">
+    <div class="tabs" role="tablist" aria-label="렛츠카트 로컬 화면">
+      <button class="tab" role="tab" aria-selected="true" data-tab="shop"><span data-icon="tag" data-icon-class="icon-sm"></span>살 때<span class="n" id="nShop"></span></button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="spend"><span data-icon="wallet" data-icon-class="icon-sm"></span>내 소비</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="records"><span data-icon="receipt" data-icon-class="icon-sm"></span>구매 기록<span class="n" id="nRecords"></span></button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="setup"><span data-icon="lock" data-icon-class="icon-sm"></span>백업·설정</button>
+    </div>
+  </nav>
+
+  <main class="shell local-main" id="tabBody">
+    <section id="view-shop">
+      <div class="view-head">
+        <div>
+          <h2 class="view-title">지금 살 것</h2>
+          <p class="view-sub">반복 구매 가능한 실물 품목만 판정합니다. 결제·상품권·디지털·내구재는 구매 기록에 남기고 추천에서 빼 둡니다.</p>
+        </div>
+        <div class="vsum" id="vsum"></div>
+      </div>
+      <div class="chiprow" id="shopCats" data-multi="false" aria-label="분류 필터"></div>
+      <div class="toolrow">
+        <div class="result-count" id="shopCount">불러오는 중…</div>
+        <div class="seg" id="shopView" role="group" aria-label="보기">
+          <button data-value="rep" aria-pressed="true">자주 산 것</button>
+          <button data-value="all" aria-pressed="false">전체</button>
+        </div>
+        <div class="dd" id="shopSort">
+          <button type="button" class="dd-btn" aria-expanded="false" aria-haspopup="true">
+            <span data-icon="sort" data-icon-class="icon-sm"></span>
+            <span data-dd-label>판정 우선</span>
+            <span data-icon="chevron" data-icon-class="icon-sm"></span>
+          </button>
+          <div class="dd-menu" role="menu">
+            <button class="dd-item" role="menuitemradio" data-value="verdict" data-label="판정 우선" aria-checked="true">판정 우선<span data-icon="check" data-icon-class="icon-sm"></span></button>
+            <button class="dd-item" role="menuitemradio" data-value="saving" data-label="절약 여지" aria-checked="false">절약 여지<span data-icon="check" data-icon-class="icon-sm"></span></button>
+            <button class="dd-item" role="menuitemradio" data-value="count" data-label="자주 산 순" aria-checked="false">자주 산 순<span data-icon="check" data-icon-class="icon-sm"></span></button>
+            <button class="dd-item" role="menuitemradio" data-value="due" data-label="구매 주기 임박" aria-checked="false">구매 주기 임박<span data-icon="check" data-icon-class="icon-sm"></span></button>
+            <button class="dd-item" role="menuitemradio" data-value="name" data-label="이름 순" aria-checked="false">이름 순<span data-icon="check" data-icon-class="icon-sm"></span></button>
+          </div>
+        </div>
+      </div>
+      <div class="sgrid" id="shopGrid"></div>
+      <div class="loadmore" id="shopMore"></div>
+    </section>
+
+    <section id="view-spend" hidden>
+      <div class="view-head">
+        <div>
+          <h2 class="view-title">내 소비</h2>
+          <p class="view-sub">카테고리·월별 지출·단위가격·슈링크플레이션. 결제·포인트·상품권 행은 소비 합계에서 자동으로 분리합니다.</p>
+        </div>
+        <div class="seg" id="spendMode" role="group" aria-label="정산 분리">
+          <button data-value="split" aria-pressed="true">정산 분리</button>
+          <button data-value="raw" aria-pressed="false">원장 그대로</button>
+        </div>
+      </div>
+      <div class="kpis" id="spendKpis"></div>
+      <div class="cols">
+        <div class="panel">
+          <div class="panel-head"><h3>월별 지출</h3><span class="hint" id="monthHint">최근 24개월</span></div>
+          <div class="panel-body" id="monthChart"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h3>카테고리</h3><span class="hint">정산·디지털 분리 후</span></div>
+          <div class="panel-body" id="catBars"></div>
+        </div>
+      </div>
+      <div class="cols">
+        <div class="panel">
+          <div class="panel-head"><h3>단위가격 (100g·100ml·1개당)</h3><span class="hint">내가 낸 가격 기준</span></div>
+          <div class="panel-body" id="unitTable"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h3>슈링크플레이션</h3><span class="hint">같은 값, 줄어든 용량</span></div>
+          <div class="panel-body" id="shrinkList"></div>
+        </div>
+      </div>
+      <div class="panel" style="margin-top:12px">
+        <div class="panel-head"><h3>가격이 오른·내린 품목</h3><span class="hint">첫 구매가 → 마지막 구매가</span></div>
+        <div class="panel-body" id="changeList"></div>
+      </div>
+    </section>
+
+    <section id="view-records" hidden>
+      <div class="view-head">
+        <div>
+          <h2 class="view-title">구매 기록</h2>
+          <p class="view-sub">메일·주문목록·.eml·붙여넣기에서 모은 원장 그대로입니다. 상품이 아닌 행은 분리 표시만 하고 지우지 않습니다.</p>
+        </div>
+      </div>
+      <div class="searchrow">
+        <div class="search" id="rSearchBox">
+          <span data-icon="search" data-icon-class="icon-sm" style="color:#8B95A1"></span>
+          <input id="rQ" type="search" placeholder="상품명·마켓 검색" aria-label="구매 기록 검색" />
+          <button type="button" class="search-clear" id="rQClear" aria-label="지우기"><span data-icon="close" data-icon-class="icon-sm"></span></button>
+        </div>
+        <div class="seg" id="rFilter" role="group" aria-label="행 종류">
+          <button data-value="all" aria-pressed="true">전체</button>
+          <button data-value="review" aria-pressed="false">검토 필요</button>
+          <button data-value="settle" aria-pressed="false">정산·결제</button>
+          <button data-value="digital" aria-pressed="false">디지털·서비스</button>
+        </div>
+      </div>
+      <div class="toolrow"><div class="result-count" id="rCount"></div></div>
+      <div class="rlist" id="rList"></div>
+      <div class="loadmore" id="rMore"></div>
+    </section>
+
+    <section id="view-setup" hidden>
+      <div class="view-head"><div><h2 class="view-title">백업·설정</h2><p class="view-sub">모든 값은 이 브라우저의 localStorage에만 저장됩니다. 내보낸 JSON은 렛츠바이(`letsbuy.v1`) 백업과 호환됩니다.</p></div></div>
+      <div class="cols">
+        <div class="panel">
+          <div class="panel-head"><h3>내보내기·불러오기</h3></div>
+          <div class="panel-body">
+            <div class="setup-row"><div><b>JSON 백업 내보내기</b><span>주문·가격·별칭·분류·제외 목록을 한 파일로</span></div><button class="btn btn-ghost btn-sm" id="btnExport">내보내기</button></div>
+            <div class="setup-row"><div><b>백업 불러오기</b><span>렛츠바이 백업 · 렛츠카트 백업 모두</span></div><button class="btn btn-ghost btn-sm" id="btnImport">불러오기</button></div>
+            <div class="setup-row"><div><b>자동 백업에서 되돌리기</b><span id="snapshotHint">최근 5개</span></div><button class="btn btn-ghost btn-sm" id="btnRestore">되돌리기</button></div>
+            <div class="setup-row"><div><b>모두 지우기</b><span>지우기 전 자동 백업을 남깁니다</span></div><button class="btn btn-ghost btn-sm" id="btnReset">지우기</button></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h3>확장 연결 상태</h3><span class="hint">bridge.js</span></div>
+          <div class="panel-body" id="extDiag"></div>
+        </div>
+      </div>
+      <div class="panel" style="margin-top:12px">
+        <div class="panel-head"><h3>개인정보 원칙</h3><span class="hint">로컬-퍼스트</span></div>
+        <div class="panel-body">
+          <ul class="policy">
+            <li><b>주문·메일은 밖으로 나가지 않습니다.</b> 수집은 브라우저 저장소(chrome.storage.local)에만 남고, 어떤 서버로도 보내지 않습니다.</li>
+            <li><b>공개 카탈로그는 보기만 합니다.</b> 확장이 상품을 조회할 때 <code>letscart.pages.dev/data/catalog.json</code>의 정제 스펙·다나와 PCode·WebP 썸네일을 참고하지만, 내 주문·메일은 이 조회에 쓰이지 않습니다.</li>
+            <li><b>로그인이 필요 없습니다.</b> 이 화면은 Access 뒤의 <code>/my</code>와 별개로, 아무 계정 없이 내 브라우저에서만 돌아갑니다.</li>
+            <li><b>지금 보는 데이터:</b> <span id="dataMode" class="mono">–</span></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="shell footer">
+    <div><b style="color:var(--c-text-2)">렛츠카트</b> — 렛츠바이(/buy) v0.18.3의 분석 엔진을 /cart로 옮긴 로컬 화면입니다. 계정·서버 없이 이 브라우저에서만 동작합니다.</div>
+    <div><a href="../">공개 카탈로그</a> · <a href="../my/">내 지출 허브(Access)</a> · <a href="https://github.com/pyw31337/cart" target="_blank" rel="noopener">소스</a></div>
+  </footer>
+
+  <input type="file" id="fileJson" accept=".json,application/json" hidden />
+
+  <script src="../assets/lc.js"></script>
+  <script src="../assets/engine/core.js"></script>
+  <script src="../assets/engine/insights.js"></script>
+  <script src="../assets/engine/action.js"></script>
+  <script src="demo.js"></script>
+  <script src="local.js"></script>
+</body>
+</html>

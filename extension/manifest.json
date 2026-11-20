@@ -1,0 +1,148 @@
+{
+  "manifest_version": 3,
+  "name": "렛츠카트 수집기",
+  "version": "0.19.0",
+  "description": "렛츠카트 수집기 — 로그인된 메일·주문목록의 구매 기록을 내 브라우저에만 저장하고, 실물 소모품만 재구매·가격·사진 대상으로 분석합니다. 개인 데이터는 외부 서버로 보내지 않습니다(로컬-퍼스트).",
+  "permissions": [
+    "storage",
+    "alarms",
+    "notifications",
+    "tabs",
+    "unlimitedStorage",
+    "declarativeNetRequestWithHostAccess"
+  ],
+  "host_permissions": [
+    "https://mail.naver.com/*",
+    "https://search.danawa.com/*",
+    "https://www.enuri.com/*",
+    "https://mail.google.com/*",
+    "https://www.coupang.com/*",
+    "https://search.shopping.naver.com/*",
+    "http://127.0.0.1:11434/*",
+    "http://localhost:11434/*",
+    "https://letsbuy-thumbs.pyw213.workers.dev/*",
+    "https://search.11st.co.kr/*",
+    "https://browse.gmarket.co.kr/*",
+    "https://www.kurly.com/*",
+    "https://*.coupangcdn.com/*",
+    "https://*.pstatic.net/*",
+    "https://order.pay.naver.com/*",
+    "https://*.danawa.com/*",
+    "https://*.011st.com/*",
+    "https://*.gmarket.co.kr/*",
+    "https://*.gmkt.kr/*",
+    "https://*.auction.co.kr/*",
+    "https://*.kurly.com/*",
+    "https://*.ssgcdn.com/*",
+    "https://contents.lotteon.com/*",
+    "https://static.megamart.com/*",
+    "https://*.baemin.com/*",
+    "https://*.ohou.se/*",
+    "https://letscart.pages.dev/*",
+    "https://pyw31337.github.io/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "렛츠카트 — 클릭하면 메일에서 구매내역 수집",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://mail.naver.com/*"
+      ],
+      "js": [
+        "core.js",
+        "diag.js",
+        "toast.js",
+        "naver-mail.js"
+      ],
+      "run_at": "document_idle",
+      "all_frames": false
+    },
+    {
+      "matches": [
+        "https://mail.google.com/*"
+      ],
+      "js": [
+        "core.js",
+        "diag.js",
+        "toast.js",
+        "gmail.js"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://mc.coupang.com/*",
+        "https://my.coupang.com/*",
+        "https://www.coupang.com/my/*",
+        "https://www.coupang.com/np/mycoupang/*",
+        "https://order.pay.naver.com/*",
+        "https://pay.naver.com/*"
+      ],
+      "js": [
+        "core.js",
+        "diag.js",
+        "toast.js",
+        "order-list.js"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://letscart.pages.dev/*",
+        "https://pyw31337.github.io/cart/*",
+        "http://localhost/*",
+        "http://127.0.0.1/*"
+      ],
+      "js": [
+        "bridge.js"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://www.coupang.com/np/search*",
+        "https://search.shopping.naver.com/search/*"
+      ],
+      "js": [
+        "price-page.js"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://www.coupang.com/*",
+        "https://www.gmarket.co.kr/*",
+        "https://shopping.naver.com/*",
+        "https://smartstore.naver.com/*"
+      ],
+      "js": [
+        "widget.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "commands": {
+    "_execute_action": {
+      "suggested_key": {
+        "default": "Alt+Shift+L"
+      },
+      "description": "구매내역 수집"
+    }
+  }
+}

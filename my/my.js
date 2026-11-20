@@ -4,13 +4,18 @@
   var LC = window.LC;
   var API = "/api/private/";
   var MEDIA = "https://letscart.pages.dev/media/";
+  var CORE = window.LetsCartCore || window.LetsBuy;
+  var INS = window.LetsCartInsights || window.LetsBuyInsights;
+  var ACT = window.LetsCartAction || null;
+  var TODAY = LC.today();
 
   var state = {
     summary: null,
     tab: "dash",
     orders: { q: "", market: "", match: "all", period: "", limit: 30, offset: 0, total: 0, rows: [], loading: false },
     ledger: { q: "", market: "", match: "all", limit: 40, offset: 0, total: 0, rows: [], loading: false },
-    rebuy: null
+    rebuy: null,
+    split: true
   };
 
   var $ = function (id) { return document.getElementById(id); };
@@ -25,6 +30,132 @@
     var ms = (state.summary && state.summary.markets) || [];
     for (var i = 0; i < ms.length; i++) if (ms[i].code === code) return ms[i].name;
     return MARKET_FALLBACK[code] || code || "–";
+  }
+
+  /* --------------------------------------------- 행동 판정 · 단위가격 엔진 */
+  function profileOf(name) { return CORE.itemProfile(String(name || "")); }
+  function isNonSpend(name) {
+    var p = profileOf(name);
+    return p.includeSpend === false || p.entity === "stored_value" || p.entity === "digital" || p.entity === "service";
+  }
+  function actOf(r) {
+    if (!ACT) return null;
+    var item = {
+      key: String(r.id), name: r.danawaName || r.label,
+      ref: r.avg ? { price: r.avg, label: "평균 구매가" } : null,
+      last: r.last, now: r.now ? { date: TODAY, price: r.now, src: "다나와", title: r.danawaName || r.label } : null,
+      count: r.buys || 0, cycleDays: r.cycle, daysLeft: r.daysLeft, img: null
+    };
+    var a = null;
+    try { a = ACT.judge(item, TODAY); } catch (e) { a = null; }
+    return a;
+  }
+  function actBadge(a, big) {
+    if (!a || !a.meta) return "";
+    return '<span class="act ' + a.meta.cls + (big ? " act-lg" : "") + '">' + LC.esc(a.meta.label) + "</span>";
+  }
+  function unitOf(r) {
+    if (!INS || !INS.unitPrice) return null;
+    var price = r.avg || r.min || r.now;
+    if (!price) return null;
+    return INS.unitPrice(r.danawaName || r.label, price, 1);
+  }
+  function shrinkOf(r) {
+    if (!ACT || !ACT.shrinkOf || !r.danawaName) return null;
+    return ACT.shrinkOf(r.label, r.danawaName);
+  }
+
+  function splitRows(rows) {
+    if (!state.split) return rows;
+    return rows.filter(function (r) { return !isNonSpend(r.danawaName || r.label); });
+  }
+
+  function renderActPanel() {
+    var d = state.rebuy;
+    var box = $("actSummary");
+    if (!box) return;
+    if (!d) { box.innerHTML = '<div class="notice">재구매 알림을 불러오는 중…</div>'; return; }
+    var rows = splitRows(d.rows || []);
+    var by = { buy: [], soon: [], due: [], wait: [], ok: [] };
+    rows.forEach(function (r) {
+      var a = actOf(r);
+      if (!a) return;
+      (by[a.verdict.k] || by.ok).push({ r: r, a: a });
+    });
+    $("actHint").textContent = LC.num(rows.length) === LC.num((d.rows || []).length)
+      ? LC.num(rows.length) + "개 상품군"
+      : LC.num(rows.length) + " / " + LC.num((d.rows || []).length) + "개 (정산·디지털 분리)";
+    var order = ["buy", "soon", "due", "wait"];
+    var labels = { buy: "지금 사세요", soon: "곧 떨어져요", due: "살 때 됐어요", wait: "기다리세요" };
+    var tone = { buy: "var(--c-green-text)", soon: "#1b64da", due: "var(--c-red-text)", wait: "var(--c-amber-text)" };
+    var top = [];
+    order.forEach(function (k) {
+      (by[k] || []).slice().sort(function (a, b) { return a.a.daysLeft - b.a.daysLeft; }).forEach(function (x) { top.push(x); });
+    });
+    box.innerHTML =
+      '<div class="statline" style="gap:14px;font-size:12px;margin-bottom:8px">' + order.map(function (k) {
+        return "<span>" + labels[k] + " <b style=\"color:" + tone[k] + "\">" + (by[k] || []).length + "</b></span>";
+      }).join("") + "</div>" +
+      (top.length ? '<div class="mini-list">' + top.slice(0, 6).map(function (x) {
+        return '<button class="mini" data-actrow="' + LC.esc(String(x.r.id)) + '"><span><span class="mini-t">' + LC.text(x.r.label) +
+          '</span><span class="mini-s">주기 ' + (x.r.cycle ? Math.round(x.r.cycle) + "일" : "–") + " · 다음 " + LC.date(x.r.next) +
+          (x.a.unit ? " · " + LC.esc(x.a.unit.label) + " " + LC.won(x.a.unit.value) : "") + "</span></span>" +
+          actBadge(x.a) + "</button>";
+      }).join("") + "</div>" : '<div class="notice">판정할 재구매 상품군이 없습니다.</div>');
+    box.querySelectorAll("[data-actrow]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var r = (d.rows || []).find(function (x) { return String(x.id) === b.dataset.actrow; });
+        if (r) openRebuy(r);
+      });
+    });
+  }
+
+  function renderUnitPanel() {
+    var box = $("unitPanel");
+    if (!box) return;
+    var d = state.rebuy;
+    if (!d) { box.innerHTML = '<div class="notice">불러오는 중…</div>'; return; }
+    var rows = splitRows(d.rows || []);
+    var units = [];
+    var shrinks = [];
+    rows.forEach(function (r) {
+      var u = unitOf(r);
+      if (u) units.push({ r: r, u: u });
+      var sh = shrinkOf(r);
+      if (sh) shrinks.push({ r: r, sh: sh });
+    });
+    units.sort(function (a, b) { return a.u.value - b.u.value; });
+    box.innerHTML =
+      (shrinks.length ? '<div class="notice" style="margin-bottom:8px"><b>슈링크플레이션 ' + shrinks.length + "건</b> — " +
+        shrinks.slice(0, 2).map(function (x) { return LC.text(x.r.label) + " 용량 −" + x.sh.pct + "%"; }).join(", ") + "</div>" : "") +
+      (units.length ? '<div class="mini-list">' + units.slice(0, 8).map(function (x) {
+        return '<div class="mini"><span><span class="mini-t">' + LC.text(x.r.label) + "</span>" +
+          '<span class="mini-s">평균 ' + LC.won(x.r.avg) + " · " + LC.esc(x.u.label) + "</span></span>" +
+          '<span class="mini-v tnum">' + LC.won(x.u.value) + "</span></div>";
+      }).join("") + "</div>" : '<div class="notice">단위가격을 계산할 수 있는 품목이 없습니다(상품명에 용량·개수가 필요).</div>') +
+      '<div class="notice" style="margin-top:8px">단위가격은 평균 구매가 기준입니다. 슈링크플레이션은 다나와에 지금 등록된 규격과 내가 산 상품명의 용량을 비교합니다.</div>';
+  }
+
+  function wireSplit(id, render) {
+    var el = $(id);
+    if (!el || el.dataset.bound) return;
+    el.dataset.bound = "1";
+    el.addEventListener("click", function (e) {
+      var b = e.target.closest("button");
+      if (!b) return;
+      el.querySelectorAll("button").forEach(function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+      state.split = b.dataset.value === "split";
+      ["dashSplit", "rebuySplit"].forEach(function (other) {
+        var o = $(other);
+        if (!o || o === el) return;
+        o.querySelectorAll("button").forEach(function (x) {
+          x.setAttribute("aria-pressed", (x.dataset.value === "split") === state.split ? "true" : "false");
+        });
+      });
+      renderActPanel();
+      renderUnitPanel();
+      render();
+    });
   }
 
   /* ------------------------------------------------------------- gate */
@@ -124,16 +255,18 @@
         "원 · 주문 " + LC.num(restOrders) + "건</div>" : "")
       || '<div class="notice">표시할 지출이 없습니다.</div>';
 
-    $("savings").innerHTML = d.savings.length
-      ? '<div class="mini-list">' + d.savings.map(function (s) {
+    var savingsRows = state.split ? d.savings.filter(function (s) { return !isNonSpend(s.label); }) : d.savings;
+    var dueRows = state.split ? d.due.filter(function (r) { return !isNonSpend(r.label); }) : d.due;
+    $("savings").innerHTML = savingsRows.length
+      ? '<div class="mini-list">' + savingsRows.map(function (s) {
         return '<button class="mini" data-saving="' + LC.esc(s.label) + '"><span><span class="mini-t">' + LC.esc(s.label) +
           '</span><span class="mini-s">평균 ' + LC.num(s.avg_price_krw) + "원 → 최저 " + LC.num(s.min_price_krw) +
           "원</span></span><span class=\"mini-v\" style=\"color:var(--c-green-text)\">−" + s.saving_pct + "%</span></button>";
       }).join("") + "</div>"
       : '<div class="notice">절감 여지가 계산된 상품이 없습니다.</div>';
 
-    $("dueList").innerHTML = d.due.length
-      ? '<div class="mini-list">' + d.due.map(function (r) {
+    $("dueList").innerHTML = dueRows.length
+      ? '<div class="mini-list">' + dueRows.map(function (r) {
         var dd = r.days_left;
         var cls = dd <= 0 ? "badge-red" : dd <= 14 ? "badge-amber" : "badge-blue";
         return '<button class="mini" data-due="' + LC.text(r.label) + '"><span><span class="mini-t">' + LC.text(r.label) +
@@ -142,7 +275,8 @@
           (dd === 0 ? "오늘" : dd < 0 ? "D+" + Math.abs(dd) : "D-" + dd) + "</span></button>";
       }).join("") + "</div>"
       : '<div class="notice">21일 내 도래하는 재구매가 없습니다.</div>' +
-        (d.totals.overdue ? '<div class="notice" style="margin-top:6px">주기가 한참 지난 상품 ' + d.totals.overdue + "개는 [재구매] 탭에서 볼 수 있습니다.</div>" : "");
+        (d.totals.overdue ? '<div class="notice" style="margin-top:6px">주기가 한참 지난 상품 ' + d.totals.overdue + "개는 [재구매] 탭에서 볼 수 있습니다.</div>" : "") +
+        (state.split ? '<div class="notice" style="margin-top:6px">정산·결제·디지털 항목은 분리해 뺐습니다. “전체”로 바꾸면 함께 보입니다.</div>' : "");
 
     $("collection").innerHTML = '<div class="mini-list">' + d.collection.map(function (c) {
       var badge = c.result === "collected" ? "badge-green" : c.result === "empty" ? "badge-amber" : "badge-red";
@@ -151,10 +285,16 @@
         '</span><span class="mini-s">' + LC.esc((c.limit_note || "").slice(0, 60)) + '</span></span>' +
         '<span class="badge ' + badge + '">' + label + " " + (c.orders_found || 0) + "</span></div>";
     }).join("") + "</div>";
+
+    ensureRebuy();
+    renderActPanel();
+    renderUnitPanel();
   }
 
   /* ------------------------------------------------------------- bind */
   function bindAll() {
+    wireSplit("dashSplit", function () { renderDash(state.summary); });
+    wireSplit("rebuySplit", function () { if (state.rebuy) renderRebuy(state.rebuy); });
     document.querySelectorAll(".tab").forEach(function (t) {
       t.addEventListener("click", function () {
         var tab = t.dataset.tab;
@@ -168,7 +308,8 @@
         });
         if (tab === "orders" && !state.orders.rows.length) initOrders();
         if (tab === "ledger" && !state.ledger.rows.length) initLedger();
-        if (tab === "rebuy" && !state.rebuy) initRebuy();
+        // 재구매 데이터는 대시보드에서 먼저 받아 두므로, 탭을 열 때는 그려 주기만 하면 된다.
+        if (tab === "rebuy") { if (state.rebuy) renderRebuy(state.rebuy); else initRebuy(); }
         window.scrollTo({ top: 0, behavior: "smooth" });
       });
     });
@@ -410,11 +551,25 @@
   }
 
   /* ------------------------------------------------------------- rebuy */
-  function initRebuy() {
-    api("rebuy", {}).then(function (d) {
+  var rebuyPending = null;
+  function ensureRebuy() {
+    if (state.rebuy) return Promise.resolve(state.rebuy);
+    if (rebuyPending) return rebuyPending;
+    rebuyPending = api("rebuy", {}).then(function (d) {
       state.rebuy = d;
-      renderRebuy(d);
-    }).catch(function () {
+      renderActPanel();
+      renderUnitPanel();
+      if (state.tab === "rebuy") renderRebuy(d);
+      return d;
+    }).catch(function (e) {
+      rebuyPending = null;
+      throw e;
+    });
+    return rebuyPending;
+  }
+
+  function initRebuy() {
+    ensureRebuy().then(function (d) { renderRebuy(d); }).catch(function () {
       $("rebuyAll").innerHTML = '<div class="empty"><h3>재구매 데이터를 불러오지 못했습니다</h3></div>';
     });
   }
@@ -428,25 +583,41 @@
       : r.state === "soon" ? '<span class="badge badge-amber">D-' + dd + "</span>"
       : r.state === "stale" ? '<span class="badge">' + Math.abs(dd) + "일 경과</span>"
       : dd === null ? '<span class="badge">주기 미상</span>' : '<span class="badge badge-blue">D-' + dd + "</span>";
+    var a = actOf(r);
+    var u = unitOf(r);
+    var sh = shrinkOf(r);
     return '<button class="rcard" data-rebuy="' + LC.esc(r.id) + '"><div class="item-thumb">' + thumb + "</div><div style=\"min-width:0\">" +
-      '<div style="display:flex;gap:6px;align-items:flex-start"><div class="item-name" style="flex:1">' + LC.text(r.label) + "</div>" + badge + "</div>" +
+      '<div style="display:flex;gap:6px;align-items:flex-start;flex-wrap:wrap"><div class="item-name" style="flex:1">' + LC.text(r.label) + "</div>" +
+      (a ? actBadge(a) : "") + badge + "</div>" +
       '<div class="statline"><span>주기 <b>' + (r.cycle ? Math.round(r.cycle) + "일" : "–") + "</b></span>" +
       "<span>평균 <b>" + LC.num(r.avg) + "</b></span><span>최저 <b>" + LC.num(r.min) + "</b></span>" +
       (r.saving ? '<span style="color:var(--c-green-text)">절감 <b>' + r.savingPct + "%</b></span>" : "") + "</div>" +
       '<div class="statline">다음 예상 <b>' + LC.date(r.next) + "</b>" + (r.now ? " · 다나와 최저 " + LC.num(r.now) + "원" : "") + "</div>" +
+      ((u || sh) ? '<div class="statline">' + (u ? "<span>" + LC.esc(u.label) + " <b>" + LC.num(u.value) + "원</b></span>" : "") +
+        (sh ? '<span style="color:var(--c-amber-text)">용량 −' + sh.pct + "%</span>" : "") + "</div>" : "") +
       "</div></button>";
   }
 
   function renderRebuy(d) {
-    $("rebuyHint").textContent = LC.num(d.count) + "개 상품군";
+    var rows = splitRows(d.rows || []);
+    var hidden = (d.rows || []).length - rows.length;
+    $("rebuyHint").textContent = LC.num(rows.length) + "개 상품군" + (hidden ? " (정산·디지털 " + hidden + "개 분리)" : "");
+    if ($("rebuySplitHint")) $("rebuySplitHint").textContent = hidden ? "정산·결제·디지털 " + hidden + "개를 목록에서 뺐습니다" : "";
+    var due = rows.filter(function (r) { return r.daysLeft !== null && r.daysLeft <= 0 && r.daysLeft >= -30; });
+    var soon = rows.filter(function (r) { return r.daysLeft !== null && r.daysLeft > 0 && r.daysLeft <= 14; });
+    var potential = rows.reduce(function (s2, r) { return s2 + (r.saving || 0); }, 0);
     $("rebuySummary").innerHTML = '<div class="statline" style="gap:16px;font-size:12.5px">' +
-      "<span>도래 <b>" + d.due + "</b></span><span>14일 내 <b>" + d.soon + "</b></span>" +
-      "<span>장기 미구매 <b>" + (d.stale || 0) + "</b></span>" +
-      "<span>절감 여지 합계 <b>" + LC.num(d.potential) + "원</b></span></div>";
-    $("rebuyDue").innerHTML = d.byDue.length ? d.byDue.map(rcard).join("")
+      "<span>도래 <b>" + due.length + "</b></span><span>14일 내 <b>" + soon.length + "</b></span>" +
+      "<span>장기 미구매 <b>" + rows.filter(function (r) { return r.state === "stale"; }).length + "</b></span>" +
+      "<span>절감 여지 합계 <b>" + LC.num(potential) + "원</b></span></div>";
+    var byDue = rows.filter(function (r) { return r.daysLeft !== null && r.daysLeft >= -30 && r.daysLeft <= 21; })
+      .sort(function (a, b) { return a.daysLeft - b.daysLeft; });
+    var bySaving = rows.filter(function (r) { return r.saving > 0; }).sort(function (a, b) { return b.saving - a.saving; });
+    $("rebuyDue").innerHTML = byDue.length ? byDue.map(rcard).join("")
       : '<div class="notice">21일 내 도래하는 재구매가 없습니다.</div>';
-    $("rebuySaving").innerHTML = d.bySaving.map(rcard).join("") || '<div class="notice">절감 여지가 계산된 상품이 없습니다.</div>';
-    $("rebuyAll").innerHTML = d.rows.slice().sort(function (a, b) { return a.label.localeCompare(b.label, "ko"); }).map(rcard).join("");
+    $("rebuySaving").innerHTML = bySaving.slice(0, 12).map(rcard).join("") || '<div class="notice">절감 여지가 계산된 상품이 없습니다.</div>';
+    $("rebuyAll").innerHTML = rows.slice().sort(function (a, b) { return String(a.label).localeCompare(String(b.label), "ko"); }).map(rcard).join("") ||
+      '<div class="notice">표시할 상품군이 없습니다.</div>';
     document.querySelectorAll("[data-rebuy]").forEach(function (b) {
       b.addEventListener("click", function () {
         var r = d.rows.find(function (x) { return String(x.id) === b.dataset.rebuy; });
@@ -464,8 +635,24 @@
           ["평균 구매가", LC.num(r.avg) + "원"], ["최저 구매가", LC.num(r.min) + "원"],
           ["목표가", r.target ? LC.num(r.target) + "원" : "–"], ["다나와 최저", r.now ? LC.num(r.now) + "원" : "–"]
         ];
-        b.innerHTML =
-          '<div class="price-hero" style="margin-top:0"><div class="price-hero-main"><b class="tnum">' + LC.num(r.avg) +
+        var a = actOf(r), u = unitOf(r), sh = shrinkOf(r);
+        var actHtml = a
+          ? '<div class="act-block" style="margin-top:0"><div class="act-line">' + actBadge(a, true) +
+            '<span class="badge">' + LC.esc(a.verdict.basis || "구매 주기·가격 기준") + "</span>" +
+            (r.target ? '<span class="badge badge-green">목표가 ' + LC.won(r.target) + "</span>" : "") + "</div>" +
+            '<div class="act-cells">' +
+              (u ? '<div class="cell"><div class="cell-k">' + LC.esc(u.label) + '</div><div class="cell-v tnum">' + LC.won(u.value) + "</div></div>" : "") +
+              '<div class="cell"><div class="cell-k">다음 구매</div><div class="cell-v tnum">' + LC.ddayLabel(r.daysLeft) + "</div></div>" +
+              (r.now ? '<div class="cell"><div class="cell-k">다나와 최저</div><div class="cell-v tnum">' + LC.won(r.now) + "</div></div>" : "") +
+              '<div class="cell"><div class="cell-k">평균 대비</div><div class="cell-v tnum">' +
+                (r.now && r.avg ? ((r.now - r.avg > 0 ? "+" : "") + Math.round((r.now - r.avg) / r.avg * 100) + "%") : "–") + "</div></div>" +
+            "</div>" +
+            (sh ? '<div class="note" style="margin-top:9px;background:var(--c-amber-weak);border-color:#ffe0bf;color:var(--c-amber-text)"><b>슈링크플레이션 −' +
+              sh.pct + "%</b> — 다나와에 지금 등록된 규격이 내가 산 것보다 작습니다.</div>" : "") +
+            "</div>"
+          : "";
+        b.innerHTML = actHtml +
+          '<div class="price-hero" style="margin-top:' + (actHtml ? "12px" : "0") + '"><div class="price-hero-main"><b class="tnum">' + LC.num(r.avg) +
           "</b><span>원 · 평균 구매가</span></div><div class=\"price-cells\">" +
           cells.map(function (c) {
             return '<div class="cell"><div class="cell-k">' + c[0] + '</div><div class="cell-v tnum">' + c[1] + "</div></div>";
