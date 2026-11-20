@@ -77,6 +77,7 @@
 
   function buildHero(s) {
     var stats = document.getElementById("heroStats");
+    if (!stats) { renderAside(); return; }
     var cells = [
       [LC.num(s.products) + "종", "카탈로그 상품"],
       [LC.num(s.withSpec), "스펙·평점 보유"],

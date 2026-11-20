@@ -49,7 +49,7 @@
 
   function renderBoard() {
     var g = byId("ramen") || groups[0];
-    if (!g || !$("heroAside")) return;
+    if (!g || !$("heroBoard")) return;
     var base = g.products[0];
     var rows = g.products.map(function (p, i) {
       return { p: p, mine: i === 0 };
@@ -57,7 +57,7 @@
     var max = Math.max.apply(null, rows.map(function (r) { return r.p.unitPrice || 0; }).concat([1]));
     var best = g.products.slice(1).sort(function (a, b) { return a.unitPrice - b.unitPrice; })[0];
     var diff = best && base.unitPrice ? Math.round((best.unitPrice - base.unitPrice) / base.unitPrice * 1000) / 10 : null;
-    $("heroAside").innerHTML = '<div class="hero-board">' +
+    $("heroBoard").innerHTML = '<div class="hero-board">' +
       '<div class="hb-k">' + LC.icon("scale", "icon-sm") + " 실측 비교 · " + LC.esc(g.unitLabel) + '</div>' +
       '<div class="hb-title">' + LC.esc(g.label) + '</div>' +
       '<div class="hb-sub">다나와 최저가 · ' + LC.esc(g.observedAt) + ' 수집</div>' +
@@ -76,8 +76,10 @@
   function renderStats() {
     if (!groups.length) return;
     var products = groups.reduce(function (s, g) { return s + g.products.length; }, 0);
+    var trended = groups.reduce(function (s, g) { return s + g.products.filter(function (p) { return (p.trend || []).length > 1; }).length; }, 0);
     $("hsGroups").textContent = groups.length;
     $("hsRivals").textContent = groups.reduce(function (s, g) { return s + g.products.length - 1; }, 0);
+    $("hsTrend").textContent = trended;
     $("hsObserved").textContent = groups[0].observedAt.slice(5).replace("-", ".");
     $("rivalHint").textContent = groups.length + "품목 · " + products + "상품 · " + groups[0].observedAt + " 수집";
     var hint = $("catalogHint");
@@ -130,9 +132,9 @@
       renderBoard();
       renderStrip();
       renderSample();
-    }).catch(function () {
+    }).catch(function (e) {
       var hint = $("rivalHint");
-      if (hint) hint.textContent = "라이벌 데이터를 불러오지 못했습니다";
+      if (hint) hint.textContent = "라이벌 데이터를 불러오지 못했습니다 (" + ((e && e.message) || e) + ")";
     });
   }
 
