@@ -351,7 +351,11 @@
       if (t) {
         e.preventDefault();
         e.stopPropagation();
-        if (cur === t) hide(); else place(t);
+        if (cur === t) {
+          if (lastPointer !== "mouse") hide();
+          return;
+        }
+        place(t);
         return;
       }
       if (cur && !e.target.closest(".tip-pop")) hide();

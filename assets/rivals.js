@@ -214,19 +214,28 @@
       (opts.note ? '<div class="rv-obs">' + opts.note + '</div>' : "") + '</div>';
   }
 
+  /* 가격 추이의 비정상 급락·급등점(다른 구성으로 집계된 값)은 선을 왜곡해 제외한다. */
+  function saneTrend(points) {
+    if (!points || points.length < 4) return points || [];
+    var s = points.map(function (x) { return x.p; }).sort(function (a, b) { return a - b; });
+    var med = s[Math.floor(s.length / 2)];
+    if (!med) return points;
+    return points.filter(function (x) { return x.p >= med * 0.5 && x.p <= med * 2; });
+  }
+
   function trendSeries(group, my, rangeDays) {
     var cut = new Date(Date.now() - (rangeDays || 180) * 864e5).toISOString().slice(0, 10);
     var base = group.products[0];
     var colors = ["#111315", "#9AA294", "#C9A227"];
     var series = [];
-    var basePts = (base.trend || []).filter(function (p) { return p.d >= cut; })
+    var basePts = saneTrend((base.trend || []).filter(function (p) { return p.d >= cut; }))
       .map(function (p) {
         var u = base.unit ? { qty: base.unit.qty, per: base.unit.per } : null;
         return { d: p.d, v: u ? Math.round(p.p / u.qty * u.per) : p.p };
       });
     series.push({ name: "내 상품 · 다나와", color: "#84F000", width: 3, points: basePts });
     group.products.slice(1).forEach(function (p, i) {
-      var pts = (p.trend || []).filter(function (x) { return x.d >= cut; }).map(function (x) {
+      var pts = saneTrend((p.trend || []).filter(function (x) { return x.d >= cut; })).map(function (x) {
         var u = p.unit ? { qty: p.unit.qty, per: p.unit.per } : null;
         return { d: x.d, v: u ? Math.round(x.p / u.qty * u.per) : x.p };
       });
@@ -372,7 +381,7 @@
         '<div class="rv-cards">' + cards + '</div></div>' +
       (opts.compact ? "" : table) +
       '<div class="section"><div class="section-head"><h3>가격 추이</h3>' +
-        info("다나와 최저가 추이(주간)의 실제 관측값입니다. 내 구매 시점의 실제 결제가는 핑크 점으로 표시합니다. 관측이 1회뿐이면 점만 그립니다.", "가격 추이 기준") +
+        info("다나와 최저가 추이(주간)의 실제 관측값입니다. 내 구매 시점의 실제 결제가는 핑크 점으로 표시합니다. 관측이 1회뿐이면 점만 그리고, 다른 구성 상품으로 집계된 비정상 급락점은 제외합니다.", "가격 추이 기준") +
         '<span class="hint">' + esc(group.unitLabel) + ' 환산</span></div>' +
         '<div class="rv-range" data-rv-ranges>' + rangeChips + '</div>' +
         '<div style="margin-top:8px" data-rv-chart>' + chart(series, { note: obs, label: group.label + " 가격 추이" }) + '</div></div>';
