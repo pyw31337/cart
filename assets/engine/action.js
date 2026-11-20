@@ -172,6 +172,9 @@
   function shrinkOf(mineName, nowTitle) {
     var I = root.LetsCartInsights || root.LetsBuyInsights;
     if (!I || !I.sizeOf || !nowTitle) return null;
+    // '신라면 120g x 10개 + 짜파게티 140g x 10개'처럼 여러 상품이 한 이름에 있으면 비교하지 않는다.
+    var sizes = String(nowTitle).match(/\d+(?:\.\d+)?\s*(?:kg|g|mg|ml|리터|l)\b/gi) || [];
+    if (new Set(sizes.map(function (x) { return x.replace(/\s+/g, '').toLowerCase(); })).size > 1) return null;
     var a = I.sizeOf(mineName), b = I.sizeOf(nowTitle);
     if (!a || !b || a.unit !== b.unit) return null;
     if ((a.cnt || 1) !== (b.cnt || 1)) return null;
