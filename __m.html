@@ -1,13 +1,26 @@
 <!DOCTYPE html>
-<html lang="ko"><head><meta charset="utf-8" /><title>measure — /</title>
+<html lang="ko"><head><meta charset="utf-8" /><title>measure</title>
 <style>
-  body { margin: 0; padding: 16px; background: #d9dbe0; font: 12px/1.4 -apple-system, "Noto Sans KR", sans-serif; }
-  .row { margin: 0 0 20px; }
-  .cap { color: #333; font-weight: 700; margin: 0 0 4px; }
+  body { margin: 0; padding: 12px; background: #d9dbe0; font: 12px/1.4 -apple-system, "Noto Sans KR", sans-serif; }
+  #cap { color: #222; font-weight: 700; margin: 0 0 6px; }
   iframe { display: block; background: #fff; border: 0; }
 </style></head>
 <body>
-  <div class="row"><p class="cap">/ — 1280×800</p><iframe id="f1280" width="1280" height="800" src="./"></iframe></div>
-  <div class="row"><p class="cap">/ — 390×844</p><iframe id="f390" width="390" height="844" src="./"></iframe></div>
-  <div class="row"><p class="cap">/ — 320×568</p><iframe id="f320" width="320" height="568" src="./"></iframe></div>
+  <p id="cap">…</p>
+  <iframe id="mm" width="1280" height="800" src="about:blank"></iframe>
+  <script>
+    var q = new URLSearchParams(location.search);
+    var w = parseInt(q.get('w') || '1280', 10);
+    var h = parseInt(q.get('h') || '800', 10);
+    var src = q.get('p') || './';
+    var f = document.getElementById('mm');
+    var cap = document.getElementById('cap');
+    f.width = w; f.height = h;
+    f.addEventListener('load', function () {
+      var iw = f.contentWindow.innerWidth;
+      var sw = f.contentDocument.documentElement.scrollWidth;
+      cap.textContent = 'frame ' + w + '×' + h + ' · layout viewport ' + iw + 'px · 문서 scrollWidth ' + sw + 'px · ' + src;
+    });
+    f.src = src;
+  </script>
 </body></html>
