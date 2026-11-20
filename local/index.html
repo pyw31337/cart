@@ -106,6 +106,7 @@
   <nav class="shell tabs-wrap">
     <div class="tabs" role="tablist" aria-label="렛츠카트 로컬 화면">
       <button class="tab" role="tab" aria-selected="true" data-tab="shop"><span data-icon="tag" data-icon-class="icon-sm"></span>살 때<span class="n" id="nShop"></span></button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="rivals"><span data-icon="scale" data-icon-class="icon-sm"></span>라이벌 비교</button>
       <button class="tab" role="tab" aria-selected="false" data-tab="spend"><span data-icon="wallet" data-icon-class="icon-sm"></span>내 소비</button>
       <button class="tab" role="tab" aria-selected="false" data-tab="records"><span data-icon="receipt" data-icon-class="icon-sm"></span>구매 기록<span class="n" id="nRecords"></span></button>
       <button class="tab" role="tab" aria-selected="false" data-tab="setup"><span data-icon="lock" data-icon-class="icon-sm"></span>백업·설정</button>
@@ -145,6 +146,18 @@
       </div>
       <div class="sgrid" id="shopGrid"></div>
       <div class="loadmore" id="shopMore"></div>
+    </section>
+
+    <section id="view-rivals" hidden>
+      <div class="view-head">
+        <div>
+          <h2 class="view-title">라이벌 비교</h2>
+          <p class="view-sub">내가 모은 구매 기록을 자주 사는 20품목에 붙여, 다나와 인기 라이벌 2종과 단위가격·스펙·가격 추이를 비교합니다. 기록은 이 브라우저 안에만 있습니다.</p>
+        </div>
+        <div class="vsum" id="rvSum"></div>
+      </div>
+      <div class="note" id="rvMode" style="margin-bottom:12px"></div>
+      <div id="rvGrid" class="local-rv-grid"></div>
     </section>
 
     <section id="view-spend" hidden>
@@ -252,6 +265,7 @@
   <script src="../assets/engine/core.js"></script>
   <script src="../assets/engine/insights.js"></script>
   <script src="../assets/engine/action.js"></script>
+  <script src="../assets/rivals.js"></script>
   <script src="demo.js"></script>
   <script src="local.js"></script>
 </body>

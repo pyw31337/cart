@@ -15,7 +15,10 @@
     orders: { q: "", market: "", match: "all", period: "", limit: 30, offset: 0, total: 0, rows: [], loading: false },
     ledger: { q: "", market: "", match: "all", limit: 40, offset: 0, total: 0, rows: [], loading: false },
     rebuy: null,
-    split: true
+    split: true,
+    rivals: null,
+    cmp: null,
+    cmpPending: null
   };
 
   var $ = function (id) { return document.getElementById(id); };
@@ -205,6 +208,7 @@
       renderKpis(d);
       renderDash(d);
       bindAll();
+      bootRivals();
     })
     .catch(function (e) {
       if (e.code) {
@@ -292,6 +296,152 @@
   }
 
   /* ------------------------------------------------------------- bind */
+
+  /* ------------------------------------------------------------- 라이벌 비교 */
+  var LCV = window.LetsCartRivals;
+
+  function loadCompare() {
+    if (state.cmp) return Promise.resolve(state.cmp);
+    if (state.cmpPending) return state.cmpPending;
+    state.cmpPending = api("compare", {}).then(function (d) {
+      state.cmp = {};
+      (d.groups || []).forEach(function (g) { state.cmp[g.id] = g.orders || []; });
+      return state.cmp;
+    }).catch(function () { state.cmp = {}; return state.cmp; });
+    return state.cmpPending;
+  }
+  function ordersOf(g) {
+    var rows = (state.cmp && state.cmp[g.id]) || [];
+    return rows.map(function (x) {
+      return { date: x.date, name: x.name, price: x.price, qty: x.qty || 1, mall: marketName(x.mall) || x.mall };
+    });
+  }
+  function bootRivals() {
+    if (!LCV) return;
+    Promise.all([LCV.load(), loadCompare()]).then(function (r) {
+      state.rivals = r[0].groups || [];
+      renderRhythm();
+      renderMyRivals();
+      renderRivalGrid();
+      ensureRebuy().then(function () { renderRhythm(); renderDueBoard(); }).catch(function () {});
+    }).catch(function () {});
+  }
+
+  function rhythmStats() {
+    var rows = state.rebuy ? state.rebuy.rows : [];
+    if (state.split) rows = rows.filter(function (r) { return !isNonSpend(r.danawaName || r.label); });
+    var buy = 0, due = 0, soon = 0, wait = 0, saving = 0, shrink = 0;
+    rows.forEach(function (r) {
+      var a = actOf(r);
+      if (a && a.meta) {
+        if (a.meta.k === "buy" || a.k === "buy") buy++;
+        else if (a.meta.k === "due" || a.k === "due") due++;
+        else if (a.meta.k === "wait" || a.k === "wait") wait++;
+        else if (a.meta.k === "soon" || a.k === "soon") soon++;
+      }
+      var dleft = r.daysLeft;
+      if (dleft != null && dleft >= -30 && dleft <= 14 && r.saving > 0) saving += r.saving;
+      var sh = shrinkOf(r);
+      if (sh && sh.pct > 0) shrink++;
+    });
+    return { buy: buy, due: due, soon: soon, wait: wait, saving: saving, shrink: shrink, total: rows.length };
+  }
+
+  function renderRhythm() {
+    var box = $("rhythm");
+    if (!box) return;
+    var st = rhythmStats();
+    var when = st.due + st.buy + st.soon;
+    box.innerHTML = '<div class="rhythm-card">' +
+      '<div class="rhythm-main">' +
+        '<div class="rhythm-k">' + LC.icon("clock", "icon-sm") + ' 이번 달 살 때 온 품목</div>' +
+        '<div class="rhythm-v tnum">' + when + '<small>개</small></div>' +
+        '<div class="rhythm-lanes">' +
+          '<span class="lane buy">지금 사세요 <b>' + st.buy + '</b></span>' +
+          '<span class="lane due">살 때 됐어요 <b>' + st.due + '</b></span>' +
+          '<span class="lane wait">기다리세요 <b>' + st.wait + '</b></span>' +
+        '</div>' +
+      '</div>' +
+      '<div class="rhythm-stats">' +
+        '<div class="rs"><span>절감 가능액</span><b class="tnum">' + LC.won(st.saving) + '</b><em>도래·임박 품목 기준</em></div>' +
+        '<div class="rs"><span>슈링크 주의</span><b class="tnum">' + st.shrink + '건</b><em>같은 값, 줄어든 용량</em></div>' +
+        '<div class="rs"><span>추적 품목</span><b class="tnum">' + st.total + '개</b><em>' + (state.split ? "정산·디지털 분리 적용" : "전체 표시") + '</em></div>' +
+      '</div>' +
+    '</div>';
+  }
+
+  function renderDueBoard() {
+    var box = $("dueBoard");
+    if (!box || !state.rebuy) return;
+    var rows = state.rebuy.rows.slice();
+    if (state.split) rows = rows.filter(function (r) { return !isNonSpend(r.danawaName || r.label); });
+    var lane = { buy: [], due: [], wait: [], soon: [] };
+    rows.forEach(function (r) {
+      var a = actOf(r);
+      var k = a && (a.k || (a.meta && a.meta.k));
+      if (!k) return;
+      if (r.daysLeft != null && r.daysLeft > 21) return;
+      if (lane[k]) lane[k].push({ r: r, a: a });
+    });
+    var def = [
+      { k: "buy", t: "지금 사세요", d: "내 평균가보다 확실히 낮음" },
+      { k: "due", t: "살 때 됐어요", d: "구매주기도 왔고 값도 평소" },
+      { k: "wait", t: "기다리세요", d: "지금은 평균보다 높음" }
+    ];
+    box.innerHTML = '<div class="lanes">' + def.map(function (x) {
+      var list = lane[x.k].sort(function (a, b) { return (a.r.daysLeft || 0) - (b.r.daysLeft || 0); }).slice(0, 4);
+      return '<div class="lane-col"><div class="lane-head"><span class="act ' + (x.k === "buy" ? "act-buy" : x.k === "due" ? "act-due" : "act-wait") + '">' + x.t + '</span>' +
+        '<b class="tnum">' + lane[x.k].length + '</b></div><div class="lane-sub">' + x.d + '</div>' +
+        (list.length ? list.map(function (o) {
+          var r = o.r;
+          var delta = r.avg && r.now ? Math.round((r.now - r.avg) / r.avg * 100) : null;
+          return '<button type="button" class="lane-row" data-rebuy="' + LC.esc(r.id) + '">' +
+            '<span class="lane-name">' + LC.text(r.label) + '</span>' +
+            '<span class="lane-meta">' + (r.daysLeft != null ? (r.daysLeft <= 0 ? "D+" + Math.abs(r.daysLeft) + " 도래" : "D-" + r.daysLeft) : "") +
+            (delta != null ? " · " + (delta <= 0 ? "" : "+") + delta + "%" : "") + '</span></button>';
+        }).join("") : '<div class="lane-empty">해당 없음</div>') + "</div>";
+    }).join("") + "</div>";
+    box.querySelectorAll("[data-rebuy]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var r = state.rebuy.rows.filter(function (x) { return String(x.id) === b.dataset.rebuy; })[0];
+        if (r) openRebuy(r);
+      });
+    });
+  }
+
+  function renderMyRivals() {
+    var box = $("myRivals");
+    if (!box || !state.rivals || !LCV) return;
+    var list = state.rivals.map(function (g) { return { g: g, my: LCV.myStats(ordersOf(g), g) }; });
+    list.sort(function (a, b) { return (b.my.buys || 0) - (a.my.buys || 0); });
+    var withMine = list.filter(function (x) { return x.my.buys > 0; });
+    $("myRivalsHint").textContent = "내 기록 있는 " + withMine.length + "품목 · 다나와 " + (state.rivals[0] ? state.rivals[0].observedAt : "");
+    var show = list.slice(0, 8);
+    box.innerHTML = '<div class="rv-grid-8">' + show.map(function (x) { return LCV.tile(x.g, x.my); }).join("") + "</div>";
+    box.querySelectorAll("[data-rv-open]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var it = show.filter(function (x) { return x.g.id === b.dataset.rvOpen; })[0];
+        if (it) LCV.open(it.g, it.my);
+      });
+    });
+  }
+
+  function renderRivalGrid() {
+    var box = $("rivalGrid");
+    if (!box || !state.rivals || !LCV) return;
+    var list = state.rivals.map(function (g) { return { g: g, my: LCV.myStats(ordersOf(g), g) }; });
+    list.sort(function (a, b) { return (b.my.buys || 0) - (a.my.buys || 0); });
+    $("rivalGridHint").textContent = list.length + "품목 · 내 기록 " +
+      list.filter(function (x) { return x.my.buys; }).length + "품목";
+    box.innerHTML = list.map(function (x) { return LCV.tile(x.g, x.my); }).join("");
+    box.querySelectorAll("[data-rv-open]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var it = list.filter(function (x) { return x.g.id === b.dataset.rvOpen; })[0];
+        if (it) LCV.open(it.g, it.my);
+      });
+    });
+  }
+
   function bindAll() {
     wireSplit("dashSplit", function () { renderDash(state.summary); });
     wireSplit("rebuySplit", function () { if (state.rebuy) renderRebuy(state.rebuy); });
@@ -303,9 +453,10 @@
         document.querySelectorAll(".tab").forEach(function (x) {
           x.setAttribute("aria-selected", x === t ? "true" : "false");
         });
-        ["dash", "orders", "ledger", "rebuy"].forEach(function (v) {
+        ["dash", "rivals", "orders", "ledger", "rebuy"].forEach(function (v) {
           $("view-" + v).hidden = v !== tab;
         });
+        if (tab === "rivals") renderRivalGrid();
         if (tab === "orders" && !state.orders.rows.length) initOrders();
         if (tab === "ledger" && !state.ledger.rows.length) initLedger();
         // 재구매 데이터는 대시보드에서 먼저 받아 두므로, 탭을 열 때는 그려 주기만 하면 된다.
@@ -338,6 +489,10 @@
     });
     $("lMore").addEventListener("click", function (e) {
       if (e.target.closest("[data-more]")) { state.ledger.offset += state.ledger.limit; loadLedger(false); }
+    });
+    var allBtn = $("btnAllRivals");
+    if (allBtn) allBtn.addEventListener("click", function () {
+      document.querySelector('.tab[data-tab="rivals"]').click();
     });
   }
 

@@ -811,11 +811,12 @@
     document.querySelectorAll(".tab").forEach(function (x) {
       x.setAttribute("aria-selected", x.dataset.tab === t ? "true" : "false");
     });
-    ["shop", "spend", "records", "setup"].forEach(function (v) {
+    ["shop", "rivals", "spend", "records", "setup"].forEach(function (v) {
       var el = $("view-" + v);
       if (el) el.hidden = v !== t;
     });
     if (t === "shop") renderShop();
+    if (t === "rivals") renderRivals();
     if (t === "spend") renderSpend();
     if (t === "records") renderRecords();
     if (t === "setup") { renderSetup(); renderExt(); }
@@ -830,9 +831,55 @@
     renderChrome();
     renderStart();
     if (state.tab === "shop") renderShop();
+    if (state.tab === "rivals") renderRivals();
     if (state.tab === "spend") renderSpend();
     if (state.tab === "records") renderRecords();
     if (state.tab === "setup") renderSetup();
+  }
+
+  /* ------------------------------------------------------------ rivals */
+  var rvData = null, rvPending = null;
+  function loadRivals() {
+    if (rvData) return Promise.resolve(rvData);
+    if (rvPending) return rvPending;
+    if (!window.LetsCartRivals) return Promise.resolve(null);
+    rvPending = window.LetsCartRivals.load().then(function (d) { rvData = d.groups || []; return rvData; }).catch(function () { return null; });
+    return rvPending;
+  }
+  function localOrders() {
+    var d = raw();
+    return (d.orders || []).map(function (o) {
+      return { date: o.date, name: o.name, price: o.price, qty: o.qty || 1, mall: o.mall || o.src || "" };
+    });
+  }
+  function renderRivals() {
+    var grid = $("rvGrid");
+    if (!grid) return;
+    var LCV = window.LetsCartRivals;
+    if (!LCV) { grid.innerHTML = '<div class="empty">비교 모듈을 불러오지 못했습니다.</div>'; return; }
+    grid.innerHTML = '<div class="skel" style="height:140px"></div>';
+    loadRivals().then(function (groups) {
+      if (!groups) { grid.innerHTML = '<div class="empty">라이벌 데이터를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.</div>'; return; }
+      var orders = localOrders();
+      var list = groups.map(function (g) { return { g: g, my: LCV.myStats(orders, g) }; });
+      list.sort(function (a, b) { return (b.my.buys || 0) - (a.my.buys || 0); });
+      var mine = list.filter(function (x) { return x.my.buys > 0; });
+      if ($("rvSum")) $("rvSum").innerHTML = '<b>' + mine.length + '</b><span>품목에 내 기록 있음</span>';
+      if ($("rvMode")) {
+        $("rvMode").innerHTML = state.demo
+          ? '<b>데모 데이터(가상)</b>로 비교 중입니다. 아래 구매 횟수·평균가는 체험용 예시이고, 상품 가격·스펙·추이는 실제 다나와 값입니다.'
+          : (orders.length
+            ? '내 브라우저에 저장된 구매 기록 <b>' + orders.length + '건</b>을 20품목에 붙였습니다. 상품 가격·스펙·추이는 다나와 실측값입니다.'
+            : '아직 구매 기록이 없습니다. <b>.eml·확장·붙여넣기</b>로 기록을 모으면 내 단위가격·주기까지 함께 비교합니다. 아래는 다나와 공개 가격 기준입니다.');
+      }
+      grid.innerHTML = list.map(function (x) { return LCV.tile(x.g, x.my); }).join("");
+      grid.querySelectorAll("[data-rv-open]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          var it = list.filter(function (x) { return x.g.id === b.dataset.rvOpen; })[0];
+          if (it) LCV.open(it.g, it.my);
+        });
+      });
+    });
   }
 
   /* ------------------------------------------------------------ wire */
@@ -883,7 +930,7 @@
     $("btnExport").addEventListener("click", exportJson);
     $("btnRestore").addEventListener("click", openRestore);
     $("btnReset").addEventListener("click", openReset);
-    $("btnDemo").addEventListener("click", function () {
+    function startDemo() {
       state.demo = true;
       state.shop.cat = null;
       state.shop.view = "rep";
@@ -891,7 +938,11 @@
       refreshAll();
       setTab("shop");
       LC.toast("데모 데이터(가상)로 보는 중입니다");
-    });
+    }
+    $("btnDemo").addEventListener("click", startDemo);
+    if (/[?&]demo=1/.test(location.search) || /(^|#)demo$/.test(location.hash)) {
+      setTimeout(startDemo, 60);
+    }
 
     var catChips = $("shopCats");
     LC.chipGroup(catChips, function () {

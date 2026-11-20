@@ -84,7 +84,11 @@
     refresh: '<path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 5v6h-6"/>',
     info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.8v.1"/>',
     arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>',
-    tag: '<path d="M3.5 12.2V4.5h7.7l9.3 9.3-7.7 7.7z"/><circle cx="8" cy="8" r="1.3"/>'
+    tag: '<path d="M3.5 12.2V4.5h7.7l9.3 9.3-7.7 7.7z"/><circle cx="8" cy="8" r="1.3"/>',
+    scale: '<path d="M12 3.5v17M7 20.5h10"/><path d="M4 8h16"/><path d="M4 8l-2.5 6a3 3 0 0 0 5 0z"/><path d="m20 8 2.5 6a3 3 0 0 1-5 0z"/>',
+    spark: '<path d="m12 2.8 2 5.6 5.6 2-5.6 2-2 5.6-2-5.6-5.6-2 5.6-2z"/><path d="M19 15.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"/>',
+    play: '<circle cx="12" cy="12" r="8.5"/><path d="m10 8.6 5.6 3.4L10 15.4z"/>',
+    leaf: '<path d="M20 4c-8 0-13 3.4-13 9a5 5 0 0 0 5 5c5.6 0 8-5 8-14z"/><path d="M4 20c1.8-5.2 5-8 10-9.5"/>'
   };
   LC.icon = function (name, cls) {
     return '<svg class="icon ' + (cls || "") + '" viewBox="0 0 24 24" aria-hidden="true">' + (P[name] || "") + "</svg>";

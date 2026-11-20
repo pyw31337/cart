@@ -245,3 +245,12 @@
   .bar-row { grid-template-columns: 64px minmax(0, 1fr) auto; }
   .seg button { padding: 0 8px; font-size: 11px; }
 }
+
+/* ---------------------------------------------------------------- Ver 3.0 라이벌 비교 */
+.tab[aria-selected="true"] { background: var(--c-ink); color: #fff; }
+.local-rv-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
+@media (min-width: 620px) { .local-rv-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1080px) { .local-rv-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.local-rv-grid .rv-tile { box-shadow: var(--sh-card); }
+.link-pill[data-state="on"] { color: var(--c-lime-text); border-color: #d8f7a3; background: var(--c-lime-weak); }
+.link-pill[data-state="on"] .led { background: var(--c-lime); box-shadow: 0 0 0 3px rgba(132, 240, 0, .22); }
