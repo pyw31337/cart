@@ -9,8 +9,8 @@
   <meta name="description" content="로그인 없이 내 브라우저에서만 도는 렛츠카트 — 크롬 확장·.eml·메일 붙여넣기로 구매 기록을 모아 살 때를 판정합니다." />
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
-  <link rel="stylesheet" href="../assets/lc.css?v=3.0.5" />
-  <link rel="stylesheet" href="local.css?v=3.0.5" />
+  <link rel="stylesheet" href="../assets/lc.css?v=3.1.0" />
+  <link rel="stylesheet" href="local.css?v=3.1.0" />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%233182F6'/%3E%3Cpath d='M6 7h2l1.6 7.4a1 1 0 0 0 1 .8h6.2a1 1 0 0 0 1-.7L19 10H8' stroke='white' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E" />
 </head>
 <body>
@@ -39,9 +39,8 @@
   <section class="shell hero">
     <div class="hero-card">
       <div class="hero-copy">
-        <div class="hero-kicker"><span data-icon="lock" data-icon-class="icon-sm"></span>로그인·Access 없이 · 데이터는 이 브라우저에만</div>
-        <h1>내 구매 기록으로<br class="br-m" /> 살 때를 판정합니다.</h1>
-        <p>확장을 붙이면 메일·주문목록에서 구매 기록을 모으고, 없으면 받은 메일(.eml)이나 붙여넣은 영수증으로 시작합니다. 주문·메일 원문은 이 브라우저를 벗어나지 않습니다.</p>
+        <div class="hero-kicker"><span data-icon="lock" data-icon-class="icon-sm"></span>로그인 없이 · 데이터는 이 브라우저에만<button type="button" class="info" data-tip="확장을 붙이면 메일·주문목록에서 구매 기록을 모으고, 없으면 받은 메일(.eml)이나 붙여넣은 영수증으로 시작합니다. 주문·메일 원문은 이 브라우저를 벗어나지 않습니다." aria-label="수집 방식 설명" aria-expanded="false" tabindex="0"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 11v5.5M12 7.8v.1" /></svg></button></div>
+        <h1>내 기록으로<br class="br-m" /> 살 때를 판정</h1>
         <div class="hero-stats" id="heroStats">
           <div class="hstat"><div class="hstat-label">구매 기록</div><div class="hstat-value tnum" id="hsOrders">–</div></div>
           <div class="hstat"><div class="hstat-label">품목</div><div class="hstat-value tnum" id="hsItems">–</div></div>
@@ -62,21 +61,21 @@
         </div>
         <div class="step-grid">
           <div class="step">
-            <div class="step-top"><span class="step-n">1</span><b>확장 설치</b></div>
-            <p>크롬·엣지에 <b>렛츠카트 수집기 v0.19.0</b>을 압축해제 방식으로 설치합니다. 메일함·주문목록에 로그인된 상태에서 아이콘을 한 번 누르면 수집됩니다.</p>
+            <div class="step-top"><span class="step-n">1</span><b>확장 설치</b><button type="button" class="info" data-tip="크롬·엣지에 렛츠카트 수집기 v0.19.0을 압축해제 방식으로 설치합니다. 메일함·주문목록에 로그인된 상태에서 아이콘을 한 번 누르면 수집됩니다." aria-label="확장 설치 설명" aria-expanded="false" tabindex="0"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 11v5.5M12 7.8v.1" /></svg></button></div>
+            <p class="step-line">메일함에서 한 번에 수집</p>
             <a class="btn btn-primary btn-sm" id="btnZip" href="../assets/letscart-extension-v0.19.0.zip" download><span data-icon="arrow" data-icon-class="icon-sm"></span>확장 ZIP 받기</a>
           </div>
           <div class="step">
-            <div class="step-top"><span class="step-n">2</span><b>기록 가져오기</b></div>
-            <p>아래 영역에 <b>.eml 파일을 끌어다 놓거나</b>, 메일 본문을 붙여넣고, 예전 <b>렛츠바이 백업 JSON</b>도 그대로 불러올 수 있습니다.</p>
+            <div class="step-top"><span class="step-n">2</span><b>기록 가져오기</b><button type="button" class="info" data-tip=".eml 파일을 끌어다 놓거나 메일 본문을 붙여넣고, 예전 렛츠바이 백업 JSON도 그대로 불러올 수 있습니다." aria-label="가져오기 설명" aria-expanded="false" tabindex="0"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 11v5.5M12 7.8v.1" /></svg></button></div>
+            <p class="step-line">.eml · 붙여넣기 · 백업</p>
             <div class="step-actions">
               <button type="button" class="btn btn-ghost btn-sm" id="btnPaste"><span data-icon="plus" data-icon-class="icon-sm"></span>메일 붙여넣기</button>
               <button type="button" class="btn btn-ghost btn-sm" id="btnJson"><span data-icon="box" data-icon-class="icon-sm"></span>백업 불러오기</button>
             </div>
           </div>
           <div class="step">
-            <div class="step-top"><span class="step-n">3</span><b>살 때 판정</b></div>
-            <p>내가 낸 가격·구매 주기·최근 최저가를 비교해 <b>지금 사세요 · 곧 떨어져요 · 기다리세요 · 살 때 됐어요</b>로 나눕니다. 판단 근거도 함께 적습니다.</p>
+            <div class="step-top"><span class="step-n">3</span><b>살 때 판정</b><button type="button" class="info" data-tip="내가 낸 가격·구매 주기·최근 최저가를 비교해 지금 사세요 · 곧 떨어져요 · 기다리세요 · 살 때 됐어요로 나눕니다. 판단 근거도 함께 적습니다." aria-label="판정 기준 설명" aria-expanded="false" tabindex="0"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 11v5.5M12 7.8v.1" /></svg></button></div>
+            <p class="step-line">지금 살까, 기다릴까</p>
             <button type="button" class="btn btn-ghost btn-sm" id="btnDemo"><span data-icon="trend" data-icon-class="icon-sm"></span>데모로 먼저 보기</button>
           </div>
         </div>
@@ -84,8 +83,8 @@
         <div class="drop" id="drop" tabindex="0" role="button" aria-label=".eml 파일 끌어다 놓기 또는 선택">
           <div class="drop-ico" data-icon="receipt" data-icon-class="icon-lg"></div>
           <div class="drop-text">
-            <b>.eml 파일을 여기에 끌어다 놓으세요</b>
-            <span>또는 눌러서 파일 선택 · 최대 50개 · 파일은 서버로 전송되지 않습니다</span>
+            <b>.eml 파일을 놓으세요</b>
+            <span>눌러서 선택 · 최대 50개 · 서버 전송 없음</span>
           </div>
           <span class="drop-msg" id="dropMsg"></span>
           <input type="file" id="fileEml" accept=".eml,message/rfc822" multiple hidden />
@@ -117,8 +116,7 @@
     <section id="view-shop">
       <div class="view-head">
         <div>
-          <h2 class="view-title">지금 살 것</h2>
-          <p class="view-sub">반복 구매 가능한 실물 품목만 판정합니다. 결제·상품권·디지털·내구재는 구매 기록에 남기고 추천에서 빼 둡니다.</p>
+          <h2 class="view-title">지금 살 것<button type="button" class="info" data-tip="반복 구매 가능한 실물 품목만 판정합니다. 결제·상품권·디지털·내구재는 구매 기록에 남기고 추천에서 빼 둡니다." aria-label="판정 대상 설명" aria-expanded="false" tabindex="0"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 11v5.5M12 7.8v.1" /></svg></button></h2>
         </div>
         <div class="vsum" id="vsum"></div>
       </div>
@@ -151,20 +149,18 @@
     <section id="view-rivals" hidden>
       <div class="view-head">
         <div>
-          <h2 class="view-title">라이벌 비교</h2>
-          <p class="view-sub">내가 모은 구매 기록을 자주 사는 20품목에 붙여, 다나와 인기 라이벌 2종과 단위가격·스펙·가격 추이를 비교합니다. 기록은 이 브라우저 안에만 있습니다.</p>
+          <h2 class="view-title">라이벌 비교<button type="button" class="info" data-tip="내가 모은 구매 기록을 자주 사는 20품목에 붙여, 다나와 인기 라이벌 2종과 단위가격·스펙·가격 추이를 비교합니다. 기록은 이 브라우저 안에만 있습니다." aria-label="라이벌 비교 설명" aria-expanded="false" tabindex="0"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 11v5.5M12 7.8v.1" /></svg></button></h2>
         </div>
         <div class="vsum" id="rvSum"></div>
       </div>
-      <div class="note" id="rvMode" style="margin-bottom:12px"></div>
+      <div class="rv-mode" id="rvMode"></div>
       <div id="rvGrid" class="local-rv-grid"></div>
     </section>
 
     <section id="view-spend" hidden>
       <div class="view-head">
         <div>
-          <h2 class="view-title">내 소비</h2>
-          <p class="view-sub">카테고리·월별 지출·단위가격·슈링크플레이션. 결제·포인트·상품권 행은 소비 합계에서 자동으로 분리합니다.</p>
+          <h2 class="view-title">내 소비<button type="button" class="info" data-tip="카테고리·월별 지출·단위가격·슈링크플레이션. 결제·포인트·상품권 행은 소비 합계에서 자동으로 분리합니다." aria-label="소비 집계 설명" aria-expanded="false" tabindex="0"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 11v5.5M12 7.8v.1" /></svg></button></h2>
         </div>
         <div class="seg" id="spendMode" role="group" aria-label="정산 분리">
           <button data-value="split" aria-pressed="true">정산 분리</button>
@@ -201,8 +197,7 @@
     <section id="view-records" hidden>
       <div class="view-head">
         <div>
-          <h2 class="view-title">구매 기록</h2>
-          <p class="view-sub">메일·주문목록·.eml·붙여넣기에서 모은 원장 그대로입니다. 상품이 아닌 행은 분리 표시만 하고 지우지 않습니다.</p>
+          <h2 class="view-title">구매 기록<button type="button" class="info" data-tip="메일·주문목록·.eml·붙여넣기에서 모은 원장 그대로입니다. 상품이 아닌 행은 분리 표시만 하고 지우지 않습니다." aria-label="원장 설명" aria-expanded="false" tabindex="0"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 11v5.5M12 7.8v.1" /></svg></button></h2>
         </div>
       </div>
       <div class="searchrow">
@@ -224,7 +219,7 @@
     </section>
 
     <section id="view-setup" hidden>
-      <div class="view-head"><div><h2 class="view-title">백업·설정</h2><p class="view-sub">모든 값은 이 브라우저의 localStorage에만 저장됩니다. 내보낸 JSON은 렛츠바이(`letsbuy.v1`) 백업과 호환됩니다.</p></div></div>
+      <div class="view-head"><div><h2 class="view-title">백업·설정<button type="button" class="info" data-tip="모든 값은 이 브라우저의 localStorage에만 저장됩니다. 내보낸 JSON은 렛츠바이(letsbuy.v1) 백업과 호환됩니다." aria-label="저장 방식 설명" aria-expanded="false" tabindex="0"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 11v5.5M12 7.8v.1" /></svg></button></h2></div></div>
       <div class="cols">
         <div class="panel">
           <div class="panel-head"><h3>내보내기·불러오기</h3></div>
@@ -261,12 +256,12 @@
 
   <input type="file" id="fileJson" accept=".json,application/json" hidden />
 
-  <script src="../assets/lc.js?v=3.0.5"></script>
-  <script src="../assets/engine/core.js?v=3.0.5"></script>
-  <script src="../assets/engine/insights.js?v=3.0.5"></script>
-  <script src="../assets/engine/action.js?v=3.0.5"></script>
-  <script src="../assets/rivals.js?v=3.0.5"></script>
-  <script src="demo.js?v=3.0.5"></script>
-  <script src="local.js?v=3.0.5"></script>
+  <script src="../assets/lc.js?v=3.1.0"></script>
+  <script src="../assets/engine/core.js?v=3.1.0"></script>
+  <script src="../assets/engine/insights.js?v=3.1.0"></script>
+  <script src="../assets/engine/action.js?v=3.1.0"></script>
+  <script src="../assets/rivals.js?v=3.1.0"></script>
+  <script src="demo.js?v=3.1.0"></script>
+  <script src="local.js?v=3.1.0"></script>
 </body>
 </html>

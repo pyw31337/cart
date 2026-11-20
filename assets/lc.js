@@ -278,6 +278,91 @@
       '<span class="tnum">' + Number(r).toFixed(1) + "</span>" +
       (n ? '<span class="muted tnum">(' + LC.compact(n) + ")</span>" : "");
   };
+  /* ------------------------------------------------------------------ info tooltip (커스텀·OS title 금지) */
+  LC.tip = function (text, label, theme) {
+    return '<button type="button" class="info" data-tip="' + LC.esc(text) + '"' +
+      (theme ? ' data-tip-theme="' + LC.esc(theme) + '"' : "") +
+      ' aria-label="' + LC.esc(label || "설명 보기") + '" aria-expanded="false" tabindex="0">' +
+      LC.icon("info") + "</button>";
+  };
+  LC.tips = function () {
+    if (LC._tipsBound) return;
+    LC._tipsBound = true;
+    var pop = null, cur = null, lastPointer = "mouse", lastPointerAt = 0;
+    function box() {
+      if (!pop) {
+        pop = document.createElement("div");
+        pop.className = "tip-pop";
+        pop.setAttribute("role", "tooltip");
+        document.body.appendChild(pop);
+      }
+      return pop;
+    }
+    function place(el) {
+      var p = box();
+      p.textContent = el.dataset.tip || "";
+      p.setAttribute("data-theme", el.dataset.tipTheme || "dark");
+      p.classList.add("on");
+      var vw = window.innerWidth, vh = window.innerHeight;
+      p.style.maxWidth = Math.min(280, vw - 16) + "px";
+      var pw = p.offsetWidth, ph = p.offsetHeight;
+      var r = el.getBoundingClientRect();
+      var x = r.left + r.width / 2 - pw / 2;
+      x = Math.max(8, Math.min(x, vw - pw - 8));
+      var y = r.bottom + 8;
+      if (y + ph > vh - 8) y = Math.max(8, r.top - ph - 8);
+      p.style.left = Math.round(x) + "px";
+      p.style.top = Math.round(y) + "px";
+      if (cur && cur !== el) cur.setAttribute("aria-expanded", "false");
+      cur = el;
+      el.setAttribute("aria-expanded", "true");
+    }
+    function hide() {
+      if (pop) pop.classList.remove("on");
+      if (cur) cur.setAttribute("aria-expanded", "false");
+      cur = null;
+    }
+    function hit(e) { return e.target.closest ? e.target.closest(".info[data-tip]") : null; }
+    document.addEventListener("pointerdown", function (e) { lastPointer = e.pointerType || "mouse"; lastPointerAt = Date.now(); }, true);
+    document.addEventListener("pointerover", function (e) {
+      var t = hit(e);
+      if (!t || (e.pointerType && e.pointerType !== "mouse")) return;
+      place(t);
+    });
+    document.addEventListener("pointerout", function (e) {
+      var t = hit(e);
+      if (!t || (e.pointerType && e.pointerType !== "mouse")) return;
+      if (cur === t) hide();
+    });
+    document.addEventListener("focusin", function (e) {
+      var t = hit(e);
+      if (!t) return;
+      if (lastPointer !== "mouse" && Date.now() - lastPointerAt < 700) return;
+      place(t);
+    });
+    document.addEventListener("focusout", function (e) {
+      var t = hit(e);
+      if (t && cur === t) hide();
+    });
+    document.addEventListener("click", function (e) {
+      var t = hit(e);
+      if (t) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (cur === t) hide(); else place(t);
+        return;
+      }
+      if (cur && !e.target.closest(".tip-pop")) hide();
+    });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape") hide(); });
+    window.addEventListener("scroll", function () { if (cur) place(cur); }, { passive: true });
+    window.addEventListener("resize", hide);
+  };
+  if (typeof document !== "undefined") {
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", LC.tips);
+    else LC.tips();
+  }
+
   LC.skeletonCards = function (n) {
     var out = "";
     for (var i = 0; i < n; i++) out += '<div class="card"><div class="card-hit">' +

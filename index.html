@@ -5,16 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="color-scheme" content="light only" />
   <meta name="theme-color" content="#f5f6f1" />
-  <title>렛츠카트 · 내 구매이력 × 라이벌 가격 비교</title>
-  <meta name="description" content="자주 사는 상품의 내 구매가·구매주기와 다나와 라이벌의 단위가격·가격 추이를 한 화면에서 비교하는 렛츠카트." />
+  <title>렛츠카트 · 내 생필품, 갈아타면 얼마 아낄까</title>
+  <meta name="description" content="자주 사는 20품목을 사진으로 비교합니다. 내 구매 단가 vs 다나와 인기 라이벌 단가, 살 타이밍까지." />
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
   <link rel="preconnect" href="https://letscart.pages.dev" crossorigin />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
-  <link rel="stylesheet" href="assets/lc.css?v=3.0.5" />
+  <link rel="stylesheet" href="assets/lc.css?v=3.1.0" />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='7' fill='%23111315'/%3E%3Cpath d='M6 7h2l1.6 7.4a1 1 0 0 0 1 .8h6.2a1 1 0 0 0 1-.7L19 10H8' stroke='%2384F000' stroke-width='1.8' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" />
 </head>
 <body>
-  <a href="#grid" class="sr-only">상품 목록으로 이동</a>
+  <a href="#rivals" class="sr-only">20품목 비교로 이동</a>
 
   <header class="topbar">
     <div class="shell topbar-in">
@@ -22,19 +22,21 @@
         <div class="brand-mark" data-icon="cart" data-icon-class="icon-lg"></div>
         <div class="brand-text">
           <span class="brand-name">렛츠카트</span>
-          <span class="brand-sub">내 구매이력 × 라이벌 가격</span>
+          <span class="brand-sub">내 단가 × 라이벌 단가</span>
         </div>
       </a>
+      <nav class="topnav hide-xs" aria-label="바로가기">
+        <a href="#rivals">20품목</a>
+        <a href="#sample">3초 체험</a>
+        <a href="#catalog">카탈로그</a>
+      </nav>
       <div class="topbar-spacer"></div>
       <div class="topbar-actions">
-        <a class="btn btn-ghost btn-sm hide-xs" href="#rivals">
-          <span data-icon="scale" data-icon-class="icon-sm"></span><span class="nowrap">라이벌 비교</span>
-        </a>
-        <a class="btn btn-ghost btn-sm" id="btnLocal" href="local/" rel="noopener" aria-label="내 브라우저에서 시작하기 (확장·.eml)">
-          <span data-icon="box" data-icon-class="icon-sm"></span><span class="nowrap hide-xs">내 브라우저</span>
+        <a class="btn btn-ghost btn-sm hide-xs" id="btnLocal" href="local/" rel="noopener" aria-label="내 브라우저에서 시작하기">
+          <span data-icon="box" data-icon-class="icon-sm"></span><span class="nowrap">내 브라우저</span>
         </a>
         <a class="btn btn-ghost btn-sm" id="btnMy" href="my/" rel="noopener">
-          <span data-icon="user" data-icon-class="icon-sm"></span><span class="nowrap hide-xs">내 기록</span>
+          <span data-icon="user" data-icon-class="icon-sm"></span><span class="nowrap">내 기록</span>
         </a>
         <button type="button" class="btn btn-primary btn-sm" id="btnRequest">
           <span data-icon="plus" data-icon-class="icon-sm"></span><span class="nowrap">관심 상품</span>
@@ -44,95 +46,57 @@
   </header>
 
   <section class="shell hero">
-    <div class="hero-card">
-      <div class="hero-copy">
-        <div class="hero-kicker"><span data-icon="spark" data-icon-class="icon-sm"></span>내 구매이력 × 다나와 라이벌 20품목</div>
-        <h1>무엇을 살지보다,<br class="br-m" /> <span class="hl">언제·얼마에</span> 사면 좋은지.</h1>
-        <p>자주 사는 20개 품목마다 내가 실제 낸 가격·구매주기와, 다나와에서 잘 팔리는 라이벌 2종의 단위가격·스펙·주간 가격 추이를 나란히 놓았습니다. 상품 DB를 따라가는 대신 <b>내 소비 리듬</b>을 기준으로 판단합니다.</p>
-        <div class="hero-cta">
-          <a class="btn btn-primary btn-sm" href="#sample"><span data-icon="play" data-icon-class="icon-sm"></span>샘플로 3분 체험</a>
-          <a class="btn btn-dark btn-sm" href="local/?demo=1"><span data-icon="box" data-icon-class="icon-sm"></span>내 기록으로 시작</a>
-          <a class="btn btn-ghost btn-sm" href="local/#view-shop"><span data-icon="tag" data-icon-class="icon-sm"></span>살 때 판정</a>
+    <div class="hg">
+      <div class="hg-copy">
+        <span class="eyebrow">반복구매 · 라이벌 단가 비교</span>
+        <h1>내가 사는 생필품,<br />갈아타면 <span class="hl">얼마 아낄까</span></h1>
+        <ol class="hg-steps">
+          <li><b>01</b>주문내역 연동</li>
+          <li><b>02</b>100g·1개 단가 비교</li>
+          <li><b>03</b>살 타이밍 알림</li>
+        </ol>
+        <div class="hg-cta">
+          <a class="btn btn-primary btn-lg" href="local/?demo=1"><span data-icon="scale" data-icon-class="icon-sm"></span>내 기록 비교</a>
+          <a class="btn btn-dark btn-lg" href="#sample"><span data-icon="play" data-icon-class="icon-sm"></span>3초 체험</a>
         </div>
-        <div class="hero-stats" aria-label="라이벌 데이터 현황">
-          <div class="hstat"><div class="hstat-label">자주 사는 품목</div><div class="hstat-value tnum" id="hsGroups">–</div></div>
-          <div class="hstat"><div class="hstat-label">라이벌 상품</div><div class="hstat-value tnum" id="hsRivals">–</div></div>
-          <div class="hstat"><div class="hstat-label">가격 추이 있는 상품</div><div class="hstat-value tnum" id="hsTrend">–</div></div>
-          <div class="hstat"><div class="hstat-label">가격 관측일</div><div class="hstat-value tnum" id="hsObserved">–</div></div>
-        </div>
+        <p class="hg-facts"><span><b>20</b> 품목</span><span><b>60</b> 상품</span><span><b>11.20</b> 다나와 실측</span></p>
       </div>
-      <div class="hero-aside" id="heroBoard" aria-label="라이벌 단위가격 비교 예시"></div>
+      <div class="board" id="heroBoard" aria-label="사진으로 보는 단위가격 비교"></div>
     </div>
   </section>
 
-  <section class="shell" style="padding-top:14px">
-    <div class="blk">
-      <div class="k">렛츠카트가 다른 점</div>
-      <h2>상품 DB 경쟁이 아니라,<br />내 구매이력의 해석입니다.</h2>
-      <p>다나와·에누리는 모든 상품을 다룹니다. 렛츠카트는 <b>내가 반복해서 사는 것</b>만 붙잡고, 그 안에서 ①내가 낸 단위가격 ②사는 주기 ③라이벌로 갈아탈 때의 차이를 계산합니다. 숫자는 전부 실제 관측값입니다.</p>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;position:relative;z-index:1">
-        <div class="aside-row" style="border-color:rgba(255,255,255,.12);padding:10px 0">
-          <span class="aside-ico" style="background:rgba(132,240,0,.14);color:#9EFF00" data-icon="receipt"></span>
-          <div><div class="aside-k" style="color:rgba(255,255,255,.55)">내 구매이력</div><div class="aside-v">1,693주문 · 106 재구매</div></div>
-        </div>
-        <div class="aside-row" style="border-color:rgba(255,255,255,.12);padding:10px 0">
-          <span class="aside-ico" style="background:rgba(132,240,0,.14);color:#9EFF00" data-icon="scale"></span>
-          <div><div class="aside-k" style="color:rgba(255,255,255,.55)">라이벌 실측</div><div class="aside-v">20품목 × 3종</div></div>
-        </div>
-        <div class="aside-row" style="border-color:rgba(255,255,255,.12);padding:10px 0">
-          <span class="aside-ico" style="background:rgba(132,240,0,.14);color:#9EFF00" data-icon="trend"></span>
-          <div><div class="aside-k" style="color:rgba(255,255,255,.55)">가격 추이</div><div class="aside-v">다나와 주간 최저가</div></div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="shell" id="rivals" style="padding-top:22px">
-    <div class="section-head" style="margin-bottom:10px">
-      <div>
-        <div class="hero-kicker" style="margin-bottom:6px"><span data-icon="scale" data-icon-class="icon-sm"></span>자주 사는 상품 × 라이벌</div>
-        <h2 style="margin:0;font-size:26px;font-weight:800;letter-spacing:-.03em">내 상품 vs 인기 라이벌</h2>
-        <p style="margin:6px 0 0;color:var(--c-text-2);font-size:13px;line-height:1.6">단위가격(100g·100ml·1개·1롤)으로 환산해 비교합니다. 카드를 누르면 스펙·가격 추이까지 펼쳐집니다.</p>
-      </div>
-      <span class="hint" id="rivalHint">불러오는 중…</span>
+  <section class="sec shell" id="rivals">
+    <div class="sec-head">
+      <h2>자주 사는 20품목</h2>
+      <button type="button" class="info" data-tip="사진은 다나와 실제 상품 이미지입니다. 왼쪽이 내 상품, 오른쪽이 가장 싼 라이벌. 숫자는 100g·100ml·1개·1롤 단위가격(2026-11-20 수집)입니다." aria-label="비교 기준 설명" aria-expanded="false" tabindex="0"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 11v5.5M12 7.8v.1" /></svg></button>
+      <span class="sec-meta" id="rivalHint">불러오는 중…</span>
     </div>
     <div id="rivalStrip" aria-live="polite"></div>
   </section>
 
-  <section class="shell" id="sample" style="padding-top:22px">
-    <div class="panel" style="border-radius:var(--r-xl)">
-      <div class="panel-head" style="padding:16px 18px">
-        <div>
-          <div class="hero-kicker" style="margin-bottom:6px"><span data-icon="play" data-icon-class="icon-sm"></span>샘플 구매이력 체험</div>
-          <h2 style="margin:0;font-size:20px;font-weight:800;letter-spacing:-.03em">내 기록 없이도 바로 비교해 보세요</h2>
-        </div>
-        <span class="hint" id="sampleHint">예시 데이터 · 실제 내 기록 아님</span>
-      </div>
-      <div class="panel-body" style="padding:14px 16px 18px">
-        <div class="sample-wrap">
-          <div class="sample-list" id="sampleList" role="group" aria-label="샘플 상품 선택"></div>
-          <div class="sample-canvas" id="sampleCanvas">
-            <div class="skel" style="height:180px"></div>
-          </div>
-        </div>
-        <div class="note" style="margin-top:12px">
-          샘플은 화장지·라면·우유의 <b>가상 구매 4~6회</b>입니다. 상품 가격·스펙·추이는 실제 다나와 값이고, 구매 기록만 체험용으로 만든 예시입니다.
-          내 기록으로 바꾸려면 <a href="local/?demo=1"><b>내 브라우저에서 시작</b></a> — 데이터는 기기를 떠나지 않습니다.
-        </div>
-      </div>
+  <section class="sec shell" id="sample">
+    <div class="sec-head">
+      <h2>3초 체험</h2>
+      <button type="button" class="info" data-tip="구매 기록은 체험용 가상 데이터입니다. 상품·가격·추이는 다나와 실측값 그대로입니다." aria-label="샘플 데이터 설명" aria-expanded="false" tabindex="0"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 11v5.5M12 7.8v.1" /></svg></button>
+      <span class="sec-meta">내 기록 없이</span>
+    </div>
+    <div class="sample-wrap">
+      <div class="sample-list" id="sampleList" role="group" aria-label="샘플 품목 선택"></div>
+      <div class="sample-canvas" id="sampleCanvas"><div class="skel" style="height:220px;border-radius:16px"></div></div>
     </div>
   </section>
 
-  <div class="filterbar" id="filterbar" style="margin-top:22px">
+  <div class="filterbar" id="filterbar">
     <div class="shell">
-      <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:8px">
-        <h2 style="margin:0;font-size:20px;font-weight:800;letter-spacing:-.03em">공개 상품 카탈로그</h2>
-        <span class="hint" id="catalogHint" style="font-size:11.5px;color:var(--c-text-3);font-weight:600">다나와 스펙·평점·최저가</span>
+      <div class="sec-head" style="margin-bottom:10px">
+        <h2>공개 카탈로그</h2>
+        <button type="button" class="info" data-tip="다나와 스펙·평점·최저가 스냅샷입니다. 사진은 480px WebP로 변환해 제공합니다." aria-label="카탈로그 데이터 설명" aria-expanded="false" tabindex="0"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 11v5.5M12 7.8v.1" /></svg></button>
+        <span class="sec-meta" id="catalogHint">다나와 실측</span>
       </div>
       <div class="searchrow">
         <div class="search" id="searchBox">
           <span data-icon="search" data-icon-class="icon-sm" style="color:#7C827A"></span>
-          <input id="q" type="search" inputmode="search" autocomplete="off" placeholder="상품명·브랜드·카테고리 검색" aria-label="상품 검색" />
+          <input id="q" type="search" inputmode="search" autocomplete="off" placeholder="상품·브랜드 검색" aria-label="상품 검색" />
           <button type="button" class="search-clear" id="qClear" aria-label="검색어 지우기">
             <span data-icon="close" data-icon-class="icon-sm"></span>
           </button>
@@ -169,23 +133,22 @@
     </div>
   </div>
 
-  <main class="shell grid-wrap">
+  <main class="shell grid-wrap" id="catalog">
     <div id="grid" class="grid" aria-live="polite"></div>
     <div id="more" style="text-align:center;margin-top:18px"></div>
   </main>
 
   <footer class="shell footer" style="padding-bottom:40px;color:var(--c-text-3);font-size:11.5px;line-height:1.7">
-    <div><b style="color:var(--c-text)">렛츠카트</b> — 공개 카탈로그. 이 화면에는 개인 주문·가계부 정보가 포함되지 않습니다.</div>
-    <div>사진은 다나와 원본을 480px WebP로 변환해 제공합니다. 가격·스펙은 2026-11-20 수집분이며, 가격 추이는 다나와 최저가 추이(주간)입니다.</div>
-    <div><a href="local/">내 브라우저에서 시작하기(확장·.eml)</a> · <a href="local/?demo=1">샘플 체험</a> · <a href="tracker/">가격 트래커</a> · <a href="my/">내 구매이력</a> · <a href="https://github.com/pyw31337/cart/issues" target="_blank" rel="noopener">관심 상품 요청</a></div>
+    <div><b style="color:var(--c-text)">렛츠카트</b> — 공개 화면. 개인 주문·가계부 정보는 담지 않습니다.</div>
+    <div><a href="local/">내 브라우저</a> · <a href="local/?demo=1">샘플 체험</a> · <a href="tracker/">가격 트래커</a> · <a href="my/">내 기록</a> · <a href="https://github.com/pyw31337/cart/issues" target="_blank" rel="noopener">관심 상품 요청</a></div>
   </footer>
 
-  <script src="assets/lc.js?v=3.0.5"></script>
-  <script src="assets/engine/core.js?v=3.0.5"></script>
-  <script src="assets/engine/insights.js?v=3.0.5"></script>
-  <script src="assets/engine/action.js?v=3.0.5"></script>
-  <script src="assets/rivals.js?v=3.0.5"></script>
-  <script src="assets/landing.js?v=3.0.5"></script>
-  <script src="assets/catalog.js?v=3.0.5"></script>
+  <script src="assets/lc.js?v=3.1.0"></script>
+  <script src="assets/engine/core.js?v=3.1.0"></script>
+  <script src="assets/engine/insights.js?v=3.1.0"></script>
+  <script src="assets/engine/action.js?v=3.1.0"></script>
+  <script src="assets/rivals.js?v=3.1.0"></script>
+  <script src="assets/landing.js?v=3.1.0"></script>
+  <script src="assets/catalog.js?v=3.1.0"></script>
 </body>
 </html>

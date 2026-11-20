@@ -239,70 +239,106 @@
     return series;
   }
 
-  /* ------------------------------------------------ HTML 조각 */
-  function specsOf(p, n) {
-    return (p.spec || []).filter(function (x) { return x[1]; }).slice(0, n || 3)
-      .map(function (x) { return [x[0], x[1]]; });
+  /* ------------------------------------------------ ⓘ 툴팁·사진 조각 */
+  var INFO_SVG = '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/>' +
+    '<path d="M12 11v5.5M12 7.8v.1"/></svg>';
+  function info(text, label) {
+    return '<button type="button" class="info" data-tip="' + esc(text) + '" aria-label="' +
+      esc(label || "설명 보기") + '" aria-expanded="false" tabindex="0">' + INFO_SVG + '</button>';
   }
+  function shortName(p) {
+    var b = String((p && p.brand) || "").trim();
+    if (b && b !== "제조사 미표기") return b;
+    return String((p && p.name) || "").split(" ")[0].slice(0, 10);
+  }
+  function unitTip(group) {
+    return "상품명의 용량·수량을 " + group.unitLabel + "으로 환산했습니다. 내 단위가격은 실제 결제 금액을 같은 방식으로 나눈 값입니다. (다나와 " +
+      date(group.observedAt) + " 수집)";
+  }
+  function saveOf(c) {
+    if (c.diff == null) return null;
+    return Math.round(Math.abs(c.diff) * 10) / 10;
+  }
+  function shotHTML(p, name, unit, isMine) {
+    return '<figure class="shot' + (isMine ? " mine" : "") + '">' +
+      '<span class="shot-tag">' + (isMine ? "내 상품" : "라이벌") + '</span>' +
+      (p.image
+        ? '<img src="' + BASE + esc(p.image) + '" alt="' + esc(p.brand || name) + '" loading="lazy" width="240" height="240" />'
+        : '<span class="thumb-ph"></span>') +
+      '<figcaption class="shot-cap"><span class="shot-name">' + esc(name) + '</span>' +
+      '<span class="shot-price"><b class="tnum">' + num(unit) + '</b><small>원</small></span></figcaption></figure>';
+  }
+
+  /* ------------------------------------------------ 비교 시트 */
   function cardHTML(r, group, c, isMine) {
     var p = r.prod;
     var d = c.ref && r.up ? Math.round((r.up - c.ref) / c.ref * 1000) / 10 : null;
     var cls = d == null ? "flat" : d < -1 ? "down" : d > 1 ? "up" : "flat";
-    var specs = specsOf(p, 3);
     return '<div class="rv-card' + (isMine ? " mine" : "") + '">' +
       (isMine ? '<span class="rv-tag">' + (c.hasMine ? "내가 사는 것" : "기준 상품") + '</span>' : "") +
-      '<div class="rv-card-head">' +
-        (p.image ? '<img class="rv-card-img" src="' + BASE + esc(p.image) + '" alt="" loading="lazy" width="44" height="44" />' : '<span class="rv-card-img"></span>') +
-        '<div style="min-width:0"><div class="rv-card-name">' + esc(r.name) + '</div>' +
-        '<div class="rv-card-brand">' + esc(p.brand || "제조사 미표기") + ' · ' + esc(group.label) + '</div></div>' +
-      '</div>' +
-      '<div class="rv-card-price"><span class="v tnum">' + (isMine && r.p ? num(r.p) + "원" : won(p.price)) + '</span>' +
-        '<span class="u">' + (isMine && r.up ? "내 평균가" : "다나와 최저가") + '</span>' +
-        (!isMine && d != null ? '<span class="rv-delta ' + cls + '">' + (d === 0 ? "같음" : pct(d)) + '</span>' : "") +
-      '</div>' +
-      '<div class="rv-card-price" style="margin-top:2px"><span class="v tnum" style="font-size:15px">' +
-        (r.up ? num(r.up) + "원" : "-") + '</span><span class="u">' + esc(group.unitLabel) + '</span></div>' +
-      '<div class="rv-card-meta">' +
-        (r.rating ? '<span class="badge">★ ' + r.rating + '</span>' : '<span class="badge">평점 없음</span>') +
-        (r.reviews ? '<span class="badge">리뷰 ' + compact(r.reviews) + '</span>' : "") +
-        (p.unit ? '<span class="badge">' + esc(p.unit.text) + '</span>' : "") +
-        (p.offers ? '<span class="badge">' + num(p.offers) + '곳</span>' : "") +
-      '</div>' +
-      (specs.length ? '<ul class="rv-card-spec">' + specs.map(function (s) {
-        return "<li>" + (s[0] ? "<b>" + esc(s[0]) + "</b> " : "") + esc(s[1]) + "</li>";
-      }).join("") + '</ul>' : "") +
-      '<div class="rv-card-meta" style="margin-top:8px"><a class="badge" href="' + esc(p.url) + '" target="_blank" rel="noopener">다나와에서 보기 ↗</a></div>' +
-    '</div>';
+      (p.image ? '<img class="rv-card-shot" src="' + BASE + esc(p.image) + '" alt="' + esc(p.brand || r.name) +
+        '" loading="lazy" width="240" height="240" />' : '<div class="rv-card-shot"></div>') +
+      '<div class="rv-card-body">' +
+        '<div class="rv-card-name">' + esc(r.name) + '</div>' +
+        '<div class="rv-card-price"><span class="v tnum">' + (isMine && r.p ? num(r.p) : won(p.price)) + '</span>' +
+          '<span class="u">' + (isMine && r.p ? "내 평균가" : "다나와 최저") + '</span></div>' +
+        '<div class="rv-card-unit"><b class="tnum">' + (r.up ? num(r.up) + "원" : "-") + '</b><span>' +
+          esc(group.unitLabel) + '</span>' +
+          (!isMine && d != null ? '<span class="rv-delta ' + cls + '" style="margin-left:auto">' +
+            (d === 0 ? "같음" : pct(d)) + '</span>' : "") + '</div>' +
+        '<div class="rv-card-meta">' +
+          (r.rating ? '<span>★ ' + r.rating + '</span>' : "") +
+          (r.reviews ? '<span>리뷰 ' + compact(r.reviews) + '</span>' : "") +
+          (p.unit ? '<span>' + esc(p.unit.text) + '</span>' : "") +
+          '<a href="' + esc(p.url) + '" target="_blank" rel="noopener">다나와 ↗</a>' +
+        '</div>' +
+      '</div></div>';
   }
 
   function compareHTML(group, my, opts) {
     opts = opts || {};
     var c = compare(group, my);
     var base = c.base;
-    var diffText = "";
-    if (c.diff != null && c.best) {
-      diffText = c.diff < 0
-        ? "라이벌 <b>" + esc((c.best.brand || c.best.name).slice(0, 14)) + "</b>가 " + esc(group.unitLabel) + " <b>" + Math.abs(c.diff) + "% 저렴</b>"
-        : c.diff > 0
-          ? "내 상품이 라이벌보다 " + esc(group.unitLabel) + " <b>" + c.mineSave + "% 저렴</b>"
-          : "라이벌과 단위가격이 같음";
+    var best = c.best || group.products[1] || base;
+    var myUnit = (my && my.avgUnit) ? my.avgUnit : base.unitPrice;
+    var save = saveOf(c);
+    var myLine = "";
+    if (my && my.buys) {
+      myLine = '<div class="rv-hero-mine"><b>내 기록 ' + my.buys + '회</b>' +
+        '<span>평균 ' + won(my.avg) + '</span>' +
+        '<span>최저 ' + won(my.min) + '</span>' +
+        (my.cycle ? '<span>주기 ' + my.cycle + '일</span>' : "") +
+        (my.next ? '<span>다음 ' + date(my.next) + '</span>' : "") + '</div>';
     }
-    var myLine = my && my.buys
-      ? "내 기록 " + my.buys + "회 · 평균 " + won(my.avg) + " · 최저 " + won(my.min) + " · 최고 " + won(my.max) +
-        (my.cycle ? " · 주기 " + my.cycle + "일" : "") + (my.next ? " · 다음 " + date(my.next) : "")
-      : "내 구매 기록이 이 품목에는 아직 없습니다. 아래는 다나와 공개 가격 기준입니다.";
 
-    var tableRows = [
-      ["브랜드", function (r) { return esc(r.prod.brand || "-"); }],
-      ["용량·규격", function (r) { return esc(r.prod.unit ? r.prod.unit.text : "-"); }],
-      [esc(group.unitLabel), function (r) { return r.up ? "<b>" + num(r.up) + "원</b>" : "-"; }],
-      ["판매 최저가", function (r) { return won(r.prod.price); }],
-      ["평점·리뷰", function (r) { return (r.rating ? "★" + r.rating : "-") + " · " + (r.reviews ? compact(r.reviews) : "-"); }]
-    ];
+    var hero = '<div class="rv-hero">' +
+      '<div class="rv-hero-top"><span class="rv-hero-k">' + esc(group.unitLabel) + ' 기준</span>' +
+        info(unitTip(group), "단위가격 계산 기준") + '</div>' +
+      '<div class="rv-hero-stage">' +
+        shotHTML(base, shortName(base), myUnit, true) +
+        '<span class="vs-dot">VS</span>' +
+        shotHTML(best, shortName(best), best.unitPrice, false) +
+      '</div>' +
+      '<div class="rv-hero-facts">' +
+        '<span><b class="tnum">' + num(myUnit) + '원</b> 내 상품</span>' +
+        '<span><b class="tnum">' + num(best.unitPrice) + '원</b> 라이벌 최저</span>' +
+        (save == null ? "" : c.diff < 0
+          ? '<span class="save">−' + save + '%</span>'
+          : c.diff > 0 ? '<span class="save win">내 상품 우세</span>' : '<span class="save win">같음</span>') +
+      '</div>' + myLine +
+    '</div>';
+
     var keys = [];
     [c.rows[0]].concat(group.products.slice(1).map(function (p) { return { prod: p }; })).forEach(function (r) {
       (r.prod.spec || []).forEach(function (x) { if (x[0] && keys.indexOf(x[0]) < 0 && keys.length < 4) keys.push(x[0]); });
     });
+    var tableRows = [
+      ["브랜드", function (r) { return esc(r.prod.brand || "-"); }],
+      ["용량·규격", function (r) { return esc(r.prod.unit ? r.prod.unit.text : "-"); }],
+      [group.unitLabel, function (r) { return r.up ? "<b class=\"tnum\">" + num(r.up) + "원</b>" : "-"; }],
+      ["판매 최저가", function (r) { return won(r.prod.price); }],
+      ["평점·리뷰", function (r) { return (r.rating ? "★" + r.rating : "-") + " · " + (r.reviews ? compact(r.reviews) : "-"); }]
+    ];
     keys.forEach(function (k) {
       tableRows.push([esc(k), function (r) {
         var hit = (r.prod.spec || []).filter(function (x) { return x[0] === k; })[0];
@@ -310,11 +346,13 @@
       }]);
     });
 
-    var table = '<div class="section"><div class="section-head"><h3>스펙·단위가격 비교</h3>' +
-      '<span class="hint">다나와 ' + date(group.observedAt) + ' 수집</span></div>' +
+    var table = '<div class="section"><div class="section-head"><h3>스펙 · 단위가격</h3>' +
+      info("다나와 상품 상세의 스펙을 그대로 옮겼습니다. 값이 없는 항목은 -로 둡니다.", "스펙 출처") +
+      '<span class="hint">' + date(group.observedAt) + '</span></div>' +
       '<div style="overflow-x:auto"><table class="rv-table"><thead><tr><th>항목</th>' +
-      '<th class="mine">내 상품</th>' + c.rivals.map(function (p, i) { return "<th>라이벌 " + String.fromCharCode(65 + i) + "</th>"; }).join("") +
-      '</tr></thead><tbody>' + tableRows.map(function (row) {
+      '<th class="mine">내 상품</th>' + c.rivals.map(function (p, i) {
+        return "<th>라이벌 " + String.fromCharCode(65 + i) + "</th>";
+      }).join("") + '</tr></thead><tbody>' + tableRows.map(function (row) {
         return "<tr><td>" + row[0] + "</td>" + c.rows.map(function (r, i) {
           return '<td class="' + (i === 0 ? "mine" : "") + '">' + row[1](r) + "</td>";
         }).join("") + "</tr>";
@@ -325,30 +363,19 @@
     var rangeChips = [[30, "1개월"], [90, "3개월"], [180, "6개월"], [365, "1년"]].map(function (x) {
       return '<button type="button" data-rv-range="' + x[0] + '" aria-pressed="' + (range === x[0]) + '">' + x[1] + "</button>";
     }).join("");
-    var trendNote = "다나와 최저가 추이(주간)는 실제 관측값입니다. " +
-      (my && my.buys ? "내 구매 " + my.buys + "회는 내가 실제 낸 가격(단위가격 환산)입니다." : "내 구매 기록은 아직 없습니다.");
-
+    var obs = "다나와 주간 최저가 · " + date(group.observedAt) + " 수집";
     var cards = c.rows.map(function (r, i) { return cardHTML(r, group, c, i === 0); }).join("");
 
-    return '<div class="rv-sum"><div class="rv-sum-k">' + esc(group.unitLabel) + ' 기준 실측 비교</div>' +
-        '<div class="rv-sum-main"><span class="n tnum">' + (c.best && c.best.unitPrice ? num(c.best.unitPrice) + "원" : "-") + '<small>' + esc(group.unitLabel) + '</small></span>' +
-        '<span class="d">라이벌 최저 · 내 상품 ' + (c.ref ? num(c.ref) + "원" : "-") + '</span></div>' +
-        (diffText ? '<p>' + diffText + '</p>' : "") +
-        '<div class="rv-sum-main" style="margin-top:10px"><span class="rv-sum-badge">' +
-        (my && my.buys ? "내 기록 " + my.buys + "회 반영" : "공개 가격 기준") + '</span></div>' +
-      '</div>' +
-      '<div class="note" style="margin-top:10px">' + esc(myLine) + '</div>' +
+    return hero +
       '<div class="section"><div class="section-head"><h3>내 상품 vs 라이벌 ' + c.rivals.length + '종</h3>' +
-        '<span class="hint">' + esc((my && my.name) ? "내가 마지막으로 산 이름" : base.name.slice(0, 18)) + '</span></div>' +
+        '<span class="hint">' + esc(group.short || group.label) + '</span></div>' +
         '<div class="rv-cards">' + cards + '</div></div>' +
       (opts.compact ? "" : table) +
-      '<div class="section"><div class="section-head"><h3>가격 추이 비교</h3><span class="hint">' + esc(group.unitLabel) + ' 환산</span></div>' +
+      '<div class="section"><div class="section-head"><h3>가격 추이</h3>' +
+        info("다나와 최저가 추이(주간)의 실제 관측값입니다. 내 구매 시점의 실제 결제가는 핑크 점으로 표시합니다. 관측이 1회뿐이면 점만 그립니다.", "가격 추이 기준") +
+        '<span class="hint">' + esc(group.unitLabel) + ' 환산</span></div>' +
         '<div class="rv-range" data-rv-ranges>' + rangeChips + '</div>' +
-        '<div style="margin-top:8px" data-rv-chart>' + chart(series, { note: trendNote, label: group.label + " 가격 추이" }) + '</div></div>' +
-      (opts.compact ? "" : '<div class="note" style="margin-top:12px">' +
-        '가격은 수집 시점의 다나와 최저가, 추이는 다나와 최저가 추이(주간)입니다. 단위가격은 상품명의 용량·수량으로 계산했고, ' +
-        '내 단위가격은 내가 실제 결제한 금액을 같은 방식으로 환산한 값입니다. 판매처·쿠폰에 따라 달라질 수 있습니다.' +
-      '</div>');
+        '<div style="margin-top:8px" data-rv-chart>' + chart(series, { note: obs, label: group.label + " 가격 추이" }) + '</div></div>';
   }
 
   function bindRanges(box, group, my) {
@@ -360,7 +387,7 @@
         });
         var holder = box.querySelector("[data-rv-chart]");
         if (holder) holder.innerHTML = chart(trendSeries(group, my, r), {
-          note: "다나와 최저가 추이(주간)의 실제 관측값입니다. 내 구매 기록은 내가 낸 단위가격으로 환산했습니다.",
+          note: "다나와 주간 최저가 · " + date(group.observedAt) + " 수집",
           label: group.label + " 가격 추이"
         });
       });
@@ -373,36 +400,39 @@
     var title = group.label + " 비교";
     LC.sheet({
       title: title,
-      subtitle: "내 구매이력 × 다나와 라이벌 " + (group.products.length - 1) + "종",
+      subtitle: (my && my.buys ? "내 기록 " + my.buys + "회 반영" : "다나와 공개 가격") + " · 라이벌 " + (group.products.length - 1) + "종",
       render: function (box) {
         box.innerHTML = compareHTML(group, my, opts);
         bindRanges(box, group, my);
       },
       footer: '<a class="btn btn-primary btn-sm" href="' + esc(group.products[0].url) + '" target="_blank" rel="noopener">내 상품 다나와에서 보기 ↗</a>' +
-        '<span class="help" style="margin:0 0 0 auto">' + esc(group.observedAt) + ' 수집</span>' +
+        '<span class="help" style="margin:0 0 0 auto">' + date(group.observedAt) + '</span>' +
         '<button class="btn btn-ghost btn-sm" type="button" data-act="close">닫기</button>' 
     });
   }
 
-  /* 스트립 타일 */
+  /* 스트립 타일 — 사진 2장 VS 보드 */
   function tile(group, my) {
     var c = compare(group, my);
-    var max = Math.max.apply(null, c.rows.map(function (r) { return r.up || 0; }).concat([1]));
-    var bars = c.rows.map(function (r, i) {
-      var w = Math.max(6, Math.round((r.up || 0) / max * 100));
-      var myLabel = c.hasMine ? "내 상품" : "기준 상품";
-      return '<div class="rv-bar' + (i === 0 ? " mine" : "") + '"><span>' + (i === 0 ? myLabel : (r.prod.brand || "라이벌")) +
-        '</span><b class="tnum">' + (r.up ? num(r.up) + "원" : "-") + '</b><i><em style="width:' + w + '%"></em></i></div>';
-    }).join("");
-    var save = c.diff != null && c.diff < 0 ? "라이벌 " + Math.abs(c.diff) + "% 저렴"
-      : c.diff > 0 ? "내 상품이 " + c.mineSave + "% 저렴" : "비슷한 가격";
-    return '<button type="button" class="rv-tile" data-rv-open="' + esc(group.id) + '">' +
-      '<span class="rv-tile-top"><span class="rv-tile-cat">' + esc(group.category) + '</span>' +
-      '<span class="badge badge-green" style="margin-left:auto">' + group.products.length + '종</span></span>' +
-      '<span class="rv-tile-name">' + esc(group.label) + (my && my.buys ? " · " + my.buys + "회 구매" : "") + '</span>' +
-      '<span class="rv-tile-bars">' + bars + '</span>' +
-      '<span class="rv-tile-foot"><span class="rv-tile-save">' + esc(save) + '</span><span class="rv-tile-more">비교 →</span></span>' +
-      '</button>';
+    var mine = group.products[0];
+    var best = c.best || group.products[1] || mine;
+    var myUnit = (my && my.avgUnit) ? my.avgUnit : mine.unitPrice;
+    var save = saveOf(c);
+    return '<button type="button" class="rv-tile" data-rv-open="' + esc(group.id) + '" aria-label="' +
+        esc(group.short || group.label) + ' 사진 비교">' +
+      '<span class="rv-vs">' +
+        '<span class="rv-shot">' + (mine.image ? '<img src="' + BASE + esc(mine.image) + '" alt="" loading="lazy" width="160" height="160" />' : "") +
+          '<span class="rv-shot-tag">내</span></span>' +
+        '<span class="rv-shot">' + (best.image ? '<img src="' + BASE + esc(best.image) + '" alt="" loading="lazy" width="160" height="160" />' : "") +
+          (save != null && c.diff < 0 ? '<b class="rv-drop">−' + save + '%</b>' : "") + '</span>' +
+        '<span class="rv-vs-dot">VS</span>' +
+      '</span>' +
+      '<span class="rv-tile-body">' +
+        '<span class="rv-tile-name">' + esc(group.short || group.label) + '</span>' +
+        '<span class="rv-tile-price"><b class="tnum">' + num(myUnit) + '</b><span aria-hidden="true">→</span>' +
+          '<b class="tnum best">' + num(best.unitPrice) + '</b><i>' + esc(group.unitLabel) + '</i></span>' +
+        (my && my.buys ? '<span class="rv-tile-mine">내 기록 ' + my.buys + '회</span>' : "") +
+      '</span></button>';
   }
 
   function stripHTML(groups, orders) {

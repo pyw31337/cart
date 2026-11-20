@@ -867,10 +867,10 @@
       if ($("rvSum")) $("rvSum").innerHTML = '<b>' + mine.length + '</b><span>품목에 내 기록 있음</span>';
       if ($("rvMode")) {
         $("rvMode").innerHTML = state.demo
-          ? '<b>데모 데이터(가상)</b>로 비교 중입니다. 아래 구매 횟수·평균가는 체험용 예시이고, 상품 가격·스펙·추이는 실제 다나와 값입니다.'
+          ? '<b>데모</b> · 가상 구매 기록 · 다나와 실제 가격'
           : (orders.length
-            ? '내 브라우저에 저장된 구매 기록 <b>' + orders.length + '건</b>을 20품목에 붙였습니다. 상품 가격·스펙·추이는 다나와 실측값입니다.'
-            : '아직 구매 기록이 없습니다. <b>.eml·확장·붙여넣기</b>로 기록을 모으면 내 단위가격·주기까지 함께 비교합니다. 아래는 다나와 공개 가격 기준입니다.');
+            ? '<b>내 기록 ' + LC.num(orders.length) + '건</b> · 다나와 실제 가격'
+            : '<b>구매 기록 0건</b> · 다나와 가격 기준');
       }
       grid.innerHTML = list.map(function (x) { return LCV.tile(x.g, x.my); }).join("");
       grid.querySelectorAll("[data-rv-open]").forEach(function (b) {

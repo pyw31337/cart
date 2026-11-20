@@ -172,3 +172,9 @@
   .userpill { max-width: 38vw; }
   .userpill span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 }
+
+/* v3.1 — ⓘ 툴팁·한 줄 상태 */
+.rv-mode { display: flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 700;
+  color: var(--c-text-3); margin: -2px 0 12px; }
+.rv-mode b { color: var(--c-text); font-weight: 800; }
+.panel-head .info { margin-left: 2px; }

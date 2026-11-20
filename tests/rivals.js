@@ -67,10 +67,17 @@ const html = R.compareHTML(group, my, { range: 180 });
 ok(!/<select/i.test(html), 'select 없음');
 ok(!/alert\(|confirm\(|prompt\(/.test(html), '시스템 다이얼로그 없음');
 ok(html.includes('1롤당'), '단위가격 라벨 노출');
-ok(html.includes('가격 추이 비교'), '가격 추이 섹션');
+ok(html.includes('가격 추이'), '가격 추이 섹션');
 ok(html.includes('내 기록 3회'), '내 구매 횟수 노출');
 const svg = R.chart([{ name: 'x', color: '#84F000', points: [{ d: '2026-10-01', v: 400 }, { d: '2026-11-01', v: 380 }] }], {});
 ok(svg.includes('<svg') && svg.includes('path'), 'SVG 선 그래프 생성');
+
+/* 4-2. 사진 우선 타일 — 20품목 모두 내 상품·라이벌 사진 2장 */
+ok(/class="info"/.test(html) && /data-tip="/.test(html), 'ⓘ 툴팁 버튼 렌더');
+ok(/aria-expanded="false"/.test(html) && /tabindex="0"/.test(html), '툴팁 접근성 속성');
+ok(!/\stitle="/.test(html), 'OS 기본 title 속성 없음');
+ok(/rv-hero/.test(html) && /class="shot/.test(html), '비교 시트 사진 VS 히어로');
+ok(/rv-card-shot/.test(html), '상품 카드 대표 사진');
 
 /* 5. 데이터 무결성 — 실제 수집분 20품목 × 3상품 */
 const data = JSON.parse(fs.readFileSync(path.join(__dirname, '../data/rivals.json'), 'utf8'));
@@ -113,5 +120,28 @@ ok(!/010-\d{4}-\d{4}/.test(raw), '전화번호 없음');
   const s = fs.readFileSync(path.join(__dirname, f), 'utf8');
   ok(!/\balert\(|\bconfirm\(|\bprompt\(/.test(s), f + ' — alert/confirm/prompt 없음');
 });
+
+/* 8. 사진 보드·카피 길이 가드 (20품목 전부) */
+const dataFull = JSON.parse(fs.readFileSync(path.join(__dirname, '../data/rivals.json'), 'utf8'));
+dataFull.groups.forEach((g) => {
+  const t = R.tile(g, null);
+  ok((t.match(/<img /g) || []).length === 2, g.id + ' — 타일에 사진 2장');
+  ok(t.includes(g.products[0].image) && t.includes(g.products[1].image) || t.includes(g.products[2].image), g.id + ' — 실제 WebP 경로');
+  ok(!/\stitle="/.test(t), g.id + ' — title 속성 없음');
+  ok(t.includes('rv-vs') && t.includes('rv-tile-name'), g.id + ' — VS 보드 구조');
+});
+
+function visibleText(file) {
+  let s = fs.readFileSync(path.join(__dirname, file), 'utf8');
+  s = s.replace(/<script[\s\S]*?<\/script>/gi, ' ').replace(/<style[\s\S]*?<\/style>/gi, ' ');
+  s = s.replace(/<[^>]+>/g, ' ');
+  s = s.replace(/&[a-z#0-9]+;/gi, ' ');
+  return s.replace(/\s+/g, ' ').trim();
+}
+const homeText = visibleText('../index.html');
+ok(homeText.length < 1100, '랜딩 정적 카피 1,100자 미만 (' + homeText.length + ')');
+ok(!/렛츠카트가 다른 점|주절주절|상품 DB 경쟁이 아니라/.test(homeText), '블로그식 서론 없음');
+ok((visibleText('../local/index.html').length) < 2600, '/local 정적 카피 2,600자 미만');
+ok((visibleText('../my/index.html').length) < 2300, '/my 정적 카피 2,300자 미만');
 
 console.log('RIVALS ALL PASS (' + n + ' checks)');

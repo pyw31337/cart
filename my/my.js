@@ -442,8 +442,11 @@
     if (!box || !state.rivals || !LCV) return;
     var list = state.rivals.map(function (g) { return { g: g, my: LCV.myStats(ordersOf(g), g) }; });
     list.sort(function (a, b) { return (b.my.buys || 0) - (a.my.buys || 0); });
-    $("rivalGridHint").textContent = list.length + "품목 · 내 기록 " +
-      list.filter(function (x) { return x.my.buys; }).length + "품목";
+    var withMine = list.filter(function (x) { return x.my.buys; }).length;
+    $("rivalGridHint").textContent = list.length + "품목 · 내 기록 " + withMine + "품목";
+    var mode = $("rivalMode");
+    if (mode) mode.innerHTML = '<b>내 기록 ' + withMine + '품목</b> · 다나와 ' +
+      (list[0] ? LC.date(list[0].g.observedAt).slice(2) : "");
     box.innerHTML = list.map(function (x) { return LCV.tile(x.g, x.my); }).join("");
     box.querySelectorAll("[data-rv-open]").forEach(function (b) {
       b.addEventListener("click", function () {

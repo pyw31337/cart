@@ -348,32 +348,25 @@
     var badges = [];
     var a = actionOf(p);
     if (a) badges.push(actBadge(a));
-    if (p.tracked) badges.push('<span class="badge badge-blue">추적 중</span>');
-    if (p.rebuy && p.rebuy.next && LC.dday(p.rebuy.next) >= -30) {
-      var dd = LC.dday(p.rebuy.next);
-      var cls = dd !== null && dd <= 14 ? "badge-amber" : "";
-      badges.push('<span class="badge ' + cls + '">' + LC.ddayLabel(dd) + "</span>");
-    } else if (p.rebuy && p.rebuy.cycle) {
-      badges.push('<span class="badge">주기 ' + Math.round(p.rebuy.cycle) + "일</span>");
-    }
     if (p.rebuy && p.rebuy.avg && p.rebuy.min && p.rebuy.avg > p.rebuy.min * 1.1) {
       badges.push('<span class="badge badge-green">절감 ' +
         Math.round((1 - p.rebuy.min / p.rebuy.avg) * 100) + "%</span>");
+    } else if (p.rebuy && p.rebuy.next && LC.dday(p.rebuy.next) !== null && LC.dday(p.rebuy.next) <= 14) {
+      badges.push('<span class="badge badge-amber">' + LC.ddayLabel(LC.dday(p.rebuy.next)) + "</span>");
+    } else if (!badges.length && p.tracked) {
+      badges.push('<span class="badge">추적 중</span>');
     }
-    if (!badges.length && p.offers) badges.push('<span class="badge">' + LC.compact(p.offers) + "곳 최저가</span>");
 
     return '<article class="card" data-id="' + LC.esc(p.id) + '" tabindex="0" role="button" aria-label="' +
       LC.esc(p.name) + ' 상세 보기">' +
       '<div class="card-hit">' +
         '<div class="thumb">' + (img || LC.placeholder("box")) + "</div>" +
         '<div class="card-body">' +
-          '<div class="card-cat"><span>' + LC.esc(p.group || "기타") + "</span></div>" +
           '<h3 class="card-name">' + LC.text(p.name) + "</h3>" +
-          '<div class="card-rating">' + (p.rating ? LC.rating(p.rating, p.reviews) : '<span class="muted">스펙 미매칭</span>') + "</div>" +
-          '<div class="card-price"><b class="tnum">' + LC.num(price) + "</b><small>원</small>" +
-            (p.price ? '<small>다나와 최저</small>' : "") + "</div>" +
-          (a && a.unit ? '<div class="card-unit"><span>' + LC.esc(a.unit.label) + " " + LC.won(a.unit.value) + "</span></div>" : "") +
-          '<div class="card-badges">' + badges.join("") + "</div>" +
+          '<div class="card-price"><b class="tnum v">' + LC.num(price) + "</b><span class=\"u\">원</span></div>" +
+          (a && a.unit ? '<div class="card-unit">' + LC.esc(a.unit.label) + " " + LC.won(a.unit.value) + "</div>" : "") +
+          '<div class="card-rating">' + (p.rating ? LC.rating(p.rating, p.reviews) : '<span class="muted">' + LC.esc(p.group || "기타") + "</span>") + "</div>" +
+          '<div class="card-badges">' + badges.slice(0, 1).join("") + "</div>" +
         "</div>" +
       "</div></article>";
   }

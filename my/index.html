@@ -9,8 +9,8 @@
   <title>내 구매 리듬 · 렛츠카트</title>
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
-  <link rel="stylesheet" href="../assets/lc.css?v=3.0.5" />
-  <link rel="stylesheet" href="my.css?v=3.0.5" />
+  <link rel="stylesheet" href="../assets/lc.css?v=3.1.0" />
+  <link rel="stylesheet" href="my.css?v=3.1.0" />
 </head>
 <body>
   <header class="topbar">
@@ -104,12 +104,11 @@
       <section id="view-rivals" hidden>
         <div class="view-head" style="display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;margin:4px 0 12px">
           <div>
-            <h2 style="margin:0;font-size:22px;font-weight:800;letter-spacing:-.03em">내 상품 vs 라이벌 20품목</h2>
-            <p style="margin:6px 0 0;color:var(--c-text-2);font-size:12.5px;line-height:1.6">내 구매 기록이 있는 품목부터 보여 줍니다. 카드를 누르면 내 구매가·주기, 라이벌 스펙·단위가격, 주간 가격 추이를 한 번에 비교합니다.</p>
+            <h2 style="margin:0;font-size:22px;font-weight:800;letter-spacing:-.03em;display:flex;align-items:center;gap:6px">내 상품 vs 라이벌 20품목<button type="button" class="info" data-tip="내 구매 기록이 있는 품목부터 보여 줍니다. 카드를 누르면 내 구매가·주기, 라이벌 스펙·단위가격, 주간 가격 추이를 한 번에 비교합니다. 가격은 다나와 최저가(2026-11-20 수집)입니다." aria-label="라이벌 비교 설명" aria-expanded="false" tabindex="0"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 11v5.5M12 7.8v.1" /></svg></button></h2>
           </div>
           <span class="hint" id="rivalGridHint" style="margin-left:auto;font-size:11.5px;color:var(--c-text-3);font-weight:600"></span>
         </div>
-        <div class="note" style="margin-bottom:12px">가격은 다나와 최저가(2026-11-20 수집), 추이는 다나와 최저가 추이(주간)입니다. 내 단위가격은 내가 실제 결제한 금액을 용량·수량으로 환산한 값입니다.</div>
+        <div class="rv-mode" id="rivalMode"></div>
         <div id="rivalGrid" class="rival-grid"></div>
       </section>
 
@@ -184,17 +183,17 @@
       </section>
 
       <footer class="footer" style="margin-top:24px">
-        <div>모든 수치는 <code>letscart</code> D1 데이터베이스에서 Cloudflare Access 인증 후 서버에서 계산됩니다. 브라우저에는 결과만 전달됩니다.</div>
+        <div>수치는 Access 인증 후 D1에서 계산되어 브라우저에는 결과만 전달됩니다.</div>
         <div><a href="../">공개 카탈로그로</a> · <a href="../local/">내 브라우저에서 시작</a></div>
       </footer>
     </div>
   </main>
 
-  <script src="../assets/lc.js?v=3.0.5"></script>
-  <script src="../assets/engine/core.js?v=3.0.5"></script>
-  <script src="../assets/engine/insights.js?v=3.0.5"></script>
-  <script src="../assets/engine/action.js?v=3.0.5"></script>
-  <script src="../assets/rivals.js?v=3.0.5"></script>
-  <script src="my.js?v=3.0.5"></script>
+  <script src="../assets/lc.js?v=3.1.0"></script>
+  <script src="../assets/engine/core.js?v=3.1.0"></script>
+  <script src="../assets/engine/insights.js?v=3.1.0"></script>
+  <script src="../assets/engine/action.js?v=3.1.0"></script>
+  <script src="../assets/rivals.js?v=3.1.0"></script>
+  <script src="my.js?v=3.1.0"></script>
 </body>
 </html>
