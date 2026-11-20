@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
   <link rel="preconnect" href="https://letscart.pages.dev" crossorigin />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
-  <link rel="stylesheet" href="assets/lc.css?v=3.1.1" />
+  <link rel="stylesheet" href="assets/lc.css?v=3.1.2" />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='7' fill='%23111315'/%3E%3Cpath d='M6 7h2l1.6 7.4a1 1 0 0 0 1 .8h6.2a1 1 0 0 0 1-.7L19 10H8' stroke='%2384F000' stroke-width='1.8' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" />
 </head>
 <body>
@@ -28,7 +28,7 @@
       <nav class="topnav hide-xs" aria-label="바로가기">
         <a href="#rivals">20품목</a>
         <a href="#sample">3초 체험</a>
-        <a href="#catalog">카탈로그</a>
+        <a href="#catalogHead">카탈로그</a>
       </nav>
       <div class="topbar-spacer"></div>
       <div class="topbar-actions">
@@ -86,13 +86,16 @@
     </div>
   </section>
 
+  <section class="sec shell" aria-labelledby="catalogHead">
+    <div class="sec-head">
+      <h2 id="catalogHead">공개 카탈로그</h2>
+      <button type="button" class="info" data-tip="다나와 스펙·평점·최저가 스냅샷입니다. 사진은 480px WebP로 변환해 제공합니다." aria-label="카탈로그 데이터 설명" aria-expanded="false" tabindex="0"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 11v5.5M12 7.8v.1" /></svg></button>
+      <span class="sec-meta" id="catalogHint">다나와 실측</span>
+    </div>
+  </section>
+
   <div class="filterbar" id="filterbar">
     <div class="shell">
-      <div class="sec-head" style="margin-bottom:10px">
-        <h2>공개 카탈로그</h2>
-        <button type="button" class="info" data-tip="다나와 스펙·평점·최저가 스냅샷입니다. 사진은 480px WebP로 변환해 제공합니다." aria-label="카탈로그 데이터 설명" aria-expanded="false" tabindex="0"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 11v5.5M12 7.8v.1" /></svg></button>
-        <span class="sec-meta" id="catalogHint">다나와 실측</span>
-      </div>
       <div class="searchrow">
         <div class="search" id="searchBox">
           <span data-icon="search" data-icon-class="icon-sm" style="color:#7C827A"></span>
@@ -143,12 +146,12 @@
     <div><a href="local/">내 브라우저</a> · <a href="local/?demo=1">샘플 체험</a> · <a href="tracker/">가격 트래커</a> · <a href="my/">내 기록</a> · <a href="https://github.com/pyw31337/cart/issues" target="_blank" rel="noopener">관심 상품 요청</a></div>
   </footer>
 
-  <script src="assets/lc.js?v=3.1.1"></script>
-  <script src="assets/engine/core.js?v=3.1.1"></script>
-  <script src="assets/engine/insights.js?v=3.1.1"></script>
-  <script src="assets/engine/action.js?v=3.1.1"></script>
-  <script src="assets/rivals.js?v=3.1.1"></script>
-  <script src="assets/landing.js?v=3.1.1"></script>
-  <script src="assets/catalog.js?v=3.1.1"></script>
+  <script src="assets/lc.js?v=3.1.2"></script>
+  <script src="assets/engine/core.js?v=3.1.2"></script>
+  <script src="assets/engine/insights.js?v=3.1.2"></script>
+  <script src="assets/engine/action.js?v=3.1.2"></script>
+  <script src="assets/rivals.js?v=3.1.2"></script>
+  <script src="assets/landing.js?v=3.1.2"></script>
+  <script src="assets/catalog.js?v=3.1.2"></script>
 </body>
 </html>

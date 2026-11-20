@@ -139,9 +139,25 @@
       '<path d="' + d + "L" + x(v.length - 1) + "," + h + "L1," + h + 'Z" fill="' + color + '" opacity=".12"/>' +
       '<path d="' + d + '" fill="none" stroke="' + color + '" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"/></svg>';
   }
+  function rivalFor(name) {
+    if (!rvData || !rvData.length) return null;
+    var n = String(name || "");
+    for (var i = 0; i < rvData.length; i++) {
+      var g = rvData[i], ex = g.exclude || [], keys = g.match || [], k;
+      var skip = false;
+      for (k = 0; k < ex.length; k++) if (n.indexOf(ex[k]) >= 0) skip = true;
+      if (skip) continue;
+      for (k = 0; k < keys.length; k++) if (n.indexOf(keys[k]) >= 0) return g;
+    }
+    return null;
+  }
   function thumbImg(item) {
     if (item.img && /^https?:/.test(item.img)) {
       return '<img src="' + LC.esc(item.img) + '" alt="" loading="lazy" decoding="async" onerror="this.style.display=\'none\'" />';
+    }
+    var g = rivalFor(item.name);
+    if (g && g.products && g.products[0] && g.products[0].image) {
+      return '<img src="../' + LC.esc(g.products[0].image) + '" alt="" loading="lazy" decoding="async" />';
     }
     return LC.icon("box", "icon-lg");
   }
@@ -852,6 +868,10 @@
       return { date: o.date, name: o.name, price: o.price, qty: o.qty || 1, mall: o.mall || o.src || "" };
     });
   }
+  function prefetchRivals() {
+    loadRivals().then(function () { if (analysis) renderShop(); });
+  }
+
   function renderRivals() {
     var grid = $("rvGrid");
     if (!grid) return;
@@ -1027,6 +1047,7 @@
     renderStart();
     renderExt();
     setTab("shop");
+    prefetchRivals();
     if (store.orders.length) LC.toast("이 브라우저에 저장된 기록 " + LC.num(store.orders.length) + "건으로 시작합니다");
   } catch (e) {
     var g = $("shopGrid");

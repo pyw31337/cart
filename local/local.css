@@ -101,13 +101,13 @@
 @media (min-width: 640px) { .sgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; } }
 @media (min-width: 1100px) { .sgrid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; } }
 
-.scard { background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--r-lg);
-  box-shadow: var(--sh-card); padding: 11px; text-align: left; width: 100%;
-  display: grid; grid-template-columns: 72px minmax(0, 1fr); gap: 10px; align-items: start; }
+.scard { background: var(--c-surface); border: 1px solid var(--c-border); border-radius: 16px;
+  box-shadow: var(--sh-card); padding: 10px; text-align: left; width: 100%;
+  display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 11px; align-items: start; }
 .scard:hover { border-color: var(--c-border-strong); box-shadow: 0 6px 22px rgba(25, 31, 40, .09); }
 .scard:active { transform: scale(.995); }
-.scard .thumb { width: 72px; height: 72px; border-radius: 11px; border: 1px solid var(--c-border);
-  overflow: hidden; background: var(--c-subtle); display: grid; place-items: center; color: #c3cad3; }
+.scard .thumb { width: 92px; height: 92px; border-radius: 12px; border: 1px solid var(--c-border);
+  overflow: hidden; background: #fff; display: grid; place-items: center; color: #c3cad3; }
 .scard .thumb img { width: 100%; height: 100%; object-fit: cover; }
 .scard-main { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
 .scard-top { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
