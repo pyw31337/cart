@@ -6,15 +6,16 @@ iframe{border:1px solid #444;background:#fff;height:900px}
 h3{color:#fff;font-size:12px;margin:8px 0 4px}</style></head><body>
 <div id="out" style="padding:8px;white-space:pre-wrap"></div>
 <div class="row">
-  <div><h3>/ 320</h3><iframe id="a" src="./?probe=1" width="320" height="1400"></iframe></div>
-  <div><h3>/ 1280</h3><iframe id="b" src="./?probe=1" width="1280" height="1400"></iframe></div>
+  <div><h3>/ 320</h3><iframe id="a" src="./?probe=1&t=1" width="320" height="1400"></iframe></div>
+  <div><h3>/ 1280</h3><iframe id="b" src="./?probe=1&t=1" width="1280" height="1400"></iframe></div>
 </div>
 <div class="row">
-  <div><h3>/local/ 320</h3><iframe id="c" src="./local/?probe=1" width="320" height="1400"></iframe></div>
-  <div><h3>/local/ 1280</h3><iframe id="d" src="./local/?probe=1" width="1280" height="1400"></iframe></div>
+  <div><h3>/local/ 320</h3><iframe id="c" src="./local/?probe=1&t=1" width="320" height="1400"></iframe></div>
+  <div><h3>/local/ 1280</h3><iframe id="d" src="./local/?probe=1&t=1" width="1280" height="1400"></iframe></div>
 </div>
 <script>
 var lines=[];
+setTimeout(function(){document.querySelectorAll('iframe').forEach(function(f){try{var u=new URL(f.src);u.searchParams.set('t',Date.now());f.src=u.toString();}catch(e){}});},50);
 function scan(id){
   var f=document.getElementById(id);
   try{
@@ -30,5 +31,5 @@ function scan(id){
   }catch(e){ lines.push(id+' ERR '+e.message); }
   document.getElementById('out').textContent=lines.join('\n');
 }
-setTimeout(function(){['a','b','c','d'].forEach(scan);},2500);
+setTimeout(function(){['a','b','c','d'].forEach(scan);},3200);
 </script></body></html>
