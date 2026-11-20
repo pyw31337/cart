@@ -71,7 +71,7 @@
     })
     .catch(function (e) {
       el.grid.innerHTML = '<div class="empty" style="grid-column:1/-1"><h3>카탈로그를 불러오지 못했습니다</h3><p>' +
-        LC.esc(e.message) + " · 잠시 후 다시 시도해 주세요.</p><p style=\"font-size:10px\">" + LC.esc(String(e.stack||"").replace(/\n/g," | ").slice(0,400)) + "</p></div>";
+        LC.esc(e.message) + " · 잠시 후 다시 시도해 주세요.</p></div>";
       el.count.textContent = "불러오기 실패";
     });
 
