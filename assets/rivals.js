@@ -61,7 +61,8 @@
       } else {
         var tail = n.slice(m.index + m[0].length, m.index + m[0].length + 30);
         var pm = tail.match(/\(\s*(\d{1,3})\s*(?:개|팩|봉|병|캔|입)\s*\)/) ||
-                 tail.match(/[x×]\s*(\d{1,3})\s*(?:개|팩|봉|병|캔|입|p)\b/);
+                 tail.match(/[x×]\s*(\d{1,3})\s*(?:개|팩|봉|병|캔|입|p)\b/) ||
+                 tail.match(/(\d{1,3})\s*(?:개입|개|입|팩|봉|병|캔)(?![가-힣])/);
         if (pm) packs2 = parseInt(pm[1], 10);
       }
       var total = amt * packs2;
@@ -148,7 +149,8 @@
     var diff = ref && best && best.unitPrice ? Math.round((best.unitPrice - ref) / ref * 1000) / 10 : null;
     var mineSave = (ref && best && best.unitPrice && best.unitPrice > ref)
       ? Math.round((best.unitPrice - ref) / best.unitPrice * 1000) / 10 : null;
-    return { base: base, rivals: rivals, rows: rows, cheapest: cheapest, best: best, mineUnit: mineUnit, ref: ref, diff: diff, mineSave: mineSave };
+    return { base: base, rivals: rivals, rows: rows, cheapest: cheapest, best: best, mineUnit: mineUnit,
+      ref: ref, diff: diff, mineSave: mineSave, hasMine: !!(my && my.buys) };
   }
 
   /* ------------------------------------------------ SVG 선 그래프 */
@@ -239,7 +241,7 @@
     var cls = d == null ? "flat" : d < -1 ? "down" : d > 1 ? "up" : "flat";
     var specs = specsOf(p, 3);
     return '<div class="rv-card' + (isMine ? " mine" : "") + '">' +
-      (isMine ? '<span class="rv-tag">내가 사는 것</span>' : "") +
+      (isMine ? '<span class="rv-tag">' + (c.hasMine ? "내가 사는 것" : "기준 상품") + '</span>' : "") +
       '<div class="rv-card-head">' +
         (p.image ? '<img class="rv-card-img" src="' + BASE + esc(p.image) + '" alt="" loading="lazy" width="44" height="44" />' : '<span class="rv-card-img"></span>') +
         '<div style="min-width:0"><div class="rv-card-name">' + esc(r.name) + '</div>' +
@@ -379,7 +381,8 @@
     var max = Math.max.apply(null, c.rows.map(function (r) { return r.up || 0; }).concat([1]));
     var bars = c.rows.map(function (r, i) {
       var w = Math.max(6, Math.round((r.up || 0) / max * 100));
-      return '<div class="rv-bar' + (i === 0 ? " mine" : "") + '"><span>' + (i === 0 ? "내 상품" : (r.prod.brand || "라이벌")) +
+      var myLabel = c.hasMine ? "내 상품" : "기준 상품";
+      return '<div class="rv-bar' + (i === 0 ? " mine" : "") + '"><span>' + (i === 0 ? myLabel : (r.prod.brand || "라이벌")) +
         '</span><b class="tnum">' + (r.up ? num(r.up) + "원" : "-") + '</b><i><em style="width:' + w + '%"></em></i></div>';
     }).join("");
     var save = c.diff != null && c.diff < 0 ? "라이벌 " + Math.abs(c.diff) + "% 저렴"

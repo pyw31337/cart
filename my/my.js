@@ -323,7 +323,8 @@
       renderRhythm();
       renderMyRivals();
       renderRivalGrid();
-      ensureRebuy().then(function () { renderRhythm(); renderDueBoard(); }).catch(function () {});
+      ensureRebuy().then(function () { renderRhythm(); renderDueBoard(); })
+        .catch(function () { renderRhythm(); renderDueBoard(); });
     }).catch(function () {});
   }
 
@@ -352,27 +353,34 @@
     if (!box) return;
     var st = rhythmStats();
     var when = st.due + st.buy + st.soon;
+    var ready = !!state.rebuy;
+    var big = ready ? when : "–";
+    var lane = function (cls, label, n) { return '<span class="lane ' + cls + '">' + label + ' <b>' + (ready ? n : "–") + '</b></span>'; };
     box.innerHTML = '<div class="rhythm-card">' +
       '<div class="rhythm-main">' +
         '<div class="rhythm-k">' + LC.icon("clock", "icon-sm") + ' 이번 달 살 때 온 품목</div>' +
-        '<div class="rhythm-v tnum">' + when + '<small>개</small></div>' +
+        (ready
+          ? '<div class="rhythm-v tnum">' + big + '<small>개</small></div>'
+          : '<div class="rhythm-v" style="font-size:18px;letter-spacing:-.02em">재구매 데이터 일시 불가</div>') +
         '<div class="rhythm-lanes">' +
-          '<span class="lane buy">지금 사세요 <b>' + st.buy + '</b></span>' +
-          '<span class="lane due">살 때 됐어요 <b>' + st.due + '</b></span>' +
-          '<span class="lane wait">기다리세요 <b>' + st.wait + '</b></span>' +
+          lane("buy", "지금 사세요", st.buy) + lane("due", "살 때 됐어요", st.due) + lane("wait", "기다리세요", st.wait) +
         '</div>' +
       '</div>' +
       '<div class="rhythm-stats">' +
-        '<div class="rs"><span>절감 가능액</span><b class="tnum">' + LC.won(st.saving) + '</b><em>도래·임박 품목 기준</em></div>' +
-        '<div class="rs"><span>슈링크 주의</span><b class="tnum">' + st.shrink + '건</b><em>같은 값, 줄어든 용량</em></div>' +
-        '<div class="rs"><span>추적 품목</span><b class="tnum">' + st.total + '개</b><em>' + (state.split ? "정산·디지털 분리 적용" : "전체 표시") + '</em></div>' +
+        '<div class="rs"><span>절감 가능액</span><b class="tnum">' + (ready ? LC.won(st.saving) : "–") + '</b><em>' + (ready ? "도래·임박 품목 기준" : "데이터 일시 불가") + '</em></div>' +
+        '<div class="rs"><span>슈링크 주의</span><b class="tnum">' + (ready ? st.shrink + "건" : "–") + '</b><em>같은 값, 줄어든 용량</em></div>' +
+        '<div class="rs"><span>추적 품목</span><b class="tnum">' + (ready ? st.total + "개" : "–") + '</b><em>' + (ready ? (state.split ? "정산·디지털 분리 적용" : "전체 표시") : "재구매 데이터 대기") + '</em></div>' +
       '</div>' +
     '</div>';
   }
 
   function renderDueBoard() {
     var box = $("dueBoard");
-    if (!box || !state.rebuy) return;
+    if (!box) return;
+    if (!state.rebuy) {
+      box.innerHTML = '<div class="empty" style="padding:22px 12px">재구매 데이터를 불러오지 못했습니다. D1이 잠시 응답하지 않을 수 있습니다 — 잠시 후 다시 열어 주세요.</div>';
+      return;
+    }
     var rows = state.rebuy.rows.slice();
     if (state.split) rows = rows.filter(function (r) { return !isNonSpend(r.danawaName || r.label); });
     var lane = { buy: [], due: [], wait: [], soon: [] };
@@ -417,6 +425,9 @@
     var withMine = list.filter(function (x) { return x.my.buys > 0; });
     $("myRivalsHint").textContent = "내 기록 있는 " + withMine.length + "품목 · 다나와 " + (state.rivals[0] ? state.rivals[0].observedAt : "");
     var show = list.slice(0, 8);
+    if (!state.cmp || !Object.keys(state.cmp).length) {
+      $("myRivalsHint").textContent = "공개 가격 기준 · 내 기록 API 일시 불가";
+    }
     box.innerHTML = '<div class="rv-grid-8">' + show.map(function (x) { return LCV.tile(x.g, x.my); }).join("") + "</div>";
     box.querySelectorAll("[data-rv-open]").forEach(function (b) {
       b.addEventListener("click", function () {

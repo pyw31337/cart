@@ -162,3 +162,13 @@
 @media (min-width: 620px) { .rival-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (min-width: 1080px) { .rival-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 .rival-grid .rv-tile { box-shadow: var(--sh-card); }
+
+/* 320px 세부 보정 */
+@media (max-width: 430px) {
+  .kpi-v { font-size: 17px; letter-spacing: -.04em; white-space: nowrap; }
+  .kpi-v small { font-size: 9.5px; }
+  .rhythm-stats em { white-space: normal; }
+  .rhythm-card { padding: 15px; }
+  .userpill { max-width: 38vw; }
+  .userpill span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+}

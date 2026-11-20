@@ -1,12 +1,14 @@
-# 렛츠카트 (LetsCart)
+# 렛츠카트 (LetsCart) Ver 3.0
 
-상품 카탈로그 + 내 지출·재구매 허브. 기존 쿠팡 가격 트래커(`pyw31337/coupang`)를 `/cart`로 격상한 2단계 결과물입니다.
+**내 구매이력 × 라이벌 가격 비교** 서비스. 자주 사는 20품목마다 내가 낸 가격·구매주기와 다나와 인기 라이벌 2종의 단위가격·스펙·주간 가격 추이를 비교합니다.
+상품 DB 전체를 따라가는 대신 개인 구매이력의 해석에 집중하며, 기존 쿠팡 가격 트래커(`pyw31337/coupang`)를 `/cart`로 격상한 결과물입니다.
+디자인은 칩스(CHIPS) 감성의 **라임(`#84F000`) × 딥블랙(`#111315`)** 시스템(Ver 3.0)입니다.
 
 | 영역 | 주소 | 데이터 | 보호 |
 |---|---|---|---|
-| 공개 카탈로그 | https://pyw31337.github.io/cart/ · https://letscart.pages.dev/ | `products`·`danawa_specs`·`price_history`·`rebuy_signals`·`media_assets` (공개 가능 데이터만) | 공개 |
+| 공개 카탈로그·라이벌 | https://pyw31337.github.io/cart/ · https://letscart.pages.dev/ | `data/catalog.json` 265종 + `data/rivals.json` 20품목·60상품(다나와 실측) | 공개 |
 | 가격 트래커(기존) | https://pyw31337.github.io/cart/tracker/ | `data.json` (매일 09:00 자동 갱신) | 공개 |
-| 내 지출·재구매 허브 | https://letscart.pages.dev/my | `orders`·`order_items`·`ledger_shopping`·`ledger_matches`·`rebuy_alerts` (Cloudflare D1) | Cloudflare Access (`ywfamily.cloudflareaccess.com`) |
+| 내 구매 리듬·라이벌 | https://letscart.pages.dev/my | `orders`·`order_items`·`ledger_shopping`·`ledger_matches`·`rebuy_alerts` (Cloudflare D1) + 공개 `rivals.json` 결합 | Cloudflare Access (`ywfamily.cloudflareaccess.com`) |
 | 내 브라우저에서 시작하기 | https://letscart.pages.dev/local/ | 브라우저 `localStorage` + 확장 `chrome.storage` (서버 없음) | 로그인 없음 · 데이터가 기기를 떠나지 않음 |
 
 ## 구조
@@ -15,6 +17,9 @@
 index.html            공개 카탈로그 (GitHub Pages / Cloudflare Pages 공용)
 assets/lc.css         디자인 토큰 + 공용 컴포넌트 (Zero-System-UI)
 assets/lc.js          시트·드로어·드롭다운·토스트·포맷 유틸
+assets/rivals.js      라이벌 단위가격·스펙·가격추이 비교 컴포넌트(공용)
+assets/landing.js     `/` 히어로 보드·라이벌 스트립·샘플 구매이력 체험
+data/rivals.json      자주 사는 20품목 × (내 상품 + 라이벌 2종) 다나와 실측 데이터
 assets/catalog.js     카탈로그 렌더·검색·필터·상세 드로어
 data/catalog.json     공개 카탈로그 데이터 (letscart/src/export_web.py 생성)
 my/                   내 지출 허브 (Access 필수)
@@ -26,7 +31,7 @@ tests/                `node --test` 대신 기존 러너 — `npm test`
 functions/            Cloudflare Pages Functions
   _middleware.js      /my·/api/private/* 만 Access JWT(RS256) 검증
   _lib/access.js      JWKS 검증 (헤더 신뢰 없음)
-  api/private/*.js    summary·orders·ledger·rebuy (D1)
+  api/private/*.js    summary·orders·ledger·rebuy·compare (D1, compare는 읽기 전용)
   media/[[path]].js   R2 `letscart-media` 이미지 서빙 (immutable)
 tracker/              기존 4개 플랫폼 가격 트래커 (data.json 은 루트에 유지)
 ```
@@ -50,6 +55,22 @@ tracker/              기존 4개 플랫폼 가격 트래커 (data.json 은 루�
 - 개인 데이터는 Cloudflare D1 `letscart`에만 있고, `/api/private/*`는 `functions/_lib/access.js`가 Access JWT의 서명·aud·exp·iss를 Workers 안에서 직접 검증한 뒤에만 응답합니다.
 - 공개 경로(`/`, `/assets/*`, `/data/*`, `/tracker/*`, `/media/*`, `/local/*`)는 인증 없이 열립니다.
 - `/local/`은 서버를 쓰지 않습니다. 확장이 수집한 주문·메일은 `chrome.storage.local`에만 남고, 페이지는 `localStorage`만 씁니다. 공개 카탈로그(`data/catalog.json`) 조회는 공개 상품 정보만 읽습니다.
+
+## 라이벌 데이터 (`data/rivals.json`)
+
+`letscart/src/rivals.py`가 다나와에서 실제로 수집합니다(가상 상품·가짜 가격 없음).
+
+- 품목: 챠오 츄르, 두부모래, 우유, 신라면, 생수, 캔커피, 녹차, 식빵, 김치, 만두, 식용유, 참기름, 재래김, 식기세척기세제, 물티슈, 샴푸, 요구르트, 화장지, 치약, 섬유유연제 — **20품목**
+- 상품: 품목마다 내 상품(기준) 1 + 같은 카테고리 인기 라이벌 2 = **60상품**
+- 수치: 다나와 최저가·평점·리뷰·판매처 수·스펙(description 파싱)·단위가격(100g/100ml/1개/1롤/100매)·주간 최저가 추이(`price/history/tendency/graph.json`)
+- 이미지: 480px WebP, SHA-256 앞 16자리 이름, `assets/media/rivals/` (참조된 60장만 유지)
+- 정직성: 관측이 1회뿐이면 화면에 `관측 시작`으로 표기하고 선을 그리지 않음. 모든 값에 수집일(`observedAt`)을 기록.
+
+```bash
+cd letscart/src && python3 rivals.py            # 전체 수집(검색·상세·추이·이미지)
+python3 rivals.py --only ramen,milk             # 일부만
+python3 rivals.py --assemble                    # groups.json 으로 rivals.json 재조립(이미지 보정)
+```
 
 ## 데이터 갱신
 
