@@ -376,32 +376,44 @@
       "</span></button>";
   }
 
-  function chart(p) {
-    var mine = (p.prices || []).slice(-24);
-    var live = (p.series || []).slice(-60);
-    var all = mine.concat(live.map(function (x) { return { date: x.date, price: x.price }; }));
-    if (all.length < 2) return '<div class="notice">가격 기록이 2개 이상 쌓이면 추이가 보입니다.</div>';
-    var W = 320, H = 120, padL = 6, padR = 6, padT = 8, padB = 16;
-    var vals = all.map(function (x) { return x.price; });
-    var mn = Math.min.apply(null, vals) * 0.97, mx = Math.max.apply(null, vals) * 1.03;
-    var d0 = all[0].date, d1 = all[all.length - 1].date;
-    var t0 = new Date(d0 + "T00:00:00Z").getTime(), t1 = new Date(d1 + "T00:00:00Z").getTime();
+  /* 작은 선 그래프 — points: [{date, price}], x는 날짜 간격 기준 */
+  function lineSvg(points, w, h, color, dash) {
+    if (!points.length) return "";
+    var W = w || 300, H = h || 92, padL = 4, padR = 4, padT = 8, padB = 14;
+    var vals = points.map(function (x) { return x.price; });
+    var mn = Math.min.apply(null, vals), mx = Math.max.apply(null, vals);
+    if (mn === mx) { mn = mn * 0.99; mx = mx * 1.01; }
+    var t0 = new Date(points[0].date + "T00:00:00Z").getTime();
+    var t1 = new Date(points[points.length - 1].date + "T00:00:00Z").getTime();
     var span = Math.max(1, t1 - t0);
     var X = function (d) { return padL + (new Date(d + "T00:00:00Z").getTime() - t0) / span * (W - padL - padR); };
     var Y = function (v) { return padT + (H - padT - padB) * (1 - (v - mn) / ((mx - mn) || 1)); };
-    var line = mine.map(function (x, i) { return (i ? "L" : "M") + X(x.date).toFixed(1) + " " + Y(x.price).toFixed(1); }).join(" ");
-    var liveLine = live.map(function (x, i) { return (i ? "L" : "M") + X(x.date).toFixed(1) + " " + Y(x.price).toFixed(1); }).join(" ");
-    var dots = mine.map(function (x) {
-      return '<circle cx="' + X(x.date).toFixed(1) + '" cy="' + Y(x.price).toFixed(1) + '" r="2.6" fill="#8B95A1" />';
-    }).join("");
-    return '<div class="mchart"><svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="내 구매가와 최근 최저가 추이">' +
-      (liveLine ? '<path d="' + liveLine + '" fill="none" stroke="#3182F6" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" opacity=".9"/>' : "") +
-      (line ? '<path d="' + line + '" fill="none" stroke="#8B95A1" stroke-width="1.6" stroke-dasharray="3 3"/>' : "") +
-      dots +
-      '<text x="' + padL + '" y="' + (H - 2) + '" font-size="8.5" fill="#8B95A1">' + LC.shortDate(d0) + "</text>" +
-      '<text x="' + (W - padR) + '" y="' + (H - 2) + '" font-size="8.5" fill="#8B95A1" text-anchor="end">' + LC.shortDate(d1) + "</text>" +
-      "</svg></div>" +
-      '<div class="legend"><span><i style="background:#8B95A1"></i>내가 낸 가격</span><span><i style="background:#3182f6"></i>최근 최저가</span></div>';
+    var path = points.map(function (x, i) { return (i ? "L" : "M") + X(x.date).toFixed(1) + " " + Y(x.price).toFixed(1); }).join(" ");
+    var dots = points.length <= 14 ? points.map(function (x) {
+      return '<circle cx="' + X(x.date).toFixed(1) + '" cy="' + Y(x.price).toFixed(1) + '" r="2.6" fill="' + color + '" />';
+    }).join("") : "";
+    return '<div class="mchart"><svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="가격 추이">' +
+      '<path d="' + path + '" fill="none" stroke="' + color + '" stroke-width="1.8" ' +
+      (dash ? 'stroke-dasharray="3 3" ' : "") + 'stroke-linejoin="round" stroke-linecap="round" />' + dots +
+      '<text x="' + padL + '" y="' + (H - 2) + '" font-size="8.5" fill="#8B95A1">' + LC.shortDate(points[0].date) + "</text>" +
+      '<text x="' + (W - padR) + '" y="' + (H - 2) + '" font-size="8.5" fill="#8B95A1" text-anchor="end">' +
+      LC.shortDate(points[points.length - 1].date) + "</text></svg></div>";
+  }
+
+  function chart(p) {
+    var mine = (p.prices || []).filter(function (x) { return x && x.price && x.date; });
+    var live = (p.series || []).filter(function (x) { return x && x.price && x.date; });
+    var out = "";
+    if (mine.length) {
+      out += '<div class="section-head" style="margin:0 0 4px"><h3 style="font-size:11.5px">내가 낸 가격</h3>' +
+        '<span class="hint">' + mine.length + "회</span></div>" + lineSvg(mine, 300, 88, "#8B95A1", true);
+    }
+    if (live.length >= 2) {
+      out += '<div class="section-head" style="margin:10px 0 4px"><h3 style="font-size:11.5px">최근 최저가</h3>' +
+        '<span class="hint">' + live.length + "일</span></div>" + lineSvg(live, 300, 88, "#3182f6", false);
+    }
+    if (!out) out = '<div class="notice">가격 기록이 2개 이상 쌓이면 추이가 보입니다.</div>';
+    return out;
   }
 
   function openDetail(p) {
