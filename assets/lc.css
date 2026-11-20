@@ -702,7 +702,7 @@ a:hover { text-decoration: underline; text-underline-offset: 2px; }
 
 /* 샘플 캔버스 — 넓은 화면에서 사진과 숫자를 좌우로 */
 @media (min-width: 900px) {
-  .sample-canvas .rv-hero { display: grid; grid-template-columns: 440px minmax(0, 1fr); column-gap: 22px; }
+  .sample-canvas .rv-hero { display: grid; grid-template-columns: 440px minmax(0, 1fr); column-gap: 22px; max-width: 800px; }
   .sample-canvas .rv-hero-top { grid-column: 1 / -1; }
   .sample-canvas .rv-hero-stage { grid-column: 1; }
   .sample-canvas .rv-hero-facts { grid-column: 2; flex-direction: column; align-items: flex-start;
