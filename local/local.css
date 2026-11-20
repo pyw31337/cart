@@ -237,6 +237,8 @@
 .nowrap { white-space: nowrap; }
 .mono { font-variant-numeric: tabular-nums; }
 
+@media (max-width: 520px) { .panel-head .hint { display: none; } }
+
 @media (max-width: 359px) {
   .scard { grid-template-columns: 60px minmax(0, 1fr); }
   .scard .thumb { width: 60px; height: 60px; }
