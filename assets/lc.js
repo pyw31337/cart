@@ -18,7 +18,7 @@
   LC.compact = function (n) {
     if (!n) return "0";
     if (n >= 100000000) return (n / 100000000).toFixed(1).replace(/\.0$/, "") + "억";
-    if (n >= 10000) return (n / 10000).toFixed(1).replace(/\.0$/, "") + "만";
+    if (n >= 10000) return Math.round(n / 10000).toLocaleString("ko-KR") + "만";
     return LC.num(n);
   };
   LC.date = function (s) {
@@ -178,7 +178,9 @@
       foot.innerHTML = opts.footer;
       foot.addEventListener("click", function (e) {
         var b = e.target.closest("[data-act]");
-        if (b && opts.onAction) opts.onAction(b.dataset.act, b, api);
+        if (!b) return;
+        if (opts.onAction) opts.onAction(b.dataset.act, b, api);
+        else if (b.dataset.act === "close") api.close();
       });
     }
     var last = document.activeElement;

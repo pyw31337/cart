@@ -66,8 +66,7 @@
     .catch(function (e) {
       if (e.code) {
         gate("Cloudflare Access 로그인이 필요합니다",
-          "이 화면은 가계부·주문·재구매 데이터를 다룹니다. Access 허용 계정(" +
-          "pyw213@naver.com · pyw31337@gmail.com · pyw31336@gmail.com)으로 로그인하면 바로 열립니다.",
+          "이 화면은 가계부·주문·재구매 데이터를 다룹니다. 허용된 가족 계정으로 로그인하면 바로 열립니다.",
           '<a class="btn btn-primary" href="/my">다시 시도</a>' +
           '<a class="btn btn-ghost" href="../" style="margin-left:8px">공개 카탈로그</a>');
       } else {
@@ -83,7 +82,7 @@
       { k: "온라인 지출 합계", v: LC.num(t.ledgerTotal) + "<small>원</small>", s: LC.num(t.ledgerRows) + "행 · " + LC.date(t.firstLedger) + "~", cls: "kpi-accent" },
       { k: "실주문", v: LC.num(t.orders) + "<small>건</small>", s: LC.num(t.items) + "라인 · " + LC.num(t.orderTotal) + "원" },
       { k: "가계부 ↔ 주문 대조", v: t.matchPct + "<small>%</small>", s: LC.num(t.matched) + " / " + LC.num(t.ledgerRows) + "행" },
-      { k: "재구매 상품군", v: LC.num(t.rebuy) + "<small>개</small>", s: "도래 " + t.dueSoon + " · 절감 여지 " + LC.num(t.savingPotential) + "원" }
+      { k: "재구매 상품군", v: LC.num(t.rebuy) + "<small>개</small>", s: "도래·임박 " + t.dueSoon + " · 장기 미구매 " + (t.overdue || 0) }
     ];
     $("kpis").innerHTML = cells.map(function (c) {
       return '<div class="kpi ' + (c.cls || "") + '"><div class="kpi-k">' + c.k + '</div>' +
@@ -97,14 +96,21 @@
   function renderDash(d) {
     var max = Math.max.apply(null, d.markets.map(function (m) { return m.ledgerTotal || 0; }).concat([1]));
     $("ledgerSpan").textContent = LC.date(d.totals.firstLedger) + " ~ " + LC.date(d.totals.lastLedger);
-    $("bars").innerHTML = d.markets.filter(function (m) { return m.ledgerTotal > 0 || m.orders > 0; })
-      .map(function (m) {
-        var w = Math.max(2, Math.round((m.ledgerTotal / max) * 100));
-        return '<div class="bar-row"><div class="bar-name"><i style="width:7px;height:7px;border-radius:50%;background:' +
-          m.color + ';display:inline-block;flex:none"></i><span>' + LC.esc(m.name) + "</span></div>" +
-          '<div class="bar-track"><div class="bar-fill" style="width:' + w + "%;background:" + m.color + '"></div></div>' +
-          '<div class="bar-val tnum">' + LC.compact(m.ledgerTotal) + "원<small>주문 " + m.orders + " · 대조 " + m.matchPct + "%</small></div></div>";
-      }).join("") || '<div class="notice">표시할 지출이 없습니다.</div>';
+    var act = d.markets.filter(function (m) { return m.ledgerTotal > 0 || m.orders > 0; });
+    var top = act.slice(0, 10);
+    var rest = act.slice(10);
+    var restTotal = rest.reduce(function (s, m) { return s + (m.ledgerTotal || 0); }, 0);
+    var restOrders = rest.reduce(function (s, m) { return s + (m.orders || 0); }, 0);
+    $("bars").innerHTML = top.map(function (m) {
+      var w = Math.max(2, Math.round((m.ledgerTotal / max) * 100));
+      return '<div class="bar-row"><div class="bar-name"><i style="width:7px;height:7px;border-radius:50%;background:' +
+        m.color + ';display:inline-block;flex:none"></i><span>' + LC.esc(m.name) + "</span></div>" +
+        '<div class="bar-track"><div class="bar-fill" style="width:' + w + "%;background:" + m.color + '"></div></div>' +
+        '<div class="bar-val tnum">' + LC.compact(m.ledgerTotal) + "원<small>주문 " + m.orders + " · 대조 " + m.matchPct + "%</small></div></div>";
+    }).join("") + (rest.length
+      ? '<div class="notice" style="margin-top:8px">그 외 ' + rest.length + "개 마켓 · " + LC.compact(restTotal) +
+        "원 · 주문 " + LC.num(restOrders) + "건</div>" : "")
+      || '<div class="notice">표시할 지출이 없습니다.</div>';
 
     $("savings").innerHTML = d.savings.length
       ? '<div class="mini-list">' + d.savings.map(function (s) {
@@ -123,12 +129,13 @@
           " · 다음 " + LC.date(r.next_expected) + '</span></span><span class="badge ' + cls + '">' +
           (dd === 0 ? "오늘" : dd < 0 ? "D+" + Math.abs(dd) : "D-" + dd) + "</span></button>";
       }).join("") + "</div>"
-      : '<div class="notice">21일 내 도래하는 재구매가 없습니다.</div>';
+      : '<div class="notice">21일 내 도래하는 재구매가 없습니다.</div>' +
+        (d.totals.overdue ? '<div class="notice" style="margin-top:6px">주기가 한참 지난 상품 ' + d.totals.overdue + "개는 [재구매] 탭에서 볼 수 있습니다.</div>" : "");
 
     $("collection").innerHTML = '<div class="mini-list">' + d.collection.map(function (c) {
       var badge = c.result === "collected" ? "badge-green" : c.result === "empty" ? "badge-amber" : "badge-red";
       var label = { collected: "수집", empty: "0건", path_not_found: "경로 없음", not_attempted: "미시도", login_required: "로그인 필요" }[c.result] || c.result;
-      return '<div class="mini" style="grid-template-columns:minmax(0,1fr) auto"><span><span class="mini-t">' + LC.esc(c.market_code) +
+      return '<div class="mini" style="grid-template-columns:minmax(0,1fr) auto"><span><span class="mini-t">' + LC.esc(c.name || c.market_code) +
         '</span><span class="mini-s">' + LC.esc((c.limit_note || "").slice(0, 60)) + '</span></span>' +
         '<span class="badge ' + badge + '">' + label + " " + (c.orders_found || 0) + "</span></div>";
     }).join("") + "</div>";
@@ -195,10 +202,13 @@
   }
 
   /* ------------------------------------------------------------- orders */
-  function marketChips(rootId, current, onPick) {
+  function marketChips(rootId, current, onPick, mode) {
     var d = state.summary;
+    var keep = mode === "orders" ? function (m) { return m.orders > 0; }
+      : mode === "ledger" ? function (m) { return m.ledgerRows > 0; }
+      : function (m) { return m.orders > 0 || m.ledgerTotal > 0; };
     var html = '<button class="chip" data-value="" aria-pressed="' + (!current ? "true" : "false") + '">전체</button>' +
-      d.markets.filter(function (m) { return m.orders > 0 || m.ledgerTotal > 0; }).map(function (m) {
+      d.markets.filter(keep).map(function (m) {
         return '<button class="chip" data-value="' + m.code + '" aria-pressed="' + (current === m.code ? "true" : "false") +
           '"><i class="dot" style="--dc:' + m.color + '"></i>' + LC.esc(m.name) +
           ' <span class="count">' + (m.orders || m.ledgerRows) + "</span></button>";
@@ -216,7 +226,7 @@
   function initOrders() {
     marketChips("oMarkets", state.orders.market, function (v) {
       state.orders.market = v; state.orders.rows = []; state.orders.offset = 0; loadOrders(true);
-    });
+    }, "orders");
     loadOrders(true);
   }
   function periodRange(p) {
@@ -254,7 +264,9 @@
     var s = state.orders;
     $("oCount").innerHTML = "<b>" + LC.num(s.total) + "</b>건";
     $("oList").innerHTML = s.rows.length ? s.rows.map(function (o, i) {
-      var names = o.items.map(function (x) { return x.name; }).slice(0, 3).join(" · ");
+      var uniq = [];
+      o.items.forEach(function (x) { if (uniq.indexOf(x.name) < 0) uniq.push(x.name); });
+      var names = uniq.slice(0, 3).join(" · ") + (uniq.length > 3 ? " 외 " + (uniq.length - 3) + "종" : "");
       var dd = o.date ? o.date.slice(5).replace("-", ".") : "";
       return '<button class="orow" data-order="' + i + '"><div class="orow-top">' +
         '<span class="orow-date">' + (o.date || "") + "</span>" +
@@ -318,7 +330,7 @@
   function initLedger() {
     marketChips("lMarkets", state.ledger.market, function (v) {
       state.ledger.market = v; state.ledger.rows = []; state.ledger.offset = 0; loadLedger(true);
-    });
+    }, "ledger");
     loadLedger(true);
   }
 
@@ -402,6 +414,7 @@
     var dd = r.daysLeft;
     var badge = r.state === "due" ? '<span class="badge badge-red">도래</span>'
       : r.state === "soon" ? '<span class="badge badge-amber">D-' + dd + "</span>"
+      : r.state === "stale" ? '<span class="badge">' + Math.abs(dd) + "일 경과</span>"
       : dd === null ? '<span class="badge">주기 미상</span>' : '<span class="badge badge-blue">D-' + dd + "</span>";
     return '<button class="rcard" data-rebuy="' + LC.esc(r.id) + '"><div class="item-thumb">' + thumb + "</div><div style=\"min-width:0\">" +
       '<div style="display:flex;gap:6px;align-items:flex-start"><div class="item-name" style="flex:1">' + LC.esc(r.label) + "</div>" + badge + "</div>" +
@@ -416,8 +429,10 @@
     $("rebuyHint").textContent = LC.num(d.count) + "개 상품군";
     $("rebuySummary").innerHTML = '<div class="statline" style="gap:16px;font-size:12.5px">' +
       "<span>도래 <b>" + d.due + "</b></span><span>14일 내 <b>" + d.soon + "</b></span>" +
+      "<span>장기 미구매 <b>" + (d.stale || 0) + "</b></span>" +
       "<span>절감 여지 합계 <b>" + LC.num(d.potential) + "원</b></span></div>";
-    $("rebuyDue").innerHTML = d.byDue.map(rcard).join("");
+    $("rebuyDue").innerHTML = d.byDue.length ? d.byDue.map(rcard).join("")
+      : '<div class="notice">21일 내 도래하는 재구매가 없습니다.</div>';
     $("rebuySaving").innerHTML = d.bySaving.map(rcard).join("") || '<div class="notice">절감 여지가 계산된 상품이 없습니다.</div>';
     $("rebuyAll").innerHTML = d.rows.slice().sort(function (a, b) { return a.label.localeCompare(b.label, "ko"); }).map(rcard).join("");
     document.querySelectorAll("[data-rebuy]").forEach(function (b) {

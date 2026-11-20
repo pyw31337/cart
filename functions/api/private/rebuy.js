@@ -48,18 +48,23 @@ export async function onRequestGet(context) {
         media: a.match_product_id ? (mMap[a.match_product_id] || null) : null,
         saving,
         savingPct: a.avg_price_krw ? Math.round((1000 * saving) / a.avg_price_krw) / 10 : 0,
-        state: d === null ? 'unknown' : d <= 0 ? 'due' : d <= 14 ? 'soon' : 'watching',
+        state: d === null ? 'unknown'
+          : d < -30 ? 'stale'
+          : d <= 0 ? 'due'
+          : d <= 14 ? 'soon' : 'watching',
       };
     });
 
-    const byDue = rows.slice().sort((a, b) => (a.daysLeft === null ? 99999 : a.daysLeft) - (b.daysLeft === null ? 99999 : b.daysLeft));
+    const byDue = rows.filter((r) => r.daysLeft !== null && r.daysLeft >= -30 && r.daysLeft <= 21)
+      .sort((a, b) => a.daysLeft - b.daysLeft);
     const bySaving = rows.slice().sort((a, b) => b.saving - a.saving);
 
     return json({
       ok: true,
       count: rows.length,
-      due: byDue.filter((r) => r.state === 'due').length,
-      soon: byDue.filter((r) => r.state === 'soon').length,
+      due: rows.filter((r) => r.daysLeft !== null && r.daysLeft <= 0 && r.daysLeft >= -30).length,
+      soon: rows.filter((r) => r.daysLeft !== null && r.daysLeft > 0 && r.daysLeft <= 14).length,
+      stale: rows.filter((r) => r.state === 'stale').length,
       potential: rows.reduce((s, r) => s + r.saving, 0),
       rows,
       byDue: byDue.slice(0, 12),

@@ -76,6 +76,7 @@ export async function onRequestGet(context) {
     const dayOf = (iso) => Math.round((new Date(iso + 'T00:00:00Z') - new Date(today + 'T00:00:00Z')) / 86400000);
     const due = [];
     const savings = [];
+    let overdue = 0;
     (alerts.results || []).forEach((a) => {
       const d = a.next_expected ? dayOf(a.next_expected.slice(0, 10)) : null;
       const row = Object.assign({}, a, {
@@ -83,7 +84,8 @@ export async function onRequestGet(context) {
         label: a.product_id,
         low_price_krw: a.low_price_krw,
       });
-      if (d !== null && d <= 21) due.push(row);
+      if (d !== null && d >= -30 && d <= 21) due.push(row);
+      else if (d !== null) overdue++;
       if (a.avg_price_krw && a.min_price_krw && a.avg_price_krw > a.min_price_krw) {
         row.saving = a.avg_price_krw - a.min_price_krw;
         row.saving_pct = Math.round((1000 * row.saving) / a.avg_price_krw) / 10;
@@ -105,6 +107,7 @@ export async function onRequestGet(context) {
         matched, matchPct: ledgerRows ? Math.round((1000 * matched) / ledgerRows) / 10 : 0,
         rebuy: (alerts.results || []).length,
         dueSoon: due.filter((x) => x.days_left !== null && x.days_left <= 14).length,
+        overdue,
         savingPotential: savings.reduce((s, x) => s + x.saving, 0),
         firstLedger: (ledger.results || []).map((r) => r.first).filter(Boolean).sort()[0] || null,
         lastLedger: (ledger.results || []).map((r) => r.last).filter(Boolean).sort().pop() || null,
@@ -112,7 +115,9 @@ export async function onRequestGet(context) {
       markets,
       due: due.slice(0, 8),
       savings: savings.slice(0, 8),
-      collection: (collection.results || []),
+      collection: (collection.results || []).map((c) => Object.assign({}, c, {
+        name: (MARKETS[c.market_code] || [c.market_code])[0],
+      })),
     });
   } catch (e) {
     return fail(e);

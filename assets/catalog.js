@@ -58,6 +58,32 @@
       return '<div class="hstat"><div class="hstat-label">' + c[1] + '</div><div class="hstat-value tnum">' +
         c[0].replace(/^([\d.,]+)(.*)$/, "$1<span>$2</span>") + "</div></div>";
     }).join("");
+    renderAside();
+  }
+
+  function renderAside() {
+    var aside = document.getElementById("heroAside");
+    if (!aside) return;
+    var due = 0, hit = 0, saving = 0, tracked = 0;
+    state.data.forEach(function (p) {
+      if (p.tracked) tracked++;
+      if (p.rebuy && p.rebuy.next) {
+        var d = LC.dday(p.rebuy.next);
+        if (d !== null && d <= 14 && d >= -30) due++;
+      }
+      if (p.price && p.rebuy && p.rebuy.target && p.price <= p.rebuy.target) hit++;
+      if (p.rebuy && p.rebuy.avg && p.rebuy.min && p.rebuy.avg > p.rebuy.min) saving += p.rebuy.avg - p.rebuy.min;
+    });
+    aside.innerHTML = '<div class="aside-row">' +
+        '<div class="aside-ico" style="background:var(--c-amber-weak);color:var(--c-amber-text)">' + LC.icon("clock") + "</div>" +
+        '<div><div class="aside-k">14일 내 구매 주기 도래</div><div class="aside-v tnum">' + due + "<small>개 상품</small></div></div></div>" +
+      '<div class="aside-row">' +
+        '<div class="aside-ico" style="background:var(--c-green-weak);color:var(--c-green-text)">' + LC.icon("trend") + "</div>" +
+        '<div><div class="aside-k">지금 목표가 이하</div><div class="aside-v tnum">' + hit + "<small>개 상품</small></div></div></div>" +
+      '<div class="aside-row">' +
+        '<div class="aside-ico" style="background:var(--c-blue-weak);color:var(--c-blue)">' + LC.icon("tag") + "</div>" +
+        '<div><div class="aside-k">최저가로 다시 살면 아끼는 금액</div><div class="aside-v tnum">' +
+        LC.num(saving) + "<small>원 · " + tracked + '개 추적 상품</small></div></div></div>';
   }
 
   function buildCats(cats) {
@@ -287,7 +313,7 @@
       : "";
     var badges = [];
     if (p.tracked) badges.push('<span class="badge badge-blue">추적 중</span>');
-    if (p.rebuy && p.rebuy.next) {
+    if (p.rebuy && p.rebuy.next && LC.dday(p.rebuy.next) >= -30) {
       var dd = LC.dday(p.rebuy.next);
       var cls = dd !== null && dd <= 14 ? "badge-amber" : "";
       badges.push('<span class="badge ' + cls + '">' + LC.ddayLabel(dd) + "</span>");
@@ -359,8 +385,9 @@
               return '<div class="cell"><div class="cell-k">' + c[0] + '</div><div class="cell-v tnum">' + c[1] + "</div></div>";
             }).join("") + "</div>" +
             (dd !== null ? '<div style="margin-top:10px;display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:' +
-              (dd <= 14 ? "var(--c-amber-text)" : "var(--c-text-2)") + '">' + LC.icon("clock", "icon-sm") +
-              "다음 구매 예상 " + LC.date(p.rebuy.next) + " · " + LC.ddayLabel(dd) + "</div>" : "") +
+              (dd <= 14 && dd >= -30 ? "var(--c-amber-text)" : "var(--c-text-2)") + '">' + LC.icon("clock", "icon-sm") +
+              "다음 구매 예상 " + LC.date(p.rebuy.next) + " · " +
+              (dd >= 0 ? LC.ddayLabel(dd) : Math.abs(dd) + "일 경과") + "</div>" : "") +
           "</div>" +
           (p.rebuy && p.rebuy.avg && p.rebuy.min && p.rebuy.avg > p.rebuy.min
             ? '<div class="note" style="margin-top:12px">평균 구매가 <b>' + LC.num(p.rebuy.avg) + "원</b> vs 최저 구매가 <b>" +
@@ -388,7 +415,9 @@
     var pts = Object.keys(byDate).sort().map(function (d) { return { d: d, v: byDate[d] }; });
     if (pts.length < 2) {
       return '<div class="section"><div class="section-head"><h3>가격 이력</h3></div>' +
-        '<div class="note">이 상품은 아직 이력이 2개 미만입니다. 다나와 최저가 ' + LC.num(p.price) + "원(2026-11-20 수집)만 확인됐습니다.</div></div>";
+        '<div class="note">확인된 가격이 1건뿐입니다. 다나와 최저가 <b>' + LC.num(p.price) + "원</b> (2026-11-20 수집)" +
+        (p.rebuy && p.rebuy.min ? " · 과거 구매가 범위 <b>" + LC.num(p.rebuy.min) + "원~" + LC.num(p.rebuy.max) + "원</b>" : "") +
+        "입니다.</div></div>";
     }
     var W = 320, H = 128, pad = 26;
     var vs = pts.map(function (x) { return x.v; });
