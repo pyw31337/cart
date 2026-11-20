@@ -127,6 +127,7 @@
     if (it.count >= 2 && it.daysLeft <= 7 && v.k !== 'wait') say += it.daysLeft < 0 ? ' 다시 살 때가 지났어요.' : ' 곧 다시 살 때예요.';
     return {
       name: it.name, key: it.key, count: it.count, avgGap: it.avgGap, daysLeft: it.daysLeft,
+      prices: it.prices || [],
       img: img, sources: sources, now: now, series: series, avg: avg && Math.round(avg), min: min,
       myLast: myLast, yearAgo: ya, vsMine: vsMine, vsYear: vsYear, nextDip: nextDip,
       verdict: v, score: score, say: say
