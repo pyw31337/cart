@@ -146,7 +146,9 @@
     var cheapest = rows.slice().sort(function (a, b) { return (a.up || 1e12) - (b.up || 1e12); })[0];
     var best = rivals.slice().sort(function (a, b) { return (a.unitPrice || 1e12) - (b.unitPrice || 1e12); })[0];
     var diff = ref && best && best.unitPrice ? Math.round((best.unitPrice - ref) / ref * 1000) / 10 : null;
-    return { base: base, rivals: rivals, rows: rows, cheapest: cheapest, best: best, mineUnit: mineUnit, ref: ref, diff: diff };
+    var mineSave = (ref && best && best.unitPrice && best.unitPrice > ref)
+      ? Math.round((best.unitPrice - ref) / best.unitPrice * 1000) / 10 : null;
+    return { base: base, rivals: rivals, rows: rows, cheapest: cheapest, best: best, mineUnit: mineUnit, ref: ref, diff: diff, mineSave: mineSave };
   }
 
   /* ------------------------------------------------ SVG 선 그래프 */
@@ -245,7 +247,7 @@
       '</div>' +
       '<div class="rv-card-price"><span class="v tnum">' + (isMine && r.p ? num(r.p) + "원" : won(p.price)) + '</span>' +
         '<span class="u">' + (isMine && r.up ? "내 평균가" : "다나와 최저가") + '</span>' +
-        (d != null ? '<span class="rv-delta ' + cls + '">' + (d === 0 ? "같음" : pct(d)) + '</span>' : "") +
+        (!isMine && d != null ? '<span class="rv-delta ' + cls + '">' + (d === 0 ? "같음" : pct(d)) + '</span>' : "") +
       '</div>' +
       '<div class="rv-card-price" style="margin-top:2px"><span class="v tnum" style="font-size:15px">' +
         (r.up ? num(r.up) + "원" : "-") + '</span><span class="u">' + esc(group.unitLabel) + '</span></div>' +
@@ -271,7 +273,7 @@
       diffText = c.diff < 0
         ? "라이벌 <b>" + esc((c.best.brand || c.best.name).slice(0, 14)) + "</b>가 " + esc(group.unitLabel) + " <b>" + Math.abs(c.diff) + "% 저렴</b>"
         : c.diff > 0
-          ? "내 상품이 라이벌보다 " + esc(group.unitLabel) + " <b>" + c.diff + "% 비쌈</b>"
+          ? "내 상품이 라이벌보다 " + esc(group.unitLabel) + " <b>" + c.mineSave + "% 저렴</b>"
           : "라이벌과 단위가격이 같음";
     }
     var myLine = my && my.buys
@@ -380,7 +382,8 @@
       return '<div class="rv-bar' + (i === 0 ? " mine" : "") + '"><span>' + (i === 0 ? "내 상품" : (r.prod.brand || "라이벌")) +
         '</span><b class="tnum">' + (r.up ? num(r.up) + "원" : "-") + '</b><i><em style="width:' + w + '%"></em></i></div>';
     }).join("");
-    var save = c.diff != null && c.diff < 0 ? "라이벌 " + Math.abs(c.diff) + "% 저렴" : c.diff > 0 ? "내 상품이 " + c.diff + "% 비쌈" : "비슷한 가격";
+    var save = c.diff != null && c.diff < 0 ? "라이벌 " + Math.abs(c.diff) + "% 저렴"
+      : c.diff > 0 ? "내 상품이 " + c.mineSave + "% 저렴" : "비슷한 가격";
     return '<button type="button" class="rv-tile" data-rv-open="' + esc(group.id) + '">' +
       '<span class="rv-tile-top"><span class="rv-tile-cat">' + esc(group.category) + '</span>' +
       '<span class="badge badge-green" style="margin-left:auto">' + group.products.length + '종</span></span>' +
