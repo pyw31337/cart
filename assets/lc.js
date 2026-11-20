@@ -52,6 +52,14 @@
       .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
   };
+  /* 원본 데이터에 이미 이스케이프된 엔티티가 섞여 있어(&amp; 등) 한 번 풀고 다시 이스케이프합니다. */
+  LC.text = function (s) {
+    var raw = String(s === null || s === undefined ? "" : s)
+      .replace(/&(amp|lt|gt|quot|#39|nbsp);/g, function (m, c) {
+        return { amp: "&", lt: "<", gt: ">", quot: '"', "#39": "'", nbsp: " " }[c];
+      });
+    return LC.esc(raw);
+  };
 
   /* ------------------------------------------------------------------ icons */
   var P = {

@@ -332,7 +332,7 @@
         '<div class="thumb">' + (img || LC.placeholder("box")) + "</div>" +
         '<div class="card-body">' +
           '<div class="card-cat"><span>' + LC.esc(p.group || "기타") + "</span></div>" +
-          '<h3 class="card-name">' + LC.esc(p.name) + "</h3>" +
+          '<h3 class="card-name">' + LC.text(p.name) + "</h3>" +
           '<div class="card-rating">' + (p.rating ? LC.rating(p.rating, p.reviews) : '<span class="muted">스펙 미매칭</span>') + "</div>" +
           '<div class="card-price"><b class="tnum">' + LC.num(price) + "</b><small>원</small>" +
             (p.price ? '<small>다나와 최저</small>' : "") + "</div>" +
@@ -374,7 +374,7 @@
 
         b.innerHTML =
           '<div class="detail-hero"><div class="thumb">' + img + "</div><div>" +
-            '<h3 class="detail-name">' + LC.esc(p.danawaName || p.name) + "</h3>" +
+            '<h3 class="detail-name">' + LC.text(p.danawaName || p.name) + "</h3>" +
             '<div class="detail-meta">' + meta.join("") + "</div>" +
             (p.category ? '<div class="muted" style="font-size:11.5px;margin-top:8px;line-height:1.5">' + LC.esc(p.category) + "</div>" : "") +
           "</div></div>" +
@@ -453,9 +453,9 @@
     }
     var html = "", lastSec = null;
     rows.slice(0, 40).forEach(function (r) {
-      if (r.s && r.s !== lastSec) { html += '<div class="spec-sec">' + LC.esc(r.s) + "</div>"; lastSec = r.s; }
-      html += '<div class="spec-row">' + (r.k ? '<div class="k">' + LC.esc(r.k) + '</div><div class="v">' +
-        LC.esc(r.v) + "</div>" : '<div class="v" style="grid-column:1/-1;font-weight:600">' + LC.esc(r.v) + "</div>") + "</div>";
+      if (r.s && r.s !== lastSec) { html += '<div class="spec-sec">' + LC.text(r.s) + "</div>"; lastSec = r.s; }
+      html += '<div class="spec-row">' + (r.k ? '<div class="k">' + LC.text(r.k) + '</div><div class="v">' +
+        LC.text(r.v) + "</div>" : '<div class="v" style="grid-column:1/-1;font-weight:600">' + LC.text(r.v) + "</div>") + "</div>";
     });
     return '<div class="section"><div class="section-head"><h3>다나와 스펙</h3>' +
       '<span class="hint">' + (p.danawaUrl ? '<a href="' + LC.esc(p.danawaUrl) + '" target="_blank" rel="noopener">원문</a>' : "") +

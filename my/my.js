@@ -136,7 +136,7 @@
       ? '<div class="mini-list">' + d.due.map(function (r) {
         var dd = r.days_left;
         var cls = dd <= 0 ? "badge-red" : dd <= 14 ? "badge-amber" : "badge-blue";
-        return '<button class="mini" data-due="' + LC.esc(r.label) + '"><span><span class="mini-t">' + LC.esc(r.label) +
+        return '<button class="mini" data-due="' + LC.text(r.label) + '"><span><span class="mini-t">' + LC.text(r.label) +
           '</span><span class="mini-s">주기 ' + (r.avg_cycle_days ? Math.round(r.avg_cycle_days) + "일" : "–") +
           " · 다음 " + LC.date(r.next_expected) + '</span></span><span class="badge ' + cls + '">' +
           (dd === 0 ? "오늘" : dd < 0 ? "D+" + Math.abs(dd) : "D-" + dd) + "</span></button>";
@@ -287,7 +287,7 @@
         (o.ledger.length ? '<span class="badge badge-green">가계부 대조</span>' : "") +
         "</div><div class=\"orow-right\" style=\"grid-row:span 2\"><div class=\"orow-total tnum\">" + LC.num(o.total) + "원</div>" +
         '<div class="orow-meta">' + (o.lineCount || o.items.length) + "개 항목</div></div>" +
-        '<div class="orow-items">' + LC.esc(names || "(항목 정보 없음)") + "</div></button>";
+        '<div class="orow-items">' + LC.text(names || "(항목 정보 없음)") + "</div></button>";
     }).join("") : '<div class="empty"><h3>조건에 맞는 주문이 없습니다</h3><p>검색어·마켓·기간을 바꿔 보세요.</p></div>';
 
     $("oMore").innerHTML = s.rows.length < s.total
@@ -309,12 +309,12 @@
             ? '<img src="' + LC.esc(MEDIA + i.product.media) + '" alt="" loading="lazy" />'
             : LC.icon("box", "icon-sm");
           return '<div class="item-row"><div class="item-thumb">' + thumb + "</div><div>" +
-            '<div class="item-name">' + LC.esc(i.name || "") + "</div>" +
+            '<div class="item-name">' + LC.text(i.name || "") + "</div>" +
             (i.option ? '<div class="item-spec">옵션: ' + LC.esc(i.option) + "</div>" : "") +
-            (i.product ? '<div class="item-spec" style="color:var(--c-text-2)"><b>' + LC.esc(i.product.name) + "</b>" +
+            (i.product ? '<div class="item-spec" style="color:var(--c-text-2)"><b>' + LC.text(i.product.name) + "</b>" +
               (i.product.rating ? " · ★" + Number(i.product.rating).toFixed(1) : "") +
               (i.product.reviews ? " (" + LC.num(i.product.reviews) + ")" : "") + "</div>" : "") +
-            (specLine ? '<div class="item-spec">' + LC.esc(specLine) + "</div>" : "") +
+            (specLine ? '<div class="item-spec">' + LC.text(specLine) + "</div>" : "") +
             (i.product && i.product.url ? '<a href="' + LC.esc(i.product.url) + '" target="_blank" rel="noopener" style="font-size:11.5px;font-weight:700">다나와 스펙 보기</a>' : "") +
             "</div><div><div class=\"item-paid tnum\">" + LC.num(i.paid) + "원</div>" +
             '<div class="orow-meta">' + (i.qty || 1) + "개" + (i.unit ? " · 개당 " + LC.num(i.unit) + "원" : "") + "</div></div></div>";
@@ -429,7 +429,7 @@
       : r.state === "stale" ? '<span class="badge">' + Math.abs(dd) + "일 경과</span>"
       : dd === null ? '<span class="badge">주기 미상</span>' : '<span class="badge badge-blue">D-' + dd + "</span>";
     return '<button class="rcard" data-rebuy="' + LC.esc(r.id) + '"><div class="item-thumb">' + thumb + "</div><div style=\"min-width:0\">" +
-      '<div style="display:flex;gap:6px;align-items:flex-start"><div class="item-name" style="flex:1">' + LC.esc(r.label) + "</div>" + badge + "</div>" +
+      '<div style="display:flex;gap:6px;align-items:flex-start"><div class="item-name" style="flex:1">' + LC.text(r.label) + "</div>" + badge + "</div>" +
       '<div class="statline"><span>주기 <b>' + (r.cycle ? Math.round(r.cycle) + "일" : "–") + "</b></span>" +
       "<span>평균 <b>" + LC.num(r.avg) + "</b></span><span>최저 <b>" + LC.num(r.min) + "</b></span>" +
       (r.saving ? '<span style="color:var(--c-green-text)">절감 <b>' + r.savingPct + "%</b></span>" : "") + "</div>" +
