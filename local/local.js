@@ -121,22 +121,19 @@
   }
   function spark(points, w, h, color) {
     w = w || 74; h = h || 26;
-    // 74px 폭에는 점을 14개까지 줄여 그린다(일별 값을 그대로 그리면 빗살처럼 보인다).
     var raw = points.map(function (x) { return x.price; }).filter(function (x) { return typeof x === "number" && isFinite(x); });
-    var v = raw.length <= 14 ? raw : (function () {
-      var out = [], n = 14, len = raw.length;
-      for (var i = 0; i < n; i++) {
-        var a = Math.floor(i * len / n), b = Math.max(a + 1, Math.floor((i + 1) * len / n));
-        var seg = raw.slice(a, b);
-        // 구간 평균을 쓴다 — 하루짜리 특가를 최저값으로 집으면 스파크라인이 톱니처럼 보인다.
-        out.push(seg.length ? Math.round(seg.reduce(function (x, y) { return x + y; }, 0) / seg.length) : raw[Math.min(a, len - 1)]);
-      }
-      return out;
-    })();
-    if (v.length < 2) return '<svg class="spk" viewBox="0 0 ' + w + " " + h + '" aria-hidden="true"></svg>';
+    if (raw.length < 2) return '<svg class="spk" viewBox="0 0 ' + w + " " + h + '" aria-hidden="true"></svg>';
+    // 5일 이동평균으로 하루짜리 특가를 눌러 준 뒤 14점만 남긴다(그대로 그리면 톱니처럼 보인다).
+    var ma = raw.map(function (_, i) {
+      var a = Math.max(0, i - 2), b = Math.min(raw.length, i + 3), sum = 0, n = 0;
+      for (var k = a; k < b; k++) { sum += raw[k]; n++; }
+      return sum / n;
+    });
+    var n = Math.min(14, ma.length), v = [];
+    for (var i = 0; i < n; i++) v.push(ma[Math.round(i * (ma.length - 1) / Math.max(1, n - 1))]);
     var mn = Math.min.apply(null, v), mx = Math.max.apply(null, v);
     var x = function (i) { return (i / (v.length - 1) * (w - 2) + 1).toFixed(1); };
-    var y = function (p) { return (h - 2 - (h - 4) * (p - mn) / ((mx - mn) || 1)).toFixed(1); };
+    var y = function (p) { return (h - 2 - (h - 5) * (p - mn) / ((mx - mn) || 1)).toFixed(1); };
     var d = v.map(function (p, i) { return (i ? "L" : "M") + x(i) + "," + y(p); }).join("");
     return '<svg class="spk" viewBox="0 0 ' + w + " " + h + '" aria-hidden="true">' +
       '<path d="' + d + "L" + x(v.length - 1) + "," + h + "L1," + h + 'Z" fill="' + color + '" opacity=".12"/>' +
