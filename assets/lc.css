@@ -85,6 +85,8 @@ a:hover { text-decoration: underline; text-underline-offset: 2px; }
 @media (min-width: 360px) { .shell { --pad: 22px; } }
 @media (min-width: 768px) { .shell { --pad: 36px; } }
 @media (min-width: 1024px) { .shell { --pad: clamp(44px, 5vw, 80px); } }
+/* ⚠️ .shell과 함께 쓰는 블록(.hero · .sec · .grid-wrap 등)은 `padding` 단축 속성을 쓰지 않는다.
+   단축은 좌우 패딩을 0으로 덮어써 컨테이너 여백이 사라진다(v3.1.4에서 실제 원인이었음). */
 
 .topbar {
   position: sticky; top: 0; z-index: 40;
@@ -130,8 +132,8 @@ a:hover { text-decoration: underline; text-underline-offset: 2px; }
 .btn-icon { width: 38px; padding: 0; }
 
 /* ---------------------------------------------------------------- hero */
-.hero { padding: 22px 0 6px; }
-@media (min-width: 768px) { .hero { padding: 40px 0 10px; } }
+.hero { padding-top: 22px; padding-bottom: 6px; }
+@media (min-width: 768px) { .hero { padding-top: 40px; padding-bottom: 10px; } }
 
 /* 랜딩 히어로 — 카피 3줄 + 사진 VS 보드 */
 .hg { display: grid; gap: 22px; min-width: 0; align-items: center; }
@@ -310,8 +312,8 @@ a:hover { text-decoration: underline; text-underline-offset: 2px; }
 .tip-pop[data-theme="light"] { background: var(--c-surface); color: var(--c-text); border: 1px solid var(--c-border); }
 .tip-pop.on { opacity: 1; transform: none; }
 
-.sec { padding: 44px 0 0; }
-@media (min-width: 768px) { .sec { padding: 68px 0 0; } }
+.sec { padding-top: 44px; }
+@media (min-width: 768px) { .sec { padding-top: 68px; } }
 .sec-head { display: flex; align-items: center; gap: 7px; margin-bottom: 14px; min-width: 0; }
 .sec-head h2 { margin: 0; font-size: 21px; font-weight: 900; letter-spacing: -.04em; }
 @media (min-width: 768px) { .sec-head h2 { font-size: 29px; } }
@@ -319,7 +321,7 @@ a:hover { text-decoration: underline; text-underline-offset: 2px; }
 .sec-sub { font-size: 12px; color: var(--c-text-3); font-weight: 600; }
 
 /* ---------------------------------------------------------------- product grid */
-.grid-wrap { padding: var(--s4) 0 var(--s10); }
+.grid-wrap { padding-top: var(--s4); padding-bottom: var(--s10); }
 .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 10px; }
 @media (min-width: 640px) { .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px 14px; } }
 @media (min-width: 1000px) { .grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 26px 16px; } }
