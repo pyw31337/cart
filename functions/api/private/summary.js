@@ -33,8 +33,10 @@ export async function onRequestGet(context) {
       db.prepare(`SELECT a.product_id, a.match_product_id, a.market_code, a.buy_count, a.avg_cycle_days,
                          a.last_bought, a.next_expected, a.avg_price_krw, a.min_price_krw, a.max_price_krw,
                          a.target_price_krw, a.alert_state,
+                         p.canonical_name,
                          s.low_price_krw, s.rating, s.review_count
                   FROM rebuy_alerts a
+                  LEFT JOIN products p ON p.product_id = a.match_product_id
                   LEFT JOIN danawa_specs s ON s.product_id = a.match_product_id
                   ORDER BY CASE WHEN a.next_expected IS NULL THEN 1 ELSE 0 END, a.next_expected ASC`),
       db.prepare(`SELECT * FROM market_collection_status ORDER BY market_code`),
@@ -81,7 +83,7 @@ export async function onRequestGet(context) {
       const d = a.next_expected ? dayOf(a.next_expected.slice(0, 10)) : null;
       const row = Object.assign({}, a, {
         days_left: d,
-        label: a.product_id,
+        label: a.canonical_name || a.product_id,
         low_price_krw: a.low_price_krw,
       });
       if (d !== null && d >= -30 && d <= 21) due.push(row);
