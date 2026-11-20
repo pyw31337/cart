@@ -699,3 +699,14 @@ a:hover { text-decoration: underline; text-underline-offset: 2px; }
   .sample-canvas .rv-card-body { padding: 8px 10px 9px; }
   .sample-canvas .rv-card-name { font-size: 11.5px; }
 }
+
+/* 샘플 캔버스 — 넓은 화면에서 사진과 숫자를 좌우로 */
+@media (min-width: 900px) {
+  .sample-canvas .rv-hero { display: grid; grid-template-columns: 440px minmax(0, 1fr); column-gap: 22px; }
+  .sample-canvas .rv-hero-top { grid-column: 1 / -1; }
+  .sample-canvas .rv-hero-stage { grid-column: 1; }
+  .sample-canvas .rv-hero-facts { grid-column: 2; flex-direction: column; align-items: flex-start;
+    justify-content: center; gap: 8px; margin: 12px 0 0; }
+  .sample-canvas .rv-hero-facts .save { margin-left: 0; }
+  .sample-canvas .rv-hero-mine { grid-column: 1 / -1; }
+}
