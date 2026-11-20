@@ -78,9 +78,13 @@ a:hover { text-decoration: underline; text-underline-offset: 2px; }
 .icon-lg { width: 22px; height: 22px; }
 
 /* ---------------------------------------------------------------- layout */
-.shell { width: 100%; max-width: 1240px; margin: 0 auto; padding: 0 var(--pad); --pad: 12px; }
-@media (min-width: 375px) { .shell { --pad: 16px; } }
-@media (min-width: 768px) { .shell { --pad: 24px; } }
+/* 컨테이너 — 모든 해상도에서 양끝 여백을 LDS v2.5.0 기준(모바일 18~22px, 태블릿 36px,
+   데스크톱 44~80px)으로 확보한다. 배경이 꽉 차야 하는 .topbar · .filterbar는 100% 폭을 유지하고
+   내부에서 이 .shell로 정렬을 맞춘다. */
+.shell { width: 100%; max-width: 1380px; margin: 0 auto; padding: 0 var(--pad); --pad: 18px; }
+@media (min-width: 360px) { .shell { --pad: 22px; } }
+@media (min-width: 768px) { .shell { --pad: 36px; } }
+@media (min-width: 1024px) { .shell { --pad: clamp(44px, 5vw, 80px); } }
 
 .topbar {
   position: sticky; top: 0; z-index: 40;
@@ -126,8 +130,8 @@ a:hover { text-decoration: underline; text-underline-offset: 2px; }
 .btn-icon { width: 38px; padding: 0; }
 
 /* ---------------------------------------------------------------- hero */
-.hero { padding: 20px 0 4px; }
-@media (min-width: 768px) { .hero { padding: 34px 0 8px; } }
+.hero { padding: 22px 0 6px; }
+@media (min-width: 768px) { .hero { padding: 40px 0 10px; } }
 
 /* 랜딩 히어로 — 카피 3줄 + 사진 VS 보드 */
 .hg { display: grid; gap: 22px; min-width: 0; align-items: center; }
@@ -306,8 +310,8 @@ a:hover { text-decoration: underline; text-underline-offset: 2px; }
 .tip-pop[data-theme="light"] { background: var(--c-surface); color: var(--c-text); border: 1px solid var(--c-border); }
 .tip-pop.on { opacity: 1; transform: none; }
 
-.sec { padding: 32px 0 0; }
-@media (min-width: 768px) { .sec { padding: 52px 0 0; } }
+.sec { padding: 44px 0 0; }
+@media (min-width: 768px) { .sec { padding: 68px 0 0; } }
 .sec-head { display: flex; align-items: center; gap: 7px; margin-bottom: 14px; min-width: 0; }
 .sec-head h2 { margin: 0; font-size: 21px; font-weight: 900; letter-spacing: -.04em; }
 @media (min-width: 768px) { .sec-head h2 { font-size: 29px; } }
