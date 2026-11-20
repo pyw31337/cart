@@ -15,6 +15,18 @@
 
   var $ = function (id) { return document.getElementById(id); };
 
+  var MARKET_FALLBACK = {
+    coupang: "쿠팡", kurly: "컬리", gmarket: "지마켓", naver: "네이버쇼핑", "11st": "11번가",
+    aliexpress: "알리익스프레스", lotteon: "롯데온", ohou: "오늘의집", temu: "테무", gsshop: "GS SHOP",
+    ssg: "SSG닷컴", amazon: "아마존", malltail: "몰테일", auction: "옥션", wemakeprice: "위메프",
+    tmon: "티몬", interpark: "인터파크", emart: "이마트몰", homeplus: "홈플러스", lotte_hs: "롯데홈쇼핑"
+  };
+  function marketName(code) {
+    var ms = (state.summary && state.summary.markets) || [];
+    for (var i = 0; i < ms.length; i++) if (ms[i].code === code) return ms[i].name;
+    return MARKET_FALLBACK[code] || code || "–";
+  }
+
   /* ------------------------------------------------------------- gate */
   function gate(title, msg, extra) {
     $("app").hidden = true;
@@ -270,7 +282,7 @@
       var dd = o.date ? o.date.slice(5).replace("-", ".") : "";
       return '<button class="orow" data-order="' + i + '"><div class="orow-top">' +
         '<span class="orow-date">' + (o.date || "") + "</span>" +
-        '<span class="mk" style="--dc:' + o.color + '"><i></i>' + LC.esc(o.market) + "</span>" +
+        '<span class="mk" style="--dc:' + o.color + '"><i></i>' + LC.esc(marketName(o.market)) + "</span>" +
         (o.status ? '<span class="badge">' + LC.esc(o.status) + "</span>" : "") +
         (o.ledger.length ? '<span class="badge badge-green">가계부 대조</span>' : "") +
         "</div><div class=\"orow-right\" style=\"grid-row:span 2\"><div class=\"orow-total tnum\">" + LC.num(o.total) + "원</div>" +
@@ -305,7 +317,7 @@
             (specLine ? '<div class="item-spec">' + LC.esc(specLine) + "</div>" : "") +
             (i.product && i.product.url ? '<a href="' + LC.esc(i.product.url) + '" target="_blank" rel="noopener" style="font-size:11.5px;font-weight:700">다나와 스펙 보기</a>' : "") +
             "</div><div><div class=\"item-paid tnum\">" + LC.num(i.paid) + "원</div>" +
-            '<div class="orow-meta">' + (i.qty || 1) + "개" + (i.unit ? " · 개당 " + LC.num(i.unit) : "") + "</div></div></div>";
+            '<div class="orow-meta">' + (i.qty || 1) + "개" + (i.unit ? " · 개당 " + LC.num(i.unit) + "원" : "") + "</div></div></div>";
         }).join("");
 
         var led = o.ledger.length
@@ -316,7 +328,7 @@
           }).join("<br>") + "</div>"
           : '<div class="unmatched-box">가계부에서 이 주문을 찾지 못했습니다. 가계부는 결제·묶음 단위로 기록되어 10% 안팎만 대조됩니다.</div>';
 
-        b.innerHTML = '<div class="mk" style="--dc:' + o.color + ';margin-bottom:10px"><i></i>' + LC.esc(o.market) +
+        b.innerHTML = '<div class="mk" style="--dc:' + o.color + ';margin-bottom:10px"><i></i>' + LC.esc(marketName(o.market)) +
           " · 주문번호 " + LC.esc(o.no || "") + "</div>" + rows +
           '<div class="section"><div class="section-head"><h3>가계부 대조</h3></div>' + led + "</div>" +
           '<div class="section"><div class="note">당시 구매가는 주문 라인 결제액이고, 스펙·사진은 같은 상품으로 매칭된 다나와 정보입니다. ' +
@@ -359,7 +371,7 @@
     $("lList").innerHTML = s.rows.length ? s.rows.map(function (r, i) {
       return '<button class="orow" data-ledger="' + i + '" style="grid-template-columns:minmax(0,1fr) auto">' +
         '<div class="orow-top"><span class="orow-date">' + r.date + '</span><span class="mk" style="--dc:' + r.color + '"><i></i>' +
-        LC.esc(r.market) + "</span>" + (r.order ? '<span class="badge badge-green">주문 대조</span>' : '<span class="badge">미대조</span>') +
+        LC.esc(marketName(r.market)) + "</span>" + (r.order ? '<span class="badge badge-green">주문 대조</span>' : '<span class="badge">미대조</span>') +
         '</div><div class="orow-right" style="grid-row:span 2"><div class="orow-total tnum">' + LC.num(r.amount) + "원</div>" +
         '<div class="orow-meta">' + (r.category || "") + "</div></div>" +
         '<div class="orow-items">' + LC.esc(r.item || "") + "</div></button>";
@@ -377,7 +389,7 @@
       subtitle: r.date + " · " + LC.num(r.amount) + "원",
       render: function (b) {
         var rows = [
-          ["마켓", r.market], ["분류", r.category || "–"], ["결제수단", r.payment || "–"],
+          ["마켓", marketName(r.market)], ["분류", r.category || "–"], ["결제수단", r.payment || "–"],
           ["금액", LC.num(r.amount) + "원"], ["분류 신뢰도", r.confidence != null ? Math.round(r.confidence * 100) + "%" : "–"]
         ].map(function (x) {
           return '<div class="spec-row"><div class="k">' + x[0] + '</div><div class="v">' + LC.esc(x[1]) + "</div></div>";
