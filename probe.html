@@ -1,0 +1,34 @@
+<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>렛츠카트 레이아웃 프로브</title>
+<style>body{margin:0;font:12px/1.4 sans-serif;background:#111;color:#9EFF00}
+.row{display:flex;gap:12px;padding:8px;align-items:flex-start}
+iframe{border:1px solid #444;background:#fff;height:900px}
+h3{color:#fff;font-size:12px;margin:8px 0 4px}</style></head><body>
+<div id="out" style="padding:8px;white-space:pre-wrap"></div>
+<div class="row">
+  <div><h3>/ 320</h3><iframe id="a" src="/?probe=1" width="320" height="1400"></iframe></div>
+  <div><h3>/ 1280</h3><iframe id="b" src="/?probe=1" width="1280" height="1400"></iframe></div>
+</div>
+<div class="row">
+  <div><h3>/local/ 320</h3><iframe id="c" src="/local/?probe=1" width="320" height="1400"></iframe></div>
+  <div><h3>/local/ 1280</h3><iframe id="d" src="/local/?probe=1" width="1280" height="1400"></iframe></div>
+</div>
+<script>
+var lines=[];
+function scan(id){
+  var f=document.getElementById(id);
+  try{
+    var d=f.contentDocument, w=f.contentWindow;
+    var de=d.documentElement, over=[];
+    d.querySelectorAll('*').forEach(function(el){
+      var r=el.getBoundingClientRect();
+      if(r.width>0 && r.right>de.clientWidth+1 && getComputedStyle(el).position!=='fixed'){
+        over.push(el.tagName+'.'+(el.className&&el.className.baseVal===undefined?String(el.className).split(' ')[0]:'')+':'+Math.round(r.right));
+      }
+    });
+    lines.push(id+' url='+(w.location.pathname+w.search)+' clientWidth='+de.clientWidth+' scrollWidth='+de.scrollWidth+' overflow='+over.slice(0,6).join(', '));
+  }catch(e){ lines.push(id+' ERR '+e.message); }
+  document.getElementById('out').textContent=lines.join('\n');
+}
+setTimeout(function(){['a','b','c','d'].forEach(scan);},2500);
+</script></body></html>
