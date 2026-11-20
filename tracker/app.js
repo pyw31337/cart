@@ -569,7 +569,7 @@
   setupEvents();
   render();
 
-  fetch('data.json')
+  fetch('../data.json')
     .then(function (r) { return r.ok ? r.json() : null; })
     .then(function (d) {
       if (Array.isArray(d) && d.length) {

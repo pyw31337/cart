@@ -1,141 +1,124 @@
-# 통합 가격 트래커 디자인 시스템 & 스타일 가이드 (Ver 1.1)
+# 렛츠카트 디자인 시스템 & 스타일 가이드 (Ver 2.0)
 
-본 스타일 가이드는 **Toss Design System (TDS)**의 시맨틱 컬러·타이포그래피 위계 체계와 **당근 SEED Design System**의 4px 기반 스페이싱·토큰 명명 규칙, 그리고 **폴센트(Pollcent)**의 가격 추이·최저가 판단 UX를 결합해 설계했습니다.
-
-Ver 1.1(2026-11-19)에서 쿠팡 단일 플랫폼에서 **쿠팡 · 컬리 · 지마켓 · 네이버쇼핑 4개 플랫폼 통합**으로 확장하면서 **플랫폼 필터 탭 · 플랫폼 배지 · 품절 배지 · 교차구매 태그**를 추가했습니다.
-
----
-
-## 1. 핵심 원칙 (Design Principles)
-1. **Zero System UI**: OS/브라우저 기본 폰트(`system-ui`, `-apple-system`), 기본 `<select>`, `alert()`, `confirm()`, `prompt()`를 일체 사용하지 않습니다.
-2. **Cross-Browser Uniformity**: Safari(iOS/macOS), Chrome, Samsung Internet, Naver Whale 모두에서 동일한 폰트·박스 모델·버튼 외형·스크롤·차트가 렌더되도록 웹폰트와 Appearance 리셋을 강제합니다.
-3. **320px-First Fluid Grid**: 최소 가로폭 **320px**부터 데스크톱 **1280px+**까지 어떤 해상도에서도 가로 스크롤(`overflow-x`)이나 텍스트 겹침·버튼 잘림이 발생하지 않습니다.
-4. **Data-First Hierarchy**: 가격 숫자는 모두 고정폭 숫자(`tabular-nums`)를 적용해 카드 간 비교 시 자릿수가 흔들리지 않게 정렬합니다.
+Ver 1.1(2026-11-19)의 4개 플랫폼 가격 트래커 스타일을 **상품 카탈로그 + 개인 지출 허브**로 확장한 판본입니다.
+Toss Design System(TDS)의 시맨틱 컬러·타이포 위계, 당근 SEED의 4px 스페이싱·토큰 명명, 폴센트의 가격 추이 UX를 기준으로 합니다.
 
 ---
 
-## 2. 타이포그래피 (Typography — TDS & SEED 기반)
+## 1. 원칙
 
-### 폰트 패밀리 (System Font 배제)
-- **Primary**: `'Pretendard Variable', 'Pretendard', 'Noto Sans KR', sans-serif` (jsDelivr Dynamic Subset CDN 로드)
-- **Numeric / Price**: `font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;`
-- **Scale Locking**: `-webkit-text-size-adjust: 100%; text-size-adjust: 100%;` (iOS Safari·삼성 브라우저 임의 확대 차단)
-
-### 타입 스케일 토큰
-| 토큰 | 크기 (320px / PC) | 행간 (Line Height) | 굵기 | 용도 |
-|---|---|---|---|---|
-| `--type-display` | 22px / 26px | 1.30 | 800 | 상단 핵심 KPI, 서비스 메인 타이틀 |
-| `--type-price-lg` | 20px / 22px | 1.25 | 800 | 카드 대표 가격 (`tabular-nums`) |
-| `--type-h2` | 17px / 18px | 1.35 | 700 | 모달/바텀시트 제목, 섹션 헤더 |
-| `--type-title` | 15px / 16px | 1.40 | 700 | 상품 카드명 (최대 2줄 말줄임 지원) |
-| `--type-body` | 14px / 14px | 1.50 | 400~500 | 입력 폼, 본문 안내 |
-| `--type-sub` | 12.5px / 13px | 1.45 | 500 | 부가 설명, 주기 정보, 버튼 |
-| `--type-caption` | 11px / 11.5px | 1.35 | 600 | 뱃지, 차트 축/라벨, 스탯 라벨 |
+1. **Zero System UI** — `<select>`, `alert()`, `confirm()`, `prompt()`를 쓰지 않습니다. 필터·정렬·기간·상세는 모두 커스텀 칩/드롭다운/바텀시트/드로어로 구현합니다.
+2. **320px 무결성** — 최소 320px부터 1240px 컨테이너까지 가로 스크롤 0, 텍스트 겹침 0, 버튼 잘림 0. 320px에서는 카드가 가로형(썸네일 92px + 본문)으로 전환됩니다.
+3. **숫자 위계** — 금액은 전부 `tabular-nums`. 카드 가격 17px/800, 상세 대표가 26px/800, KPI 21~24px/800.
+4. **한 화면 한 결정** — 목록은 "무엇을 살까", 상세는 "언제 살까"(가격 이력·주기·목표가)에 집중합니다.
+5. **깔끔한 표면 계층** — canvas `#F2F4F8` → surface `#FFF` → subtle `#F8F9FB`. 그림자는 3단계(카드/플로팅/모달)만 사용합니다.
 
 ---
 
-## 3. 컬러 시스템 (Color Tokens — TDS OKLCH 균일 명도 + SEED 팔레트)
+## 2. 토큰
 
-### Neutral (표면 & 텍스트)
-- `--color-bg-canvas`: `#F4F6F9` (앱 전체 배경)
-- `--color-bg-surface`: `#FFFFFF` (카드, 모달, 입력창)
-- `--color-bg-subtle`: `#F8F9FB` (스탯 박스, 차트 내부 배경)
-- `--color-bg-hover`: `#EEF1F6` (보조 버튼 호버)
-- `--color-border-default`: `#E5E8EB` (기본 1px 외곽선)
-- `--color-border-strong`: `#D1D6DB` (입력창 호버·구분선)
-- `--color-text-primary`: `#191F28` (주 제목, 가격)
-- `--color-text-secondary`: `#4E5968` (설명, 본문)
-- `--color-text-tertiary`: `#8B95A1` (라벨, 비활성)
-
-### Semantic (의미 & 상태)
-- **Brand / Action (`Blue`)**:
-  - `--color-brand`: `#3182F6`
-  - `--color-brand-hover`: `#1B64DA`
-  - `--color-brand-weak`: `#E8F3FF`
-- **Buy Signal / Lowest (`Green`)**:
-  - `--color-success`: `#0CA678`
-  - `--color-success-text`: `#087F5B`
-  - `--color-success-weak`: `#E6FCF5`
-- **Wait / Approaching (`Amber`)**:
-  - `--color-warning`: `#F08C00`
-  - `--color-warning-text`: `#D9480F`
-  - `--color-warning-weak`: `#FFF4E6`
-- **High Price / Danger (`Red`)**:
-  - `--color-danger`: `#F03E3E`
-  - `--color-danger-text`: `#C92A2A`
-  - `--color-danger-weak`: `#FFF5F5`
-
----
-
-## 4. 여백 & 레이아웃 그리드 (Spacing & Breakpoints — SEED 4px 그리드)
-
-### 스페이싱 토큰
-- `--space-1`: `4px` / `--space-1_5`: `6px` / `--space-2`: `8px` / `--space-3`: `12px` / `--space-4`: `16px` / `--space-5`: `20px` / `--space-6`: `24px` / `--space-8`: `32px`
-- `--gutter-xs`: `12px` (320px~374px)
-- `--gutter-sm`: `16px` (375px~767px)
-- `--gutter-lg`: `24px` (768px+)
-
-### 라운드 & 엘리베이션
-- `--radius-sm`: `8px` (뱃지, 소형 버튼)
-- `--radius-md`: `12px` (입력창, 스탯 박스, 칩)
-- `--radius-lg`: `16px` (상품 카드, 배너)
-- `--radius-xl`: `22px` (모달, 바텀시트)
-- `--radius-pill`: `9999px` (필터 칩, 토스트)
-- `--shadow-card`: `0 2px 10px rgba(25, 31, 40, 0.045)`
-- `--shadow-modal`: `0 16px 40px rgba(25, 31, 40, 0.16)`
-
-### 반응형 브레이크포인트 (320px 무결성 보장)
-1. **320px ~ 374px (초소형 모바일 · Galaxy Fold 커버 / iPhone SE1)**
-   - 좌우 패딩 `12px`, KPI 3열 대신 상단 풀폭 1열 + 하단 2열(`2-row`)로 숫자 줄바꿈 방지
-   - 스탯 4칸 그리드는 **2×2 그리드**로 전환해 `역대 최저 / 평균 / 최고 / 목표가` 금액 잘림 원천 차단
-   - 카드 하단 액션 버튼은 줄바꿈 시 자연 정렬, 터치 영역 최소 높이 `40px` 확보
-2. **375px ~ 767px (일반 모바일)**
-   - 좌우 패딩 `16px`, KPI 3열, 스탯 4열, 1열 카드 리스트
-3. **768px ~ 1119px (태블릿 / 소형 랩톱)**
-   - 컨테이너 최대폭 `960px`, 상품 카드 **2열 그리드** (`grid-template-columns: repeat(2, minmax(0, 1fr))`)
-4. **1120px+ (PC 데스크톱)**
-   - 컨테이너 최대폭 `1200px`, 상품 카드 **2~3열 유동 그리드** (`repeat(auto-fill, minmax(350px, 1fr))`), 상단 툴바 1행 통합
-
----
-
-## 5. 크로스 브라우저 & Zero System UI 구현 규칙
-1. **커스텀 셀렉트/피커**: 모달 내 플랫폼·카테고리 선택은 네이티브 `<select>` 대신 커스텀 칩/리스트 피커 버튼(`.custom-picker` + `.picker-option`)으로 구현.
-2. **커스텀 다이얼로그**: 목표가 수정, 삭제 확인, 피클 연동 복사 안내는 모두 전용 커스텀 모달/바텀시트 + 토스트로 처리 (`alert`/`confirm`/`prompt` 미사용).
-3. **Samsung Internet 다크모드/강제반전 방어**: `<meta name="color-scheme" content="light only">` 및 모든 surface에 명시적 배경·보더 선언.
-4. **iOS Safari 보정**: `100dvh` 모달 최대 높이, `env(safe-area-inset-bottom)` 하단 패딩, `font-size: 16px` 입력창(포커스 시 iOS 자동 줌 방지!).
-5. **터치 & 포커스**: `-webkit-tap-highlight-color: transparent`, `:focus-visible` 브랜드 컬러 아웃라인 적용.
-
----
-
-## 6. 4개 플랫폼 확장 규칙 (Ver 1.1)
-
-### 플랫폼 필터 탭 (`.platform-tabs` / `.platform-tab`)
-- 툴바 위 별도 행에 `전체 · 쿠팡 · 컬리 · 지마켓 · 네이버쇼핑` 탭을 가로 스크롤(`overflow-x: auto`, 스크롤바 숨김)으로 배치해 320px에서도 한 줄이 넘치지 않게 합니다.
-- 탭 높이 `38px`, 모서리 `--radius-pill`, 활성 탭은 `--color-text-primary` 배경 + 흰색 텍스트(TDS 세그먼트 패턴).
-- 각 탭 오른쪽에 해당 플랫폼 상품 수를 `.platform-count`(11px, `tabular-nums`)로 표시합니다.
-- 플랫폼 식별은 색 점(`.platform-dot`)으로만 하고, 배지 배경은 중립색을 유지해 상태 배지(매수 적기/대기/높음)와 색이 충돌하지 않게 합니다.
-
-| 플랫폼 | 점 색상 | 클래스 |
+### 컬러
+| 토큰 | 값 | 용도 |
 |---|---|---|
-| 쿠팡 | `#E52528` | `.dot-coupang` |
-| 컬리 | `#6B21A8` | `.dot-kurly` |
-| 지마켓 | `#0B8A4B` | `.dot-gmarket` |
-| 네이버쇼핑 | `#03C75A` | `.dot-naver` |
+| `--c-canvas` | `#F2F4F8` | 앱 배경 |
+| `--c-surface` | `#FFFFFF` | 카드·시트·입력 |
+| `--c-subtle` | `#F8F9FB` | 스탯 박스·차트 배경 |
+| `--c-border` / `--c-border-strong` | `#E5E8EB` / `#D1D6DB` | 1px 외곽선 |
+| `--c-text` / `-2` / `-3` | `#191F28` / `#4E5968` / `#8B95A1` | 제목·본문·라벨 |
+| `--c-blue` (+hover/weak) | `#3182F6` / `#1B64DA` / `#E8F3FF` | 브랜드·주요 CTA |
+| `--c-green` (+text/weak) | `#0CA678` / `#087F5B` / `#E6FCF5` | 최저가·절감·대조됨 |
+| `--c-amber` (+text/weak) | `#F08C00` / `#D9480F` / `#FFF4E6` | 도래 임박(D-14 이내) |
+| `--c-red` (+text/weak) | `#F03E3E` / `#C92A2A` / `#FFF5F5` | 도래·오류 |
+| `--c-violet` (+weak) | `#7048E8` / `#F3F0FF` | 분류·태그 |
 
-### 카드 배지 위계
-1. `.badge-platform` — 플랫폼(점 + 이름), 중립 배경 + 1px 보더
-2. 상태 배지 — `.badge-buy`(매수 적기) / `.badge-wait`(대기) / `.badge-high`(높음) / `.badge-soldout`(품절·판매중지, `--color-danger-weak`)
-3. `.badge` 카테고리 또는 `.badge-custom`(내가 추가함)
-4. `.badge-cross` — 교차구매(브랜드 블루 약배경)
-5. 재구매 주기 배지(D-n / 구매 주기 도래 / 다음 날짜)
+마켓 식별은 점(dot) 색으로만: 쿠팡 `#E52528`, 컬리 `#6B21A8`, 지마켓 `#0B8A4B`, 네이버 `#03C75A`, 롯데온 `#E60013`, 알리 `#FF4747`, GS SHOP `#0B5AA5`.
 
-### 교차구매 안내 (`.cross-note`)
-- 카드 제목 아래에 `--color-brand-weak` 배경의 11.5px 안내 박스로 다른 플랫폼의 구매·가격 정보를 표시합니다. 라벨 `.cross-note-label`은 브랜드 컬러 800 굵기.
-- 긴 상품명·메모는 모두 `overflow-wrap: anywhere`로 320px에서 가로 넘침을 막습니다.
+### 타이포
+| 역할 | 크기(320 / PC) | 굵기 | 행간 |
+|---|---|---|---|
+| 히어로 H1 | 22 / 30 | 800 | 1.3 |
+| KPI | 21 / 24 | 800 | 1.2 |
+| 상세 대표가 | 26 | 800 | 1.2 |
+| 카드 가격 | 17 | 800 | 1.25 |
+| 시트 제목 | 16 | 800 | 1.35 |
+| 카드 상품명 | 13.5 | 700 | 1.35 (2줄 말줄임) |
+| 본문 | 14 | 400~500 | 1.5 |
+| 보조 | 12.5 | 600 | 1.45 |
+| 캡션·배지 | 10.5~11.5 | 600~800 | 1.35 |
 
-### 품절 상태 원칙
-- `liveStatus === '품절'` 또는 `'판매중지'`이면 `getStatus()`가 가격 비교보다 먼저 품절 배지를 반환합니다. **가격이 목표가 이하여도 '매수 적기'로 표시하지 않습니다.**
-- 가격 출처 라벨에 `실시간 확인가 (2026-11-19) · 품절`처럼 상태를 함께 노출합니다.
+폰트: `Pretendard Variable`(jsDelivr dynamic subset). `system-ui` 미사용.
 
-### CTA 버튼
-- 플랫폼별 라벨: `쿠팡에서 보기` / `컬리에서 보기` / `지마켓에서 보기` / `네이버에서 보기`. 동일한 `.btn.btn-primary.btn-sm` 토큰을 사용하며 길이가 늘어나도 `.card-footer`의 `flex-wrap`으로 320px에서 다음 줄로 자연스럽게 내려갑니다.
+### 스페이싱·라운드·그림자
+- 4px 그리드: `4/6/8/12/16/20/24/32/40`
+- 라운드: `8`(배지) `10`(버튼) `12`(입력·칩·행) `16`(카드·패널) `22`(시트) `9999`(필터 칩)
+- 그림자: `--sh-card`(카드) `--sh-float`(드롭다운) `--sh-modal`(시트)
+
+---
+
+## 3. 레이아웃
+
+| 구간 | 컨테이너 | 좌우 패딩 | 그리드 |
+|---|---|---|---|
+| 320~374 | fluid | 12px | 카드 1열(가로형), KPI 2열 |
+| 375~429 | fluid | 16px | 카드 1열(가로형) |
+| 430~899 | fluid | 16px | 카드 2열(세로형), KPI 2→4열 |
+| 900~1179 | 1240 | 24px | 카드 3열, 상세는 우측 드로어(480px) |
+| 1180+ | 1240 | 24px | 카드 4열, 상세 우측 드로어 |
+
+상단 `--header-h: 60px` 고정. 필터바는 헤더 아래에 sticky(스크롤 시 `is-stuck` 그림자).
+
+---
+
+## 4. 컴포넌트
+
+### 4-1. 카탈로그 카드 (`.card`)
+- 320~429px: `grid-template-columns: 92px 1fr` 가로형. 썸네일 정사각, 본문은 분류 → 상품명(2줄) → 평점 → 가격 → 배지.
+- 430px+: 썸네일이 상단 정사각(1:1)으로 바뀌는 세로형.
+- 배지 순서: 추적중(파랑) → D-day(호박, 14일 내) → 절감(초록) → 최저가 판매처 수.
+- 호버: 테두리 `--c-border-strong`, 그림자 상승. 클릭: 전체 카드가 상세 드로어를 엽니다.
+
+### 4-2. 필터 바 (`.filterbar`)
+- 검색 입력(44px, 포커스 시 브랜드 링), 필터 버튼(44px 정사각).
+- 카테고리 칩 행: 가로 스크롤, 스크롤바 숨김, 선택 시 검정 배경 + 흰 글자.
+- 툴바: 결과 수 → 반복구매 칩 → 사진 칩 → 정렬 드롭다운(오른쪽 정렬).
+
+### 4-3. 커스텀 드롭다운 (`.dd`)
+버튼 `aria-expanded`, 메뉴 `role=menu`, 항목 `aria-checked`. 선택 항목은 파란 배경 + 체크 아이콘. 바깥 클릭·ESC로 닫힘.
+
+### 4-4. 시트/드로어 (`.sheet`)
+- 320~899px: 하단 바텀시트(상단 22px 라운드, `92dvh` 한도, grab handle, safe-area 패딩).
+- 900px+: 우측 드로어(480px, 전체 높이).
+- 헤더 고정 + 본문만 스크롤 + 푸터 고정(주 CTA). 배경 `backdrop`은 blur 2px.
+- 포커스 트랩, ESC 닫기, 닫힐 때 직전 포커스 복원.
+- 상세 구성: 썸네일+이름 → 가격 히어로(대표가 + 4칸 셀) → 절감 안내 → 가격 이력 차트 → 다나와 스펙표 → 마켓별 가격 → 메모.
+
+### 4-5. 가격 이력 차트
+- SVG 선 + 영역 그라디언트. 점은 최대 8개만(밀집 시 샘플링). 축 라벨은 시작/끝 날짜만 9px `#8B95A1`.
+- `role="img"` + `aria-label`. 표를 대체하지 않고 요약(최저/최고)을 범례로 함께 제공.
+
+### 4-6. KPI · 마켓 바 (개인 영역)
+- KPI 카드: 라벨 11.5px, 값 21~24px/800, 보조 11.5px. 첫 카드만 파란 그라디언트.
+- 마켓 바: 이름(76px) + 트랙(8px) + 값/보조 2줄. 마켓 컬러를 그대로 사용.
+
+### 4-7. 탭 · 세그먼트
+- 탭: 알약형 컨테이너 안에서 선택 시 검정 배경. 가로 스크롤 허용.
+- 세그먼트(기간·대조 여부): 30px 높이, 12px/700.
+
+---
+
+## 5. 크로스 브라우저
+
+- `color-scheme: light only`, `<meta name="theme-color" content="#ffffff">`.
+- iOS: 입력창 `font-size:16px`(자동 줌 방지), `env(safe-area-inset-bottom)`.
+- 삼성 인터넷 강제 다크모드 방어: 모든 surface에 명시적 배경/보더.
+- `-webkit-tap-highlight-color: transparent`, `:focus-visible` 2px 브랜드 아웃라인.
+- 아이콘은 인라인 SVG(스트로크 1.9, 24 그리드)만 사용하고 UI 크롬에 이모지를 쓰지 않습니다.
+
+---
+
+## 6. 접근성
+
+- 모든 인터랙션은 `button`/`a`. 카드도 `role="button"` + Enter 동작.
+- 시트는 `role="dialog" aria-modal="true"`, 제목 연결, 포커스 트랩.
+- 색만으로 상태를 전달하지 않고 배지 텍스트(D-12, 절감 37%)를 함께 표기.
+- `aria-live="polite"` 결과 수, 토스트는 `role="status"`.

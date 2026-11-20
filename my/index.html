@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light only" />
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>내 지출·재구매 허브 · 렛츠카트</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+  <link rel="stylesheet" href="../assets/lc.css" />
+  <link rel="stylesheet" href="my.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell topbar-in">
+      <a class="brand" href="../" style="color:inherit">
+        <div class="brand-mark" data-icon="cart" data-icon-class="icon-lg"></div>
+        <div class="brand-text">
+          <span class="brand-name">렛츠카트</span>
+          <span class="brand-sub">내 지출 · 재구매 허브</span>
+        </div>
+      </a>
+      <div class="topbar-spacer"></div>
+      <div class="topbar-actions">
+        <span class="userpill" id="who"><span data-icon="lock" data-icon-class="icon-sm"></span><span id="whoEmail">Access 확인 중…</span></span>
+      </div>
+    </div>
+  </header>
+
+  <main class="shell" style="padding-bottom:48px">
+    <div id="gate" hidden></div>
+
+    <div id="app" hidden>
+      <section class="kpis" id="kpis" style="margin-top:16px"></section>
+
+      <nav class="tabs" role="tablist" aria-label="내 지출 메뉴" style="margin-top:16px">
+        <button class="tab" role="tab" aria-selected="true" data-tab="dash"><span data-icon="trend" data-icon-class="icon-sm"></span>대시보드</button>
+        <button class="tab" role="tab" aria-selected="false" data-tab="orders"><span data-icon="receipt" data-icon-class="icon-sm"></span>주문 <span class="n" id="nOrders"></span></button>
+        <button class="tab" role="tab" aria-selected="false" data-tab="ledger"><span data-icon="wallet" data-icon-class="icon-sm"></span>가계부 <span class="n" id="nLedger"></span></button>
+        <button class="tab" role="tab" aria-selected="false" data-tab="rebuy"><span data-icon="refresh" data-icon-class="icon-sm"></span>재구매 <span class="n" id="nRebuy"></span></button>
+      </nav>
+
+      <section id="view-dash">
+        <div class="cols">
+          <div class="panel">
+            <div class="panel-head"><h3>마켓별 온라인 지출</h3><span class="hint" id="ledgerSpan"></span></div>
+            <div class="panel-body" id="bars"></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h3>절감 여지 TOP</h3><span class="hint">평균 구매가 − 최저 구매가</span></div>
+            <div class="panel-body" id="savings"></div>
+          </div>
+        </div>
+        <div class="cols">
+          <div class="panel">
+            <div class="panel-head"><h3>재구매 도래 임박</h3><span class="hint">다음 예상일 기준</span></div>
+            <div class="panel-body" id="dueList"></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h3>수집 상태와 한계</h3><span class="hint">마켓별</span></div>
+            <div class="panel-body" id="collection"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-orders" hidden>
+        <div class="toolbar">
+          <div class="row">
+            <div class="search" id="oSearchBox" style="flex:1 1 220px">
+              <span data-icon="search" data-icon-class="icon-sm" style="color:#8B95A1"></span>
+              <input id="oQ" type="search" placeholder="상품명·주문번호 검색" aria-label="주문 검색" />
+              <button type="button" class="search-clear" id="oQClear" aria-label="지우기"><span data-icon="close" data-icon-class="icon-sm"></span></button>
+            </div>
+            <div class="seg" id="oMatch" role="group" aria-label="매칭 여부">
+              <button data-value="all" aria-pressed="true">전체</button>
+              <button data-value="matched" aria-pressed="false">매칭</button>
+              <button data-value="unmatched" aria-pressed="false">미매칭</button>
+            </div>
+          </div>
+          <div class="chiprow" id="oMarkets" data-multi="false"></div>
+          <div class="row">
+            <div class="seg" id="oPeriod" role="group" aria-label="기간">
+              <button data-value="" aria-pressed="true">전체</button>
+              <button data-value="3m" aria-pressed="false">3개월</button>
+              <button data-value="1y" aria-pressed="false">1년</button>
+              <button data-value="3y" aria-pressed="false">3년</button>
+            </div>
+            <span class="result-count" id="oCount" style="margin-left:auto"></span>
+          </div>
+        </div>
+        <div class="olist" id="oList"></div>
+        <div class="loadmore" id="oMore"></div>
+      </section>
+
+      <section id="view-ledger" hidden>
+        <div class="toolbar">
+          <div class="row">
+            <div class="search" id="lSearchBox" style="flex:1 1 220px">
+              <span data-icon="search" data-icon-class="icon-sm" style="color:#8B95A1"></span>
+              <input id="lQ" type="search" placeholder="지출 항목·메모 검색" aria-label="가계부 검색" />
+              <button type="button" class="search-clear" id="lQClear" aria-label="지우기"><span data-icon="close" data-icon-class="icon-sm"></span></button>
+            </div>
+            <div class="seg" id="lMatch" role="group" aria-label="대조 여부">
+              <button data-value="all" aria-pressed="true">전체</button>
+              <button data-value="matched" aria-pressed="false">주문 대조됨</button>
+              <button data-value="unmatched" aria-pressed="false">미대조</button>
+            </div>
+          </div>
+          <div class="chiprow" id="lMarkets" data-multi="false"></div>
+          <div class="row"><span class="result-count" id="lCount" style="margin-left:auto"></span></div>
+        </div>
+        <div class="olist" id="lList"></div>
+        <div class="loadmore" id="lMore"></div>
+      </section>
+
+      <section id="view-rebuy" hidden>
+        <div class="panel" style="margin-bottom:12px">
+          <div class="panel-head"><h3>재구매 요약</h3><span class="hint" id="rebuyHint"></span></div>
+          <div class="panel-body" id="rebuySummary"></div>
+        </div>
+        <div class="section-head" style="margin:18px 0 8px"><h3 style="font-size:14px">구매주기 도래·임박</h3></div>
+        <div class="rgrid" id="rebuyDue"></div>
+        <div class="section-head" style="margin:22px 0 8px"><h3 style="font-size:14px">절감 여지 순</h3></div>
+        <div class="rgrid" id="rebuySaving"></div>
+        <div class="section-head" style="margin:22px 0 8px"><h3 style="font-size:14px">전체 상품군</h3></div>
+        <div class="rgrid" id="rebuyAll"></div>
+      </section>
+
+      <footer class="footer">
+        <div>모든 수치는 <code>letscart</code> D1 데이터베이스에서 Cloudflare Access 인증 후 서버에서 계산됩니다. 브라우저에는 결과만 전달됩니다.</div>
+        <div><a href="../">공개 카탈로그로</a></div>
+      </footer>
+    </div>
+  </main>
+
+  <script src="../assets/lc.js"></script>
+  <script src="my.js"></script>
+</body>
+</html>
