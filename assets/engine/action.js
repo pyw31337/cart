@@ -167,13 +167,16 @@
     return I.unitPrice(name, price, qty || 1);
   }
 
-  /** 내가 산 규격보다 지금 등록된 규격이 작으면 슈링크플레이션 신호로 돌려준다. */
+  /** 내가 산 규격보다 지금 등록된 규격이 작으면 슈링크플레이션 신호로 돌려준다.
+      묶음 수(2개·4개)가 다르면 같은 상품 비교가 아니므로 판단하지 않는다. */
   function shrinkOf(mineName, nowTitle) {
     var I = root.LetsCartInsights || root.LetsBuyInsights;
     if (!I || !I.sizeOf || !nowTitle) return null;
     var a = I.sizeOf(mineName), b = I.sizeOf(nowTitle);
-    if (!a || !b || a.unit !== b.unit || !(b.total < a.total)) return null;
-    return { pct: Math.round((1 - b.total / a.total) * 100), before: a, after: b };
+    if (!a || !b || a.unit !== b.unit) return null;
+    if ((a.cnt || 1) !== (b.cnt || 1)) return null;
+    if (!(b.amt < a.amt * 0.98)) return null;
+    return { pct: Math.round((1 - b.amt / a.amt) * 100), before: a, after: b };
   }
 
   /**

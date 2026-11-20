@@ -122,12 +122,14 @@
   function spark(points, w, h, color) {
     w = w || 74; h = h || 26;
     // 74px 폭에는 점을 14개까지 줄여 그린다(일별 값을 그대로 그리면 빗살처럼 보인다).
-    var raw = points.map(function (x) { return x.price; });
+    var raw = points.map(function (x) { return x.price; }).filter(function (x) { return typeof x === "number" && isFinite(x); });
     var v = raw.length <= 14 ? raw : (function () {
-      var out = [], step = raw.length / 14;
-      for (var i = 0; i < 14; i++) {
-        var a = Math.floor(i * step), b = Math.max(a + 1, Math.floor((i + 1) * step));
-        out.push(Math.min.apply(null, raw.slice(a, b)));
+      var out = [], n = 14, len = raw.length;
+      for (var i = 0; i < n; i++) {
+        var a = Math.floor(i * len / n), b = Math.max(a + 1, Math.floor((i + 1) * len / n));
+        var seg = raw.slice(a, b);
+        // 구간 평균을 쓴다 — 하루짜리 특가를 최저값으로 집으면 스파크라인이 톱니처럼 보인다.
+        out.push(seg.length ? Math.round(seg.reduce(function (x, y) { return x + y; }, 0) / seg.length) : raw[Math.min(a, len - 1)]);
       }
       return out;
     })();
