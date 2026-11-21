@@ -109,6 +109,8 @@ export async function onRequestGet(context) {
         matched, matchPct: ledgerRows ? Math.round((1000 * matched) / ledgerRows) / 10 : 0,
         rebuy: (alerts.results || []).length,
         dueSoon: due.filter((x) => x.days_left !== null && x.days_left <= 14).length,
+        dueAll: due.length,
+        unknownCycle: (alerts.results || []).length - due.length - overdue,
         overdue,
         savingPotential: savings.reduce((s, x) => s + x.saving, 0),
         firstLedger: (ledger.results || []).map((r) => r.first).filter(Boolean).sort()[0] || null,

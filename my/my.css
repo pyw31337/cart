@@ -128,6 +128,9 @@
   background: radial-gradient(circle, rgba(132, 240, 0, .22), transparent 70%); pointer-events: none; }
 @media (min-width: 860px) { .rhythm-card { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); align-items: center; padding: 22px 24px; } }
 .rhythm-k { display: flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 800; color: var(--c-lime-strong); }
+.rhythm-k .info { color: rgba(255, 255, 255, .5); }
+.rhythm-k .info:hover { color: #fff; background: rgba(255, 255, 255, .12); }
+.rhythm-k .info[aria-expanded="true"] { color: var(--c-ink); background: var(--c-lime-strong); }
 .rhythm-v { font-size: 46px; font-weight: 800; letter-spacing: -.05em; line-height: 1.05; margin: 6px 0 2px; color: var(--c-lime-strong); }
 .rhythm-v small { font-size: 14px; color: rgba(255, 255, 255, .55); margin-left: 4px; letter-spacing: 0; }
 .rhythm-lanes { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
@@ -139,9 +142,13 @@
   border-radius: var(--r-lg); overflow: hidden; }
 .rhythm-stats .rs { background: rgba(255, 255, 255, .06); padding: 11px 12px; min-width: 0; }
 .rhythm-stats span { font-size: 10.5px; font-weight: 700; color: rgba(255, 255, 255, .55); display: block; }
-.rhythm-stats b { display: block; font-size: 17px; font-weight: 800; letter-spacing: -.03em; color: var(--c-lime-strong); margin-top: 2px; }
+.rhythm-stats b { display: block; font-size: 17px; font-weight: 800; letter-spacing: -.03em; color: var(--c-lime-strong); margin-top: 2px;
+  white-space: nowrap; font-variant-numeric: tabular-nums; }
 .rhythm-stats em { display: block; font-size: 10px; color: rgba(255, 255, 255, .4); font-style: normal; margin-top: 2px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rhythm-note { font-size: 10.5px; font-weight: 600; color: rgba(255, 255, 255, .45); line-height: 1.5; margin-top: 8px; }
+.board-note { font-size: 11px; font-weight: 600; color: var(--c-text-3); line-height: 1.55; margin-top: 10px; padding-top: 9px;
+  border-top: 1px dashed var(--c-border); }
 
 .lanes { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
 @media (min-width: 860px) { .lanes { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
@@ -163,14 +170,25 @@
 @media (min-width: 1080px) { .rival-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 .rival-grid .rv-tile { box-shadow: var(--sh-card); }
 
-/* 320px 세부 보정 */
+/* 320px 세부 보정 — 히어로 스텟: 2열(세 번째는 한 줄 전체)로 숫자·캡션이 쪼개지지 않게 */
 @media (max-width: 430px) {
   .kpi-v { font-size: 17px; letter-spacing: -.04em; white-space: nowrap; }
   .kpi-v small { font-size: 9.5px; }
-  .rhythm-stats em { white-space: normal; }
-  .rhythm-card { padding: 15px; }
+  .rhythm-card { padding: 14px; gap: 12px; }
+  .rhythm-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .rhythm-stats .rs { padding: 9px 9px; }
+  .rhythm-stats .rs:last-child { grid-column: 1 / -1; }
+  .rhythm-stats b { font-size: clamp(13px, 4.4vw, 16px); letter-spacing: -.035em; }
+  .rhythm-stats em { font-size: 9.5px; }
+  .rhythm-stats span { font-size: 10px; }
+  .rhythm-note { font-size: 10px; }
+  .rhythm-lanes .lane { font-size: 10.5px; padding: 4px 9px; }
   .userpill { max-width: 38vw; }
   .userpill span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+}
+@media (max-width: 360px) {
+  .rhythm-stats b { font-size: 13px; }
+  .rhythm-v { font-size: 40px; }
 }
 
 /* v3.1 — ⓘ 툴팁·한 줄 상태 */
@@ -178,3 +196,5 @@
   color: var(--c-text-3); margin: -2px 0 12px; }
 .rv-mode b { color: var(--c-text); font-weight: 800; }
 .panel-head .info { margin-left: 2px; }
+.statline.verdicts { gap: 6px 12px; }
+.statline.verdicts span { white-space: nowrap; }

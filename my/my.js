@@ -83,22 +83,27 @@
     var by = { buy: [], soon: [], due: [], wait: [], ok: [] };
     rows.forEach(function (r) {
       var a = actOf(r);
-      if (!a) return;
-      (by[a.verdict.k] || by.ok).push({ r: r, a: a });
+      var k = (a && a.verdict && a.verdict.k) || "ok";
+      (by[k] || by.ok).push({ r: r, a: a });
     });
+    var t = rhythmTally();
+    var counts = t ? t.by : null;
+    var totalN = t ? t.total : rows.length;
     $("actHint").textContent = LC.num(rows.length) === LC.num((d.rows || []).length)
-      ? LC.num(rows.length) + "개 상품군"
-      : LC.num(rows.length) + " / " + LC.num((d.rows || []).length) + "개 (정산·디지털 분리)";
-    var order = ["buy", "soon", "due", "wait"];
-    var labels = { buy: "지금 사세요", soon: "곧 떨어져요", due: "살 때 됐어요", wait: "기다리세요" };
-    var tone = { buy: "var(--c-green-text)", soon: "#1b64da", due: "var(--c-red-text)", wait: "var(--c-amber-text)" };
+      ? LC.num(rows.length) + "개 상품군 · 판정 합계 " + LC.num(totalN)
+      : LC.num(rows.length) + " / " + LC.num((d.rows || []).length) + "개 · 판정 합계 " + LC.num(totalN) + " (정산·디지털 분리)";
+    var order = ["buy", "soon", "due", "wait", "ok"];
+    var labels = { buy: "지금 사세요", soon: "곧 떨어져요", due: "살 때 됐어요", wait: "기다리세요", ok: "보통 가격" };
+    var tone = { buy: "var(--c-green-text)", soon: "#1b64da", due: "var(--c-red-text)", wait: "var(--c-amber-text)", ok: "var(--c-text-3)" };
     var top = [];
-    order.forEach(function (k) {
-      (by[k] || []).slice().sort(function (a, b) { return a.a.daysLeft - b.a.daysLeft; }).forEach(function (x) { top.push(x); });
+    ["buy", "soon", "due", "wait"].forEach(function (k) {
+      (by[k] || []).slice().sort(function (a, b) {
+        return (a.a ? a.a.daysLeft : a.r.daysLeft == null ? 9999 : a.r.daysLeft) - (b.a ? b.a.daysLeft : b.r.daysLeft == null ? 9999 : b.r.daysLeft);
+      }).forEach(function (x) { top.push(x); });
     });
     box.innerHTML =
-      '<div class="statline" style="gap:14px;font-size:12px;margin-bottom:8px">' + order.map(function (k) {
-        return "<span>" + labels[k] + " <b style=\"color:" + tone[k] + "\">" + (by[k] || []).length + "</b></span>";
+      '<div class="statline verdicts" style="gap:14px;font-size:12px;margin-bottom:8px">' + order.map(function (k) {
+        return "<span>" + labels[k] + ' <b class="tnum" style="color:' + tone[k] + '">' + (counts ? counts[k] : (by[k] || []).length) + "</b></span>";
       }).join("") + "</div>" +
       (top.length ? '<div class="mini-list">' + top.slice(0, 6).map(function (x) {
         return '<button class="mini" data-actrow="' + LC.esc(String(x.r.id)) + '"><span><span class="mini-t">' + LC.text(x.r.label) +
@@ -230,7 +235,7 @@
       { k: "온라인 지출 합계", v: LC.num(t.ledgerTotal) + "<small>원</small>", s: LC.num(t.ledgerRows) + "행 · " + LC.date(t.firstLedger) + "~", cls: "kpi-accent" },
       { k: "실주문", v: LC.num(t.orders) + "<small>건</small>", s: LC.num(t.items) + "라인 · " + LC.num(t.orderTotal) + "원" },
       { k: "가계부 ↔ 주문 대조", v: t.matchPct + "<small>%</small>", s: LC.num(t.matched) + " / " + LC.num(t.ledgerRows) + "행" },
-      { k: "재구매 상품군", v: LC.num(t.rebuy) + "<small>개</small>", s: "도래·임박 " + t.dueSoon + " · 장기 미구매 " + (t.overdue || 0) }
+      { k: "재구매 상품군", v: LC.num(t.rebuy) + "<small>개</small>", s: "도래·임박 " + (t.dueAll != null ? t.dueAll : t.dueSoon) + " · 그 밖 " + (t.overdue || 0) + " · 주기 미산출 " + (t.unknownCycle || 0) }
     ];
     $("kpis").innerHTML = cells.map(function (c) {
       return '<div class="kpi ' + (c.cls || "") + '"><div class="kpi-k">' + c.k + '</div>' +
@@ -329,73 +334,77 @@
     }).catch(function () {});
   }
 
-  function rhythmStats() {
-    var rows = state.rebuy ? state.rebuy.rows : [];
-    if (state.split) rows = rows.filter(function (r) { return !isNonSpend(r.danawaName || r.label); });
-    var buy = 0, due = 0, soon = 0, wait = 0, saving = 0, shrink = 0;
+  /* 히어로·보드·판정 패널이 함께 쓰는 유일한 집계.
+     판정 5상태 합계 = 추적 품목, 창(D-21 이내) 안의 3가지 = 이번 달 살 때 온 품목. */
+  function rhythmTally() {
+    if (!ACT || !ACT.tally || !state.rebuy) return null;
+    var rows = splitRows(state.rebuy.rows || []);
+    var t = ACT.tally(rows, actOf, { winDays: 21 });
+    var saving = 0, shrink = 0;
     rows.forEach(function (r) {
-      var a = actOf(r);
-      if (a && a.meta) {
-        if (a.meta.k === "buy" || a.k === "buy") buy++;
-        else if (a.meta.k === "due" || a.k === "due") due++;
-        else if (a.meta.k === "wait" || a.k === "wait") wait++;
-        else if (a.meta.k === "soon" || a.k === "soon") soon++;
-      }
       var dleft = r.daysLeft;
       if (dleft != null && dleft >= -30 && dleft <= 14 && r.saving > 0) saving += r.saving;
       var sh = shrinkOf(r);
       if (sh && sh.pct > 0) shrink++;
     });
-    return { buy: buy, due: due, soon: soon, wait: wait, saving: saving, shrink: shrink, total: rows.length };
+    t.saving = saving;
+    t.shrink = shrink;
+    return t;
   }
+
+  var RHYTHM_TIP = "이번 달 = 다음 구매 시점이 D-21 안으로 들어온 품목(아직 주기가 계산되지 않은 품목 포함). " +
+    "값이 확실히 싸면 ‘지금 사세요’, 주기가 왔고 값이 평소면 ‘살 때 됐어요’, 주기가 왔어도 값이 평균보다 높으면 ‘기다리세요’로 나눠 셉니다. " +
+    "셋을 더하면 위 숫자와 같습니다. 전체 추적 품목의 다섯 가지 판정(지금 사세요·곧 떨어져요·살 때 됐어요·기다리세요·보통 가격) 합계는 아래 ‘살 때 판정’에 있습니다.";
 
   function renderRhythm() {
     var box = $("rhythm");
     if (!box) return;
-    var st = rhythmStats();
-    var when = st.due + st.buy + st.soon;
-    var ready = !!state.rebuy;
-    var big = ready ? when : "–";
+    var t = rhythmTally();
+    var ready = !!t;
     var lane = function (cls, label, n) { return '<span class="lane ' + cls + '">' + label + ' <b>' + (ready ? n : "–") + '</b></span>'; };
     box.innerHTML = '<div class="rhythm-card">' +
       '<div class="rhythm-main">' +
-        '<div class="rhythm-k">' + LC.icon("clock", "icon-sm") + ' 이번 달 살 때 온 품목</div>' +
+        '<div class="rhythm-k">' + LC.icon("clock", "icon-sm") + ' 이번 달 살 때 온 품목' + LC.tip(RHYTHM_TIP, "이번 달 살 때 온 품목 기준", "light") + '</div>' +
         (ready
-          ? '<div class="rhythm-v tnum">' + big + '<small>개</small></div>'
+          ? '<div class="rhythm-v tnum">' + t.monthTotal + '<small>개</small></div>'
           : '<div class="rhythm-v" style="font-size:18px;letter-spacing:-.02em">재구매 데이터 일시 불가</div>') +
         '<div class="rhythm-lanes">' +
-          lane("buy", "지금 사세요", st.buy) + lane("due", "살 때 됐어요", st.due) + lane("wait", "기다리세요", st.wait) +
+          lane("buy", "지금 사세요", t ? t.month.buy : 0) + lane("due", "살 때 됐어요", t ? t.month.due : 0) + lane("wait", "기다리세요", t ? t.month.wait : 0) +
         '</div>' +
+        (ready ? '<div class="rhythm-note">셋을 더하면 ' + t.monthTotal + '개 · 전체 추적 ' + t.total + '개 중 나머지 ' + t.outside + '개는 D-21 밖이거나 보통 가격·곧 떨어져요</div>' : '') +
       '</div>' +
       '<div class="rhythm-stats">' +
-        '<div class="rs"><span>절감 가능액</span><b class="tnum">' + (ready ? LC.won(st.saving) : "–") + '</b><em>' + (ready ? "도래·임박 품목 기준" : "데이터 일시 불가") + '</em></div>' +
-        '<div class="rs"><span>슈링크 주의</span><b class="tnum">' + (ready ? st.shrink + "건" : "–") + '</b><em>같은 값, 줄어든 용량</em></div>' +
-        '<div class="rs"><span>추적 품목</span><b class="tnum">' + (ready ? st.total + "개" : "–") + '</b><em>' + (ready ? (state.split ? "정산·디지털 분리 적용" : "전체 표시") : "재구매 데이터 대기") + '</em></div>' +
+        '<div class="rs"><span>절감 가능액</span><b class="tnum">' + (ready ? LC.won(t.saving) : "–") + '</b><em>' + (ready ? "도래·임박 품목 기준" : "데이터 일시 불가") + '</em></div>' +
+        '<div class="rs"><span>슈링크 주의</span><b class="tnum">' + (ready ? t.shrink + "건" : "–") + '</b><em>같은 값, 줄어든 용량</em></div>' +
+        '<div class="rs"><span>추적 품목</span><b class="tnum">' + (ready ? t.total + "개" : "–") + '</b><em>' + (ready ? (state.split ? "판정 5가지 합계 · 정산·디지털 분리" : "판정 5가지 합계") : "재구매 데이터 대기") + '</em></div>' +
       '</div>' +
     '</div>';
+    if (LC.paintIcons) LC.paintIcons(box);
   }
 
   function renderDueBoard() {
     var box = $("dueBoard");
     if (!box) return;
-    if (!state.rebuy) {
+    var t = rhythmTally();
+    if (!t) {
       box.innerHTML = '<div class="empty" style="padding:22px 12px">재구매 데이터 일시 불가 · 잠시 후 자동 갱신</div>';
+      if ($("dueHint")) $("dueHint").textContent = "내 구매주기 기준";
       return;
     }
-    var rows = state.rebuy.rows.slice();
-    if (state.split) rows = rows.filter(function (r) { return !isNonSpend(r.danawaName || r.label); });
-    var lane = { buy: [], due: [], wait: [], soon: [] };
+    var rows = splitRows(state.rebuy.rows || []);
+    var lane = { buy: [], due: [], wait: [] };
     rows.forEach(function (r) {
       var a = actOf(r);
-      var k = a && (a.k || (a.meta && a.meta.k));
-      if (!k) return;
+      var k = a && a.verdict && a.verdict.k;
+      if (!k || !lane.hasOwnProperty(k)) return;
       if (r.daysLeft != null && r.daysLeft > 21) return;
-      if (lane[k]) lane[k].push({ r: r, a: a });
+      lane[k].push({ r: r, a: a });
     });
+    if ($("dueHint")) $("dueHint").textContent = "구매주기 D-21 이내 · 전체 추적 " + t.total + "개";
     var def = [
       { k: "buy", t: "지금 사세요", d: "내 평균가보다 확실히 낮음" },
       { k: "due", t: "살 때 됐어요", d: "구매주기도 왔고 값도 평소" },
-      { k: "wait", t: "기다리세요", d: "지금은 평균보다 높음" }
+      { k: "wait", t: "기다리세요", d: "주기는 왔지만 값이 평균보다 높음" }
     ];
     box.innerHTML = '<div class="lanes">' + def.map(function (x) {
       var list = lane[x.k].sort(function (a, b) { return (a.r.daysLeft || 0) - (b.r.daysLeft || 0); }).slice(0, 4);
@@ -409,7 +418,9 @@
             '<span class="lane-meta">' + (r.daysLeft != null ? (r.daysLeft <= 0 ? "D+" + Math.abs(r.daysLeft) + " 도래" : "D-" + r.daysLeft) : "") +
             (delta != null ? " · " + (delta <= 0 ? "" : "+") + delta + "%" : "") + '</span></button>';
         }).join("") : '<div class="lane-empty">해당 없음</div>') + "</div>";
-    }).join("") + "</div>";
+    }).join("") + "</div>" +
+      '<div class="board-note">위 숫자를 더하면 히어로의 ' + t.monthTotal + '개와 같습니다. 나머지 ' + t.outside +
+      '개는 D-21 밖이거나 보통 가격·곧 떨어져요 상태이며 [재구매] 탭에 있습니다.</div>';
     box.querySelectorAll("[data-rebuy]").forEach(function (b) {
       b.addEventListener("click", function () {
         var r = state.rebuy.rows.filter(function (x) { return String(x.id) === b.dataset.rebuy; })[0];

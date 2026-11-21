@@ -239,10 +239,43 @@
     return r;
   }
 
+  /*
+   * 화면 집계 — 판정 분포와 '이번 달 살 때 온 품목'을 한 곳에서 센다.
+   * 히어로 머리 숫자·레인·이번 달 보드·살 때 판정 패널이 모두 이 결과만 쓰므로
+   * 서로 다른 조합을 더해 숫자가 어긋나는 일이 없다.
+   *   rows  서버 재구매 행([{ daysLeft, ... }])
+   *   judge (row) => { verdict: { k } } | null  — 판정이 없으면 '보통 가격(ok)'으로 센다
+   *   opt.winDays  '이번 달' 창(기본 21일). 다음 예상일이 없어 daysLeft가 null인 품목은 창에 넣는다.
+   * 반환: { total, by{buy,soon,due,wait,ok}, month{buy,due,wait}, monthTotal, unknown, outside, winDays }
+   */
+  function tally(rows, judgeFn, opt) {
+    opt = opt || {};
+    var winDays = opt.winDays == null ? 21 : opt.winDays;
+    var by = { buy: 0, soon: 0, due: 0, wait: 0, ok: 0 };
+    var month = { buy: 0, due: 0, wait: 0 };
+    var total = 0, unknown = 0, monthTotal = 0;
+    (rows || []).forEach(function (r) {
+      var a = null;
+      try { a = judgeFn ? judgeFn(r) : null; } catch (e) { a = null; }
+      var k = a && a.verdict && a.verdict.k;
+      if (!Object.prototype.hasOwnProperty.call(by, k)) k = 'ok';
+      by[k]++;
+      total++;
+      var d = r.daysLeft;
+      if (d == null) unknown++;
+      if ((d == null || d <= winDays) && Object.prototype.hasOwnProperty.call(month, k)) {
+        month[k]++;
+        monthTotal++;
+      }
+    });
+    return { total: total, by: by, month: month, monthTotal: monthTotal,
+      unknown: unknown, outside: total - monthTotal, winDays: winDays };
+  }
+
   var api = {
     SRCURL: SRCURL, KINDS: KINDS, kindMeta: kindMeta, model: model, build: build,
     pricesOf: pricesOf, srcOf: srcOf, judge: judge, judgeCatalog: judgeCatalog,
-    unitOf: unitOf, shrinkOf: shrinkOf
+    unitOf: unitOf, shrinkOf: shrinkOf, tally: tally
   };
   if (typeof module !== 'undefined') module.exports = api;
   root.LetsCartAction = api;
