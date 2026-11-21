@@ -1,7 +1,10 @@
 // letsbuy-thumbs 사진 재사용 해석기 — 해시 주소·후보 속성·폴백 규칙
+const core = require('../assets/engine/core.js');
+global.self = global;
+global.LetsCartCore = core;
 const t = require('../assets/thumbs.js');
 let f = 0;
-const eq = (a, b, n) => { if (a !== b) { f++; console.log('FAIL', n, JSON.stringify(a)); } };
+const eq = (a, b, n) => { if (a !== b) { f++; console.log('FAIL', n, JSON.stringify(a), JSON.stringify(b)); } };
 const ok = (v, n) => { if (!v) { f++; console.log('FAIL', n); } };
 
 const H = '0123456789abcdef0123456789abcdef';
@@ -27,8 +30,17 @@ ok(s.startsWith('<div class="item-thumb" data-thumbs="'), 'slot open');
 ok(s.endsWith('</div>'), 'slot close');
 ok(s.includes('<svg></svg>'), 'slot inner');
 
-// 브라우저 밖(document 없음)에서 prime 은 조용히 아무 것도 하지 않는다
-t.prime();
+(async () => {
+  // 이름표는 반드시 '정규화 키(keyOf)'의 해시여야 한다. 원문을 해시하면 렛츠바이가 올린 사진과 한 건도 맞지 않는다.
+  const want = await core.thumbHash(core.keyOf('오리온 초코파이 정 444g'));
+  eq(await t.hashOf('오리온 초코파이 정 444g'), want, 'hash = thumbHash(keyOf(name))');
+  eq(await t.hashOf('오리온 초코파이 정 468g'), want, 'capacity variant same key');
+  eq(await t.hashOf('오리온 초코파이 정 444g'), want, 'hash cached + stable');
+  ok((await t.hashOf('')).length === 0, 'empty name no hash');
 
-console.log(f ? `THUMBS ${f} FAILED` : 'THUMBS ALL PASS');
-process.exit(f ? 1 : 0);
+  // 브라우저 밖(document 없음)에서 prime 은 조용히 아무 것도 하지 않는다
+  t.prime();
+  if (global.LCThumbs !== t) { f++; console.log('FAIL global expose'); }
+  console.log(f ? `THUMBS ${f} FAILED` : 'THUMBS ALL PASS');
+  process.exit(f ? 1 : 0);
+})();

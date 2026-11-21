@@ -38,14 +38,17 @@
     } catch (e) {}
   }
 
+  /* 렛츠바이가 올릴 때 쓴 이름표는 '정규화 키'(core.keyOf)의 SHA-256 이다.
+     상품명 원문을 그대로 해시하면 용량·옵션 표기가 달라 한 건도 맞지 않는다. */
   function hashOf(name) {
     name = String(name == null ? "" : name);
     if (!name) return Promise.resolve("");
     if (hashOfKey[name]) return Promise.resolve(hashOfKey[name]);
+    var key = (CORE && CORE.keyOf) ? (CORE.keyOf(name) || name) : name;
     var p;
-    if (CORE && CORE.thumbHash) p = CORE.thumbHash(name);
+    if (CORE && CORE.thumbHash) p = CORE.thumbHash(key);
     else if (root.crypto && root.crypto.subtle && root.TextEncoder) {
-      p = root.crypto.subtle.digest("SHA-256", new root.TextEncoder().encode(name.normalize("NFC").toLowerCase().trim()))
+      p = root.crypto.subtle.digest("SHA-256", new root.TextEncoder().encode(key.normalize("NFC").toLowerCase().trim()))
         .then(function (b) {
           return Array.prototype.slice.call(new Uint8Array(b), 0, 16).map(function (x) { return x.toString(16).padStart(2, "0"); }).join("");
         });
@@ -122,6 +125,7 @@
       names(el).forEach(function (n) { if (wanted.indexOf(n) < 0) wanted.push(n); });
     });
     running = true;
+    var failed = false;
     Promise.all(wanted.map(function (n) { return hashOf(n); }))
       .then(function (hs) {
         var now = Date.now(), ask = [];
@@ -132,11 +136,15 @@
         });
         return ask.length ? query(ask) : null;
       })
-      .then(function () { els.forEach(fill); })
-      .catch(function () {})
+      .catch(function () { failed = true; })
+      .then(function () {
+        // 취소·네트워크 오류로 한 번에 못 채워도 나머지 자리는 그대로 진행한다.
+        els.forEach(function (el) { try { fill(el); } catch (e) {} });
+        if (failed) els.forEach(function (el) { if (!el.__lcDone) el.__lcQueued = 0; });
+      })
       .then(function () {
         running = false;
-        if (queue.length) timer = setTimeout(flush, 40);
+        if (queue.length && !timer) timer = setTimeout(flush, 40);
       });
   }
 
@@ -172,7 +180,7 @@
     return "<" + (tag || "span") + (cls ? ' class="' + cls + '"' : "") + attr(list) + ">" + inner + "</" + (tag || "span") + ">";
   }
 
-  var api = { url: url, attr: attr, prime: prime, slot: slot, API: API };
+  var api = { url: url, attr: attr, prime: prime, slot: slot, hashOf: hashOf, API: API };
   root.LCThumbs = api;
   if (typeof module !== "undefined" && module.exports) module.exports = api;
 })(typeof self !== "undefined" ? self : this);
