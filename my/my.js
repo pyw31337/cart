@@ -4,6 +4,7 @@
   var LC = window.LC;
   var API = "/api/private/";
   var MEDIA = "https://letscart.pages.dev/media/";
+  var THUMBS = window.LCThumbs || null;
   var CORE = window.LetsCartCore || window.LetsBuy;
   var INS = window.LetsCartInsights || window.LetsBuyInsights;
   var ACT = window.LetsCartAction || null;
@@ -616,9 +617,9 @@
         var rows = o.items.map(function (i) {
           var specLine = i.product ? (i.product.spec || "") : "";
           var thumb = i.product && i.product.media
-            ? '<img src="' + LC.esc(MEDIA + i.product.media) + '" alt="" loading="lazy" />'
-            : LC.icon("box", "icon-sm");
-          return '<div class="item-row"><div class="item-thumb">' + thumb + "</div><div>" +
+            ? '<div class="item-thumb"><img src="' + LC.esc(MEDIA + i.product.media) + '" alt="" loading="lazy" /></div>'
+            : thumbSlot([i.product ? i.product.name : null, i.name], "item-thumb");
+          return '<div class="item-row">' + thumb + "<div>" +
             '<div class="item-name">' + LC.text(i.name || "") + "</div>" +
             (i.option ? '<div class="item-spec">옵션: ' + LC.esc(i.option) + "</div>" : "") +
             (i.product ? '<div class="item-spec" style="color:var(--c-text-2)"><b>' + LC.text(i.product.name) + "</b>" +
@@ -643,6 +644,7 @@
           '<div class="section"><div class="section-head"><h3>가계부 대조</h3></div>' + led + "</div>" +
           '<div class="section"><div class="note">당시 구매가는 주문 라인 결제액이고, 스펙·사진은 같은 상품으로 매칭된 다나와 정보입니다. ' +
           "매칭되지 않은 라인은 상품명만 표시됩니다.</div></div>";
+        if (THUMBS) THUMBS.prime(b);
       },
       footer: '<button class="btn btn-ghost" data-act="close">닫기</button>'
     }).foot && null;
@@ -743,10 +745,18 @@
     });
   }
 
+  /* 사진 자리: 다나와 매칭 사진(letscart-media)이 1순위, 없으면 렛츠바이가 모아 둔
+     letsbuy-thumbs R2 의 같은 품목 사진을 이름 해시로 찾아 채운다(LCThumbs.prime 이 비동기로). */
+  function thumbSlot(names, cls) {
+    var icon = LC.icon("box", "icon-sm");
+    if (!THUMBS) return '<div class="' + cls + '">' + icon + "</div>";
+    return THUMBS.slot(names, icon, "div", cls);
+  }
+
   function rcard(r) {
     var thumb = r.media
-      ? '<img src="' + LC.esc(MEDIA + r.media) + '" alt="" loading="lazy" />'
-      : LC.icon("box", "icon-sm");
+      ? '<div class="item-thumb"><img src="' + LC.esc(MEDIA + r.media) + '" alt="" loading="lazy" /></div>'
+      : thumbSlot([r.danawaName, r.label], "item-thumb");
     var dd = r.daysLeft;
     var badge = r.state === "due" ? '<span class="badge badge-red">도래</span>'
       : r.state === "soon" ? '<span class="badge badge-amber">D-' + dd + "</span>"
@@ -755,7 +765,7 @@
     var a = actOf(r);
     var u = unitOf(r);
     var sh = shrinkOf(r);
-    return '<button class="rcard" data-rebuy="' + LC.esc(r.id) + '"><div class="item-thumb">' + thumb + "</div><div style=\"min-width:0\">" +
+    return '<button class="rcard" data-rebuy="' + LC.esc(r.id) + '">' + thumb + "<div style=\"min-width:0\">" +
       '<div style="display:flex;gap:6px;align-items:flex-start;flex-wrap:wrap"><div class="item-name" style="flex:1">' + LC.text(r.label) + "</div>" +
       (a ? actBadge(a) : "") + badge + "</div>" +
       '<div class="statline"><span>주기 <b>' + (r.cycle ? Math.round(r.cycle) + "일" : "–") + "</b></span>" +
@@ -793,6 +803,7 @@
         if (r) openRebuy(r);
       });
     });
+    if (THUMBS) THUMBS.prime($("view-rebuy") || document);
   }
 
   function openRebuy(r) {

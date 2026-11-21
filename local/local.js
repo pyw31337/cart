@@ -151,15 +151,25 @@
     }
     return null;
   }
-  function thumbImg(item) {
-    if (item.img && /^https?:/.test(item.img)) {
-      return '<img src="' + LC.esc(item.img) + '" alt="" loading="lazy" decoding="async" onerror="this.style.display=\'none\'" />';
-    }
+  /* 사진: ① 내 기록에 붙은 사진(item.img) ② 라이벌 상품 사진 ③ 렛츠바이 letsbuy-thumbs R2 의 같은 품목 사진 */
+  var THUMBS = window.LCThumbs || null;
+  function thumbSrc(item) {
+    if (item.img && /^https?:/.test(item.img)) return item.img;
     var g = rivalFor(item.name);
-    if (g && g.products && g.products[0] && g.products[0].image) {
-      return '<img src="../' + LC.esc(g.products[0].image) + '" alt="" loading="lazy" decoding="async" />';
+    if (g && g.products && g.products[0] && g.products[0].image) return "../" + g.products[0].image;
+    return null;
+  }
+  function thumbImg(item) {
+    var u = thumbSrc(item);
+    if (u) {
+      return '<img src="' + LC.esc(u) + '" alt="" loading="lazy" decoding="async" onerror="this.style.display=\'none\'" />';
     }
     return LC.icon("box", "icon-lg");
+  }
+  /* 사진이 없을 때만 붙는 자리 표시(렛츠바이 R2 사진을 이름 해시로 찾아 채운다) */
+  function thumbAttr(item) {
+    if (!THUMBS || thumbSrc(item)) return "";
+    return THUMBS.attr([item.name]);
   }
 
   /* 헤더·히어로 */
@@ -357,6 +367,7 @@
     }
     var slice = list.slice(0, state.shop.shown);
     $("shopGrid").innerHTML = slice.map(card).join("");
+    if (THUMBS) THUMBS.prime($("shopGrid"));
     $("shopMore").innerHTML = list.length > state.shop.shown
       ? '<button class="btn btn-ghost" data-more="1">더 보기 (' + LC.num(list.length - state.shop.shown) + "개)</button>" : "";
   }
@@ -374,7 +385,7 @@
     var sp = seriesOf(p);
     var unit = p.myLast ? ACT.unitOf(p.name, p.myLast.price, 1) : null;
     return '<button class="scard" data-key="' + LC.esc(p.key) + '" aria-label="' + LC.esc(p.name) + ' 판정 상세">' +
-      '<span class="thumb">' + thumbImg(p) + "</span>" +
+      '<span class="thumb"' + thumbAttr(p) + '>' + thumbImg(p) + "</span>" +
       '<span class="scard-main">' +
         '<span class="scard-top">' + actBadge(p.verdict) +
           (p.count >= 2 && p.verdict.k !== "due" ? '<span class="scard-meta">' + ddayLabel(p.daysLeft) + "</span>" : "") + "</span>" +
@@ -448,7 +459,7 @@
       variant: "sheet-detail",
       render: function (b) {
         b.innerHTML =
-          '<div class="detail-hero"><div class="thumb">' + thumbImg(p) + "</div><div>" +
+          '<div class="detail-hero"><div class="thumb"' + thumbAttr(p) + '>' + thumbImg(p) + "</div><div>" +
             '<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:6px">' + actBadge(p.verdict, true) +
               (p.verdict.basis ? '<span class="pill-k">' + LC.esc(p.verdict.basis) + "</span>" : "") + "</div>" +
             '<div class="item-name">' + LC.text(p.name) + "</div>" +
@@ -480,6 +491,7 @@
           "</div>" +
           '<div class="section"><div class="notice"><b>' + LC.esc(p.profile.reason || "") + "</b> — " + SCOPE_NOTE +
             " 이 판정은 내 구매 기록과 최근 가격만으로 계산합니다. 실제 결제 전 가격·구성을 한 번 더 확인해 주세요.</div></div>";
+        if (THUMBS) THUMBS.prime(b);
       },
       footer: '<button class="btn btn-ghost" data-act="close">닫기</button>' +
         (p.now && p.now.url ? '<a class="btn btn-primary" href="' + LC.esc(p.now.url) + '" target="_blank" rel="noopener">' + LC.esc(p.now.src) + "에서 보기</a>" : "")

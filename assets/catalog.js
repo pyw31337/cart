@@ -4,6 +4,7 @@
   var LC = window.LC;
   var REPO = "pyw31337/cart";
   var ACT = window.LetsCartAction || null;
+  var THUMBS = window.LCThumbs || null;
   var TODAY = LC.today();
   var actCache = {};
 
@@ -333,6 +334,7 @@
     }
     var slice = list.slice(0, state.shown);
     el.grid.innerHTML = slice.map(card).join("");
+    if (THUMBS) THUMBS.prime(el.grid);
     el.more.innerHTML = list.length > state.shown
       ? '<button type="button" class="btn btn-ghost" data-act="more">더 보기 (' +
         LC.num(list.length - state.shown) + '개)</button>'
@@ -360,7 +362,7 @@
     return '<article class="card" data-id="' + LC.esc(p.id) + '" tabindex="0" role="button" aria-label="' +
       LC.esc(p.name) + ' 상세 보기">' +
       '<div class="card-hit">' +
-        '<div class="thumb">' + (img || LC.placeholder("box")) + "</div>" +
+        '<div class="thumb"' + (p.media || !THUMBS ? "" : THUMBS.attr([p.danawaName, p.name])) + ">" + (img || LC.placeholder("box")) + "</div>" +
         '<div class="card-body">' +
           '<h3 class="card-name">' + LC.text(p.name) + "</h3>" +
           '<div class="card-price"><b class="tnum v">' + LC.num(price) + "</b><span class=\"u\">원</span></div>" +
@@ -428,7 +430,7 @@
         var dd = p.rebuy && p.rebuy.next ? LC.dday(p.rebuy.next) : null;
 
         b.innerHTML =
-          '<div class="detail-hero"><div class="thumb">' + img + "</div><div>" +
+          '<div class="detail-hero"><div class="thumb"' + (p.media || !THUMBS ? "" : THUMBS.attr([p.danawaName, p.name])) + ">" + img + "</div><div>" +
             '<h3 class="detail-name">' + LC.text(p.danawaName || p.name) + "</h3>" +
             '<div class="detail-meta">' + meta.join("") + "</div>" +
             (p.category ? '<div class="muted" style="font-size:11.5px;margin-top:8px;line-height:1.5">' + LC.esc(p.category) + "</div>" : "") +
@@ -454,6 +456,7 @@
           marketSection(p) +
           (p.tracker && p.tracker.note ? '<div class="section"><div class="note">' + LC.esc(p.tracker.note) + "</div></div>" : "") +
           (p.tracker && p.tracker.crossNote ? '<div class="section"><div class="note">' + LC.esc(p.tracker.crossNote) + "</div></div>" : "");
+        if (THUMBS) THUMBS.prime(b);
       },
       footer: '<button class="btn btn-ghost" data-act="req">관심 상품 신청</button>' +
         (p.danawaUrl ? '<a class="btn btn-primary" href="' + LC.esc(p.danawaUrl) + '" target="_blank" rel="noopener">다나와에서 보기</a>' :
