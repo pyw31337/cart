@@ -18,6 +18,7 @@ index.html            공개 카탈로그 (GitHub Pages / Cloudflare Pages 공�
 assets/lc.css         디자인 토큰 + 공용 컴포넌트 (Zero-System-UI)
 assets/lc.js          시트·드로어·드롭다운·토스트·포맷 유틸
 assets/rivals.js      라이벌 단위가격·스펙·가격추이 비교 컴포넌트(공용)
+assets/thumbs.js      사진 없는 품목에 렛츠바이 letsbuy-thumbs R2 사진을 이름 해시로 이어 붙이는 공용 리졸버
 assets/landing.js     `/` 히어로 보드·라이벌 스트립·샘플 구매이력 체험
 data/rivals.json      자주 사는 20품목 × (내 상품 + 라이벌 2종) 다나와 실측 데이터
 assets/catalog.js     카탈로그 렌더·검색·필터·상세 드로어
@@ -33,6 +34,7 @@ functions/            Cloudflare Pages Functions
   _lib/access.js      JWKS 검증 (헤더 신뢰 없음)
   api/private/*.js    summary·orders·ledger·rebuy·compare (D1, compare는 읽기 전용)
   media/[[path]].js   R2 `letscart-media` 이미지 서빙 (immutable)
+  thumbs/[[path]].js  R2 `letsbuy-thumbs` 사진 서빙 (/thumbs/t/<hash>.webp, /thumbs/has?h=…)
 tracker/              기존 4개 플랫폼 가격 트래커 (data.json 은 루트에 유지)
 ```
 
@@ -81,3 +83,14 @@ python3 letscart/src/d1_seed.py        # D1 적재 (CF_API_TOKEN 필요)
 
 - 카탈로그: 다나와 매칭 80종 + 반복구매 54개 상품군 + 기존 추적 39종 (총 259개 상품)
 - 이미지: 168장 WebP(2.86MB) → R2 `letscart-media`, 키 `products/{sha[:2]}/{sha16}.webp`
+
+## 사진 재사용 (`letsbuy-thumbs`)
+
+다나와 매칭이 없어 사진이 비어 있는 품목은, 통합 전 렛츠바이가 이름 해시로 모아 둔 R2 `letsbuy-thumbs`
+(939개 WebP·6.93MB)의 사진을 그대로 이어서 씁니다. 사진을 복사·이동하지 않고, 상품명 정규화 키
+(`core.keyOf`)의 SHA-256 앞 32자리로 기존 Worker `/has` 에 존재 여부만 묻고 `…/t/<hash>.webp` 에서 읽습니다.
+
+- 1순위는 언제나 다나와 `letscart-media` 사진이고, 이 해석기는 **빈 자리만** 채웁니다(사진이 깨지면 원래 아이콘으로 폴백).
+- `/my/` 재구매 카드·주문 상세, `/local/` 품목, 공개 카탈로그가 같은 `assets/thumbs.js` 를 씁니다.
+- Pages 주소로도 같은 사진을 서빙합니다: `/thumbs/t/<32hex>.webp`, `/thumbs/has?h=a,b,c`. 프로젝트에 `THUMBS_BUCKET`
+  바인딩이 있으면 R2에서 직접 읽고, 없으면 기존 Worker로 넘깁니다(읽기 전용).
