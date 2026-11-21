@@ -376,7 +376,7 @@
       '<div class="rhythm-stats">' +
         '<div class="rs"><span>절감 가능액</span><b class="tnum">' + (ready ? LC.won(t.saving) : "–") + '</b><em>' + (ready ? "도래·임박 품목 기준" : "데이터 일시 불가") + '</em></div>' +
         '<div class="rs"><span>슈링크 주의</span><b class="tnum">' + (ready ? t.shrink + "건" : "–") + '</b><em>같은 값, 줄어든 용량</em></div>' +
-        '<div class="rs"><span>추적 품목</span><b class="tnum">' + (ready ? t.total + "개" : "–") + '</b><em>' + (ready ? (state.split ? "판정 5가지 합계 · 정산·디지털 분리" : "판정 5가지 합계") : "재구매 데이터 대기") + '</em></div>' +
+        '<div class="rs"><span>추적 품목</span><b class="tnum">' + (ready ? t.total + "개" : "–") + '</b><em>' + (ready ? "5가지 판정 합계" : "재구매 데이터 대기") + '</em></div>' +
       '</div>' +
     '</div>';
     if (LC.paintIcons) LC.paintIcons(box);
