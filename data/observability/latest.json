@@ -1,0 +1,35 @@
+{
+  "schema": "lets_observability_v1",
+  "run_id": "cart-20261123T085121Z",
+  "observed_at": "2026-11-23T08:51:21.984877+00:00",
+  "service_id": "cart",
+  "source": "persisted_letscart_catalog",
+  "stages": {
+    "collect": {
+      "status": "success",
+      "ok": 39,
+      "artifact": true
+    },
+    "analyze": {
+      "status": "success",
+      "ok": 302,
+      "artifact": true
+    },
+    "quality": {
+      "status": "success",
+      "quality_issue_count": 0
+    },
+    "publish": {
+      "status": "success",
+      "artifact": true
+    }
+  },
+  "counts": {
+    "records": 39,
+    "catalog_products": 302,
+    "increment": 39,
+    "increment_date": "2026-11-23",
+    "reviews": 997520
+  },
+  "note": "Persisted LetsCart catalog and price snapshot; source service is LetsCart, not deprecated LetsBuy."
+}
