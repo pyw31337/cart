@@ -1,13 +1,12 @@
-/* 렛츠카트 — letsbuy-thumbs R2 사진 재사용 해석기
-   통합 전 렛츠바이가 모아 둔 R2 `letsbuy-thumbs` 의 WebP 상품 사진을 렛츠카트(/my/, /local/, 공개 카탈로그)가
-   그대로 이어서 쓴다. 사진은 복사·이동하지 않고, 상품명 정규화 키의 SHA-256 앞 32자리로 존재 여부만 확인한 뒤
-   기존 letsbuy-thumbs Worker(=`LetsBuy.THUMBS`)에서 그대로 읽는다. 개인정보는 해시만 나가고 이름도 전송하지 않는다.
-   - 1순위는 언제나 이미 붙어 있는 다나와 `letscart-media` 사진이고, 이 모듈은 그 자리를 채우지 않는다. */
+/* 렛츠카트 — 썸네일 캐시 해석기
+   렛츠카트(/my/, /local/, 공개 카탈로그)가 상품 사진을 서빙하는 모듈.
+   상품명 정규화 키의 SHA-256 앞 32자리로 존재 여부 확인 후 letscart.pages.dev/thumbs 에서 읽는다.
+   - 1순위는 언제나 이미 붙어 있는 다나와 `letscart-media` 사진이고, 이 모듈은 빈 자리만 채운다. */
 (function (root) {
   "use strict";
 
   var CORE = root.LetsCartCore || root.LetsBuy || null;
-  var WORKER = "https://letsbuy-thumbs.pyw213.workers.dev";
+  var WORKER = "https://letscart.pages.dev/thumbs";
   var API = (CORE && CORE.THUMBS) || WORKER;
   var KEY = "[data-thumbs]";
   var BATCH = 300;              // Worker /has 상한

@@ -404,7 +404,7 @@
   }
   /** 공유 썸네일 이름표: 정규화한 제품 키의 SHA-256 앞 32자리 (이름 외 정보 없음) */
   async function thumbHash(key) { const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(String(key).normalize('NFC').toLowerCase().trim())); return [...new Uint8Array(b)].slice(0, 16).map(x => x.toString(16).padStart(2, '0')).join(''); }
-  const THUMBS = 'https://letsbuy-thumbs.pyw213.workers.dev';
+  const THUMBS = 'https://letscart.pages.dev/thumbs';
   // 이름만 비슷한 결제 행을 실물 상품으로 다루면 가격·사진·재구매 추천이 모두 오염된다.
   // 원본 주문은 보존하고, 이 정책은 분석·검색의 자격만 결정한다.
   function itemProfile(name) {

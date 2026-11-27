@@ -1,4 +1,4 @@
-// letsbuy-thumbs 사진 재사용 해석기 — 해시 주소·후보 속성·폴백 규칙
+// 렛츠카트 썸네일 캐시 해석기 — 해시 주소·후보 속성·폴백 규칙
 const core = require('../assets/engine/core.js');
 global.self = global;
 global.LetsCartCore = core;
@@ -8,7 +8,7 @@ const eq = (a, b, n) => { if (a !== b) { f++; console.log('FAIL', n, JSON.string
 const ok = (v, n) => { if (!v) { f++; console.log('FAIL', n); } };
 
 const H = '0123456789abcdef0123456789abcdef';
-eq(t.url(H), 'https://letsbuy-thumbs.pyw213.workers.dev/t/' + H + '.webp', 'url');
+eq(t.url(H), 'https://letscart.pages.dev/thumbs/t/' + H + '.webp', 'url');
 ok(/^https:\/\//.test(t.API), 'api https');
 
 // 후보 이름은 중복·빈 값을 빼고, 숫자·용량 표기가 달라도 같은 키를 쓸 수 있게 JSON 으로 넣는다.
