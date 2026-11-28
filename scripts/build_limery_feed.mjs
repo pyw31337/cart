@@ -70,10 +70,15 @@ const usedTracker = new Set();
 const products = ps.map((p) => {
   const t = trackerOf(p); if (t) usedTracker.add(t.id);
   const hist = (p.history || []).filter((h) => h.date && h.price);
-  const purchases = hist.filter((h) => h.source === 'purchase').map((h) => ({ date: h.date.slice(0, 10), price: h.price }));
-  const live = (t?.history || []).map((h) => ({ date: String(h.date).slice(0, 10), price: h.price, source: 'tracker' }));
-  const priceHistory = [...hist.filter((h) => h.source !== 'purchase').map((h) => ({ date: h.date.slice(0, 10), price: h.price, source: h.source || 'price' })), ...live]
-    .sort((a, b) => (a.date < b.date ? -1 : 1));
+  // 구매 기록: 트래커가 이어지면 트래커 기록(묶음 구매를 1개 단가로 환산해 둔 값)을 정본으로 쓰고, 아니면 카탈로그 구매 기록.
+  //   두 기록을 함께 넣으면 같은 날 구매가 두 번 잡히고 2개 묶음 합계가 단가처럼 보인다(2026-11-28 수정).
+  const dedupe = (xs) => { const seen = new Set(); return xs.filter((h) => { const k = `${h.date}|${h.price}`; if (seen.has(k)) return false; seen.add(k); return true; }); };
+  const purchases = dedupe(t?.history?.length
+    ? t.history.map((h) => ({ date: String(h.date).slice(0, 10), price: h.price, ...(h.note ? { note: h.note } : {}) }))
+    : hist.filter((h) => h.source === 'purchase').map((h) => ({ date: h.date.slice(0, 10), price: h.price })));
+  // 가격 관측: 다나와 등 판매 가격 + 트래커의 오늘 가격(구매 기록은 넣지 않는다)
+  const priceHistory = dedupe([...hist.filter((h) => h.source && h.source !== 'purchase').map((h) => ({ date: h.date.slice(0, 10), price: h.price, source: h.source })),
+    ...(t?.livePrice && t?.liveDate ? [{ date: String(t.liveDate).slice(0, 10), price: t.livePrice, source: 'live' }] : [])]).sort((a, b) => (a.date < b.date ? -1 : 1));
   const platforms = (p.markets || []).map((m) => ({ code: m.code, label: m.label, url: m.url, price: m.price, date: m.date, status: m.status }));
   if (t?.url && !platforms.some((m) => m.url === t.url)) { const c = marketOf(t.url); platforms.push({ code: c, label: (catalog.markets || []).find((x) => x.code === c)?.name || c, url: t.url, price: t.livePrice, date: t.liveDate }); }
   const img = p.media ? mediaBase + p.media : thumbs.get(p.name) || null;
@@ -84,7 +89,7 @@ const products = ps.map((p) => {
     spec: p.spec || '', spec_table: (p.specTable || []).filter((r) => r.v),
     rating: p.rating ?? null, reviews: p.reviews ?? null, price: p.price ?? t?.livePrice ?? null, offers: p.offers ?? null,
     price_url: p.danawaUrl || null, platforms, main_platform: platforms[0]?.code || null,
-    purchases, purchase_count: purchases.length || t?.count || 0, last_purchase: purchases.at(-1)?.date || t?.lastDate || null,
+    purchases, purchase_count: t?.count || purchases.length || 0, last_purchase: purchases.at(-1)?.date || t?.lastDate || null,
     price_history: priceHistory,
     rebuy: rb || tr || t ? { cycle_days: rb?.cycle ?? tr?.cycleDays ?? t?.cycleDays ?? null, next: rb?.next ?? tr?.nextDate ?? t?.nextDate ?? null,
       target: rb?.target ?? tr?.targetPrice ?? t?.targetPrice ?? null, min: rb?.min ?? tr?.minPrice ?? t?.minPrice ?? null, max: rb?.max ?? tr?.maxPrice ?? t?.maxPrice ?? null,
@@ -98,8 +103,8 @@ for (const t of tracker) {
   products.push({ id: t.id, ids: [t.id], name: t.title, brand: '', group: t.category || '', category: t.category || '', img: null, img_source: null,
     spec: '', spec_table: [], rating: null, reviews: null, price: t.livePrice ?? null, offers: null, price_url: null,
     platforms: [{ code: c, label: (catalog.markets || []).find((x) => x.code === c)?.name || c, url: t.url, price: t.livePrice, date: t.liveDate }], main_platform: c,
-    purchases: (t.history || []).map((h) => ({ date: String(h.date).slice(0, 10), price: h.price })), purchase_count: t.count || 0, last_purchase: t.lastDate || null,
-    price_history: [], rebuy: { cycle_days: t.cycleDays, next: t.nextDate, target: t.targetPrice, min: t.minPrice, max: t.maxPrice, avg: t.avgPrice, unit: t.unitLabel, note: null } });
+    purchases: (t.history || []).map((h) => ({ date: String(h.date).slice(0, 10), price: h.price, ...(h.note ? { note: h.note } : {}) })), purchase_count: t.count || 0, last_purchase: t.lastDate || null,
+    price_history: t.livePrice && t.liveDate ? [{ date: String(t.liveDate).slice(0, 10), price: t.livePrice, source: 'live' }] : [], rebuy: { cycle_days: t.cycleDays, next: t.nextDate, target: t.targetPrice, min: t.minPrice, max: t.maxPrice, avg: t.avgPrice, unit: t.unitLabel, note: null } });
 }
 const lateThumbs = await thumbsFor(products.filter((p) => !p.img).map((p) => p.name));
 for (const p of products) if (!p.img && lateThumbs.get(p.name)) { p.img = lateThumbs.get(p.name); p.img_source = 'thumbs'; }
