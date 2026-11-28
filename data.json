@@ -8,7 +8,7 @@
     "nextDate": "2026-11-29",
     "targetPrice": 3690,
     "livePrice": 3690,
-    "liveDate": "2026-11-23",
+    "liveDate": "2026-11-28",
     "url": "https://mc.coupang.com/ssr/sdp/link?vendorItemId=70187605147",
     "count": 25,
     "minPrice": 3690,
@@ -176,7 +176,7 @@
       "컬리"
     ],
     "liveStatus": "판매중",
-    "note": "정가 3,690원(할인 없음) — 전일과 동일, 목표가(3,690) 유지"
+    "note": "정가 3,690원(할인 없음) — 11-23과 동일가, 목표가(3,690) 유지"
   },
   {
     "id": "pong-churu",
@@ -186,8 +186,8 @@
     "cycleDays": 24,
     "nextDate": "2026-11-30",
     "targetPrice": 16000,
-    "livePrice": 14780,
-    "liveDate": "2026-11-23",
+    "livePrice": 15900,
+    "liveDate": "2026-11-28",
     "url": "https://mc.coupang.com/ssr/sdp/link?vendorItemId=83511460503",
     "count": 23,
     "minPrice": 7650,
@@ -339,7 +339,7 @@
     "platformLabel": "쿠팡",
     "liveStatus": "판매중",
     "crossNote": "35g×20개입(700g) 구성 확인(정가 16,900, 4% 할인), 10g당 230원. 다시 구매 목록에서 700g 1개 옵션도 동일가 16,100원. 별도 추적 URL(85433616158)은 여전히 35g×1개(11,000원) 옵션을 가리킴",
-    "note": "다시 구매 700g 3옵션 모두 쿠폰 12% 16,900→14,780원 (전일 15,400 → -620, -4.0%), 10g당 211원"
+    "note": "쿠폰 12%→5% 축소로 14,780→15,900(+7.6%) — 목표 16,000 이하 유지, 다음 예상 구매 11-30"
   },
   {
     "id": "shin-ramyun",
@@ -349,8 +349,8 @@
     "cycleDays": 32,
     "nextDate": "2026-12-20",
     "targetPrice": 3950,
-    "livePrice": 2900,
-    "liveDate": "2026-11-23",
+    "livePrice": 4150,
+    "liveDate": "2026-11-28",
     "url": "https://mc.coupang.com/ssr/sdp/link?vendorItemId=84566941756",
     "count": 19,
     "minPrice": 3510,
@@ -483,7 +483,7 @@
       "지마켓"
     ],
     "liveStatus": "판매중",
-    "note": "5개입 2,900원 / 10개입 5,810원 / 15개 8,710 / 30개 19,900 / 40개 26,500 — 쿠폰 30% 적용(5개 1,250원 할인). 전일 5개 4,150·10개 7,470 → 목표가 대폭 하회, 봉당 580원"
+    "note": "쿠폰 30%→10% 축소: 5개 4,150·10개 7,470(봉당 830·747). 5개 목표 3,950 미달 +5.1%, 10개 목표 7,470 정확히 도달. 11-23 30% 쿠폰 특가(5개 2,900·10개 5,810) 종료"
   },
   {
     "id": "beansprout",
@@ -494,7 +494,7 @@
     "nextDate": "2026-12-10",
     "targetPrice": 1000,
     "livePrice": 1090,
-    "liveDate": "2026-11-23",
+    "liveDate": "2026-11-28",
     "url": "https://mc.coupang.com/ssr/sdp/link?vendorItemId=70278175584",
     "count": 20,
     "minPrice": 970,
@@ -627,7 +627,7 @@
     "platform": "coupang",
     "platformLabel": "쿠팡",
     "liveStatus": "판매중",
-    "note": "전일과 동일 (목표 1,000원까지 +9.0%)"
+    "note": "11-23과 동일가 (목표 1,000원까지 +9.0%)"
   },
   {
     "id": "shine-muscat",
@@ -637,8 +637,8 @@
     "cycleDays": 12,
     "nextDate": "2026-11-24",
     "targetPrice": 10900,
-    "livePrice": 10650,
-    "liveDate": "2026-11-23",
+    "livePrice": 9500,
+    "liveDate": "2026-11-28",
     "url": "https://mc.coupang.com/ssr/sdp/link?vendorItemId=77583447249",
     "count": 7,
     "minPrice": 9900,
@@ -692,10 +692,10 @@
     ],
     "platform": "coupang",
     "platformLabel": "쿠팡",
-    "liveStatus": "판매중",
+    "liveStatus": "품절",
     "liveStatusDetail": "일시품절(대체상품 안내 노출, 재입고 대기)",
     "crossNote": "2026-11-20 9,900→10,650원(+7.6%) 인상, 품절 유지",
-    "note": "판매중 유지 — 로켓프레시 구매가능·오늘(월) 20시 전 도착 보장. 목표가 이하, 다음 예상 구매일 11-24"
+    "note": "11-23 판매중(10,650) → 11-28 품절 전환(페이지 9,500원 표시·대체상품 안내). 다음 예상 구매일 11-24 경과 — 재입고 시 알림"
   },
   {
     "id": "eggs-30",
@@ -705,8 +705,8 @@
     "cycleDays": 51,
     "nextDate": "2026-12-29",
     "targetPrice": 8000,
-    "livePrice": 8990,
-    "liveDate": "2026-11-23",
+    "livePrice": 9390,
+    "liveDate": "2026-11-28",
     "url": "https://mc.coupang.com/ssr/sdp/link?vendorItemId=70272921457",
     "count": 7,
     "minPrice": 7990,
@@ -766,7 +766,7 @@
       "컬리"
     ],
     "liveStatus": "판매중",
-    "note": "전일과 동일, 목표가 대비 +12.4%"
+    "note": "8,990→9,390(+4.4%) 목표 8,000 대비 +17.4%"
   },
   {
     "id": "oiocha",
@@ -776,8 +776,8 @@
     "cycleDays": 28,
     "nextDate": "2026-11-19",
     "targetPrice": 23500,
-    "livePrice": 30620,
-    "liveDate": "2026-11-23",
+    "livePrice": 30240,
+    "liveDate": "2026-11-28",
     "url": "https://mc.coupang.com/ssr/sdp/link?vendorItemId=3000937145",
     "count": 10,
     "minPrice": 14420,
@@ -850,7 +850,7 @@
     "platform": "coupang",
     "platformLabel": "쿠팡",
     "liveStatus": "판매중",
-    "note": "신고가 유지(정가 40,000·쿠폰 10%), 목표가 대비 +30.3%"
+    "note": "30,620→30,240(-1.2%) 목표 23,500 대비 +28.7%"
   },
   {
     "id": "top-coffee",
@@ -861,7 +861,7 @@
     "nextDate": "2026-11-19",
     "targetPrice": 24500,
     "livePrice": 26980,
-    "liveDate": "2026-11-23",
+    "liveDate": "2026-11-28",
     "url": "https://mc.coupang.com/ssr/sdp/link?vendorItemId=92608438454",
     "count": 8,
     "minPrice": 24000,
@@ -922,7 +922,7 @@
     "platform": "coupang",
     "platformLabel": "쿠팡",
     "liveStatus": "판매중",
-    "note": "정가 30,000·쿠폰 10% 할인 — 전일과 동일"
+    "note": "정가 30,000·쿠폰 10% 할인 — 11-23과 동일, 목표 24,500 대비 +10.1%"
   },
   {
     "id": "frosch",
@@ -933,7 +933,7 @@
     "nextDate": "2026-12-15",
     "targetPrice": 19200,
     "livePrice": 22000,
-    "liveDate": "2026-11-23",
+    "liveDate": "2026-11-28",
     "url": "https://mc.coupang.com/ssr/sdp/link?vendorItemId=92411542361",
     "count": 5,
     "minPrice": 17850,
@@ -976,7 +976,7 @@
     "platform": "coupang",
     "platformLabel": "쿠팡",
     "liveStatus": "판매중",
-    "note": "정가 45,800·쿠폰 51% 할인 — 전일과 동일"
+    "note": "정가 45,800·쿠폰 51% 할인 — 11-23과 동일, 목표 19,200 대비 +14.6%"
   },
   {
     "id": "tofu-litter",
@@ -987,7 +987,7 @@
     "nextDate": "2026-12-27",
     "targetPrice": 26000,
     "livePrice": 25990,
-    "liveDate": "2026-11-23",
+    "liveDate": "2026-11-28",
     "url": "https://mc.coupang.com/ssr/sdp/link?vendorItemId=4543610007",
     "count": 6,
     "minPrice": 25820,
@@ -1036,7 +1036,7 @@
     "platform": "coupang",
     "platformLabel": "쿠팡",
     "liveStatus": "판매중",
-    "note": "정가 60,000·쿠폰 56% 할인 — 목표가(26,000) 이하 유지"
+    "note": "정가 60,000·쿠폰 56% 할인 25,990 — 목표가 이하 10원, 11-23과 동일"
   },
   {
     "id": "onion",
@@ -1047,7 +1047,7 @@
     "nextDate": "2026-12-11",
     "targetPrice": 3900,
     "livePrice": 3860,
-    "liveDate": "2026-11-23",
+    "liveDate": "2026-11-28",
     "url": "https://mc.coupang.com/ssr/sdp/link?vendorItemId=91772599788",
     "count": 7,
     "minPrice": 2560,
@@ -1103,7 +1103,7 @@
     "platformLabel": "쿠팡",
     "crossNote": "컬리·지마켓·네이버에 양파 단독 구매 이력은 없고, 쿠팡에서만 반복 구매",
     "liveStatus": "판매중",
-    "note": "정가 5,860·34% 할인 3,860원 — 할인 종료 카운트다운 165시간(약 11/30 07:00)으로 연장, 전일 종료 예정(11/23 07:00)에서 +7일"
+    "note": "정가 5,860·34% 할인 3,860 — 목표가 이하 40원, 할인 종료 D-2(11/30 07:00경)"
   },
   {
     "id": "albaegi",
@@ -1114,7 +1114,7 @@
     "nextDate": "2027-01-06",
     "targetPrice": 2200,
     "livePrice": 2580,
-    "liveDate": "2026-11-23",
+    "liveDate": "2026-11-28",
     "url": "https://mc.coupang.com/ssr/sdp/link?vendorItemId=71797311591",
     "count": 7,
     "minPrice": 1990,
@@ -1169,7 +1169,7 @@
     "platform": "coupang",
     "platformLabel": "쿠팡",
     "liveStatus": "판매중",
-    "note": "신고가 유지(과거 최고 2,546), 목표가 대비 +17.3%"
+    "note": "11-23과 동일, 목표 2,200 대비 +17.3%"
   },
   {
     "id": "multivitamin",
@@ -1179,8 +1179,8 @@
     "cycleDays": 70,
     "nextDate": "2026-12-29",
     "targetPrice": 14800,
-    "livePrice": 14270,
-    "liveDate": "2026-11-23",
+    "livePrice": 14380,
+    "liveDate": "2026-11-28",
     "url": "https://mc.coupang.com/ssr/sdp/link?vendorItemId=91109293970",
     "count": 7,
     "minPrice": 13900,
@@ -1241,7 +1241,7 @@
       "네이버쇼핑"
     ],
     "liveStatus": "판매중",
-    "note": "정가 25,000·쿠폰 42% 할인 14,270원 (전일 14,620 → -350, -2.4%), 목표가(14,800) 이하 유지"
+    "note": "정가 25,000·쿠폰 42% 할인 14,380(14,270→+0.8%) — 목표 14,800 이하 유지"
   },
   {
     "id": "white-kimchi",
@@ -1252,7 +1252,7 @@
     "nextDate": "비정기",
     "targetPrice": 7700,
     "livePrice": 8760,
-    "liveDate": "2026-11-23",
+    "liveDate": "2026-11-28",
     "url": "https://mc.coupang.com/ssr/sdp/link?vendorItemId=90965101041",
     "count": 11,
     "minPrice": 7360,
@@ -1331,7 +1331,7 @@
     "platform": "coupang",
     "platformLabel": "쿠팡",
     "liveStatus": "판매중",
-    "note": "1개 4,380 / 2개 8,760 / 4개 16,680 — 전일과 동일, 목표가 대비 +13.8%"
+    "note": "1개 4,380 / 2개 8,760 / 6개 25,900(개당 4,317) — 11-23과 동일, 목표 7,700 대비 +13.8%"
   },
   {
     "id": "yogurt",
@@ -1341,8 +1341,8 @@
     "cycleDays": 22,
     "nextDate": "비정기",
     "targetPrice": 3200,
-    "livePrice": 3360,
-    "liveDate": "2026-11-23",
+    "livePrice": 4400,
+    "liveDate": "2026-11-28",
     "url": "https://mc.coupang.com/ssr/sdp/link?vendorItemId=3850251194",
     "count": 10,
     "minPrice": 2920,
@@ -1415,7 +1415,7 @@
     "platform": "coupang",
     "platformLabel": "쿠팡",
     "liveStatus": "판매중",
-    "note": "정가 4,400·쿠폰할인 1,040원 적용 3,360원 (10ml당 29원). 전일 4,320 → -960, -22.2%. 목표가(3,200)까지 +5.0%"
+    "note": "쿠폰할인(1,040원) 종료로 3,360→4,400(+31.0%) — 목표 3,200 대비 +37.5%"
   },
   {
     "id": "kurly-5085771",
@@ -1428,7 +1428,7 @@
     "nextDate": "2027-12-31",
     "targetPrice": 11352,
     "livePrice": 14190,
-    "liveDate": "2026-11-23",
+    "liveDate": "2026-11-28",
     "url": "https://www.kurly.com/goods/5085771",
     "count": 4,
     "history": [
@@ -1457,7 +1457,7 @@
       "2025-09-20",
       "2026-11-10"
     ],
-    "note": "일반 SKU 10085771 14,190·할인 없음(1kg엔 멤버스특가 없음) — 전일과 동일, 목표가 11,352까지 +25.0%",
+    "note": "1kg 일반 SKU 14,190(할인 없음) — 11-23과 동일, 목표 11,352 대비 +25.0%",
     "minPrice": 11352,
     "maxPrice": 14350,
     "avgPrice": 13170,
@@ -1476,7 +1476,7 @@
     "nextDate": "2026-11-25",
     "targetPrice": 12140,
     "livePrice": 12990,
-    "liveDate": "2026-11-23",
+    "liveDate": "2026-11-28",
     "url": "https://www.kurly.com/goods/5085769",
     "count": 4,
     "history": [
@@ -1505,7 +1505,7 @@
       "2024-08-28",
       "2026-07-02"
     ],
-    "note": "일반 SKU 10085769 12,990·할인 없음 — 전일과 동일, 다음 예상 구매 11-25, 목표가 12,140까지 +7.0%",
+    "note": "1kg 일반 SKU 12,990(할인 없음) — 11-23과 동일, 목표 12,140 대비 +7.0%",
     "minPrice": 12140,
     "maxPrice": 13490,
     "avgPrice": 12905,
@@ -1524,7 +1524,7 @@
     "nextDate": "2027-03-15",
     "targetPrice": 11890,
     "livePrice": 12900,
-    "liveDate": "2026-11-23",
+    "liveDate": "2026-11-28",
     "url": "https://www.kurly.com/goods/1000128745",
     "count": 4,
     "history": [
@@ -1555,7 +1555,7 @@
       "2024-09-23",
       "2026-11-10"
     ],
-    "note": "일반 SKU 1000128744 12,900(정가 16,990) — 전일과 동일, 목표가 11,890까지 +8.5%",
+    "note": "일반 SKU 12,900(정가 16,990·24% 할인) — 11-23과 동일, 목표 11,890 대비 +8.5%",
     "minPrice": 11890,
     "maxPrice": 12900,
     "avgPrice": 12192,
@@ -1573,8 +1573,8 @@
     "cycleDays": 47,
     "nextDate": "비정기",
     "targetPrice": 6072,
-    "livePrice": 6291,
-    "liveDate": "2026-11-23",
+    "livePrice": 6990,
+    "liveDate": "2026-11-28",
     "url": "https://www.kurly.com/goods/5109945",
     "count": 4,
     "history": [
@@ -1604,7 +1604,7 @@
       "2024-05-21",
       "2025-09-20"
     ],
-    "note": "일반 SKU 11109944 6,291(정가 6,990 → 10% 할인) — 전일과 동일, 목표가 6,072까지 +3.6%",
+    "note": "일반 SKU 10% 상품할인 종료로 6,291→6,990(+11.1%) — 목표 6,072 대비 +15.1%",
     "minPrice": 6072,
     "maxPrice": 6900,
     "avgPrice": 6368,
@@ -1622,8 +1622,8 @@
     "cycleDays": 29,
     "nextDate": "비정기",
     "targetPrice": 8550,
-    "livePrice": 7850,
-    "liveDate": "2026-11-23",
+    "livePrice": 7695,
+    "liveDate": "2026-11-28",
     "url": "https://www.kurly.com/goods/5056344",
     "count": 3,
     "history": [
@@ -1647,8 +1647,7 @@
       "2026-02-26",
       "2026-03-20"
     ],
-    "note": "17% 상품할인 9,500→7,850원(비구독 일반가, 멤버스 아님). 목표가 8,550원 이하 첫 도달·과거 최저 8,550 경신. 샛별배송 23시 전 주문 시 내일 아침 도착",
-    "liveStatusDetail": "판매중",
+    "note": "일반 SKU 19% 상품할인 7,695(11-23 7,850 → -155) — 목표 8,550 이하 유지, 역대 최저",
     "minPrice": 8550,
     "maxPrice": 9500,
     "avgPrice": 9013,
@@ -1668,7 +1667,7 @@
     "nextDate": "2027-09-03",
     "targetPrice": 6390,
     "livePrice": 7990,
-    "liveDate": "2026-11-23",
+    "liveDate": "2026-11-28",
     "url": "https://www.kurly.com/goods/1000304161",
     "count": 3,
     "history": [
@@ -1693,7 +1692,7 @@
       "2026-01-21",
       "2026-08-06"
     ],
-    "note": "일반 SKU 1000304160 7,990 — 전일과 동일, 목표가 6,390까지 +25.0%",
+    "note": "일반 SKU 7,990(정가 9,990·20% 할인) — 11-23과 동일, 목표 6,390 대비 +25.0%",
     "minPrice": 6390,
     "maxPrice": 7990,
     "avgPrice": 7457,
@@ -1712,7 +1711,7 @@
     "nextDate": "비정기",
     "targetPrice": 14800,
     "livePrice": 16800,
-    "liveDate": "2026-11-23",
+    "liveDate": "2026-11-28",
     "url": "https://www.kurly.com/goods/5144844",
     "count": 2,
     "history": [
@@ -1731,7 +1730,7 @@
       "2025-01-07",
       "2025-02-04"
     ],
-    "note": "16,800(정가 25,000 → 32% 할인) — 전일과 동일, 목표가 14,800까지 +13.5%",
+    "note": "정가 25,000·32% 할인 16,800 — 11-23과 동일, 목표 14,800 대비 +13.5%",
     "minPrice": 13900,
     "maxPrice": 17800,
     "avgPrice": 15850,
@@ -1756,7 +1755,7 @@
     "nextDate": "2027-08-30",
     "targetPrice": 13900,
     "livePrice": 14400,
-    "liveDate": "2026-11-23",
+    "liveDate": "2026-11-28",
     "url": "https://www.kurly.com/goods/5095355",
     "count": 2,
     "history": [
@@ -1775,7 +1774,7 @@
       "2026-01-21",
       "2026-11-10"
     ],
-    "note": "일반 SKU 10095355 14,400(정가 24,900) — 전일과 동일, 목표가 13,900까지 +3.6%",
+    "note": "일반 SKU 14,400(100g당 576원) — 11-23과 동일, 목표 13,900 대비 +3.6%",
     "minPrice": 13900,
     "maxPrice": 15900,
     "avgPrice": 14900,
@@ -1793,8 +1792,8 @@
     "cycleDays": 36,
     "nextDate": "비정기",
     "targetPrice": 14175,
-    "livePrice": 16900,
-    "liveDate": "2026-11-23",
+    "livePrice": 16065,
+    "liveDate": "2026-11-28",
     "url": "https://www.kurly.com/goods/1000811962",
     "count": 2,
     "history": [
@@ -1813,7 +1812,7 @@
       "2026-01-21",
       "2026-02-26"
     ],
-    "note": "일반 SKU 1000811961 16,900(정가 18,900 → 10% 할인) — 전일과 동일, 목표가 14,175까지 +19.2%",
+    "note": "일반 SKU 상품할인 10%→15% 확대 16,900→16,065(-4.9%) — 목표 14,175 대비 +13.3%",
     "minPrice": 14175,
     "maxPrice": 15120,
     "avgPrice": 14648,
@@ -1832,7 +1831,7 @@
     "nextDate": "2026-10-07",
     "targetPrice": 8850,
     "livePrice": 10500,
-    "liveDate": "2026-11-23",
+    "liveDate": "2026-11-28",
     "url": "https://www.kurly.com/goods/1001530446",
     "count": 2,
     "history": [
@@ -1851,7 +1850,7 @@
       "2025-11-19",
       "2026-04-29"
     ],
-    "note": "일반 SKU 1001530445 10,500 — 전일과 동일, 목표가 8,850까지 +18.6%",
+    "note": "일반 SKU 10,500(정가 13,500·22% 할인) — 11-23과 동일, 목표 8,850 대비 +18.6%",
     "minPrice": 8850,
     "maxPrice": 9900,
     "avgPrice": 9375,
@@ -1869,8 +1868,8 @@
     "cycleDays": 348,
     "nextDate": "2026-11-02",
     "targetPrice": 5925,
-    "livePrice": 6320,
-    "liveDate": "2026-11-23",
+    "livePrice": 7110,
+    "liveDate": "2026-11-28",
     "url": "https://www.kurly.com/goods/1000085434",
     "count": 2,
     "history": [
@@ -1893,7 +1892,7 @@
       "2024-12-06",
       "2025-11-19"
     ],
-    "note": "단팥·슈크림 6,320(정가 7,900 → 20% 할인), 우유맛만 품절 — 전일과 동일, 목표가 5,925까지 +6.7%",
+    "note": "단팥 10% 할인 7,110(11-23 6,320 → +12.5%) — 목표 5,925 대비 +20.0%, 우유맛만 품절",
     "minPrice": 5925,
     "maxPrice": 7900,
     "avgPrice": 6583,
@@ -1911,8 +1910,8 @@
     "cycleDays": 28,
     "nextDate": "비정기",
     "targetPrice": 8118,
-    "livePrice": 9810,
-    "liveDate": "2026-11-23",
+    "livePrice": 10900,
+    "liveDate": "2026-11-28",
     "url": "https://www.kurly.com/goods/1000200844",
     "count": 2,
     "history": [
@@ -1930,7 +1929,7 @@
       "2024-11-08",
       "2024-12-06"
     ],
-    "note": "1kg 9,810(정가 10,900 → 10% 할인) — 전일과 동일, 목표가 8,118까지 +20.9%",
+    "note": "10% 상품할인 종료로 9,810→10,900(+11.1%) — 목표 8,118 대비 +34.3%",
     "minPrice": 8118,
     "maxPrice": 9900,
     "avgPrice": 9009,
@@ -1948,8 +1947,8 @@
     "cycleDays": 316,
     "nextDate": "2027-03-11",
     "targetPrice": 7980,
-    "livePrice": 9480,
-    "liveDate": "2026-11-23",
+    "livePrice": 9180,
+    "liveDate": "2026-11-28",
     "url": "https://www.kurly.com/goods/1000765126",
     "count": 2,
     "history": [
@@ -1968,7 +1967,7 @@
       "2025-06-17",
       "2026-04-29"
     ],
-    "note": "정가 10,480 → 9% 할인 9,480원 (전일 8,980 → +500, +5.6%). 목표가 7,980까지 +18.8% 미달",
+    "note": "할인 9%→12% 확대 9,480→9,180(-3.2%) — 목표 7,980 대비 +15.0%",
     "minPrice": 7980,
     "maxPrice": 9680,
     "avgPrice": 8830,
@@ -1986,8 +1985,8 @@
     "cycleDays": 23,
     "nextDate": "비정기",
     "targetPrice": 7900,
-    "livePrice": 8900,
-    "liveDate": "2026-11-23",
+    "livePrice": 7920,
+    "liveDate": "2026-11-28",
     "url": "https://www.kurly.com/goods/1001363780",
     "count": 2,
     "history": [
@@ -2006,7 +2005,7 @@
       "2025-07-24",
       "2025-08-16"
     ],
-    "note": "일반 SKU 1001363779 8,900 — 전일과 동일, 목표가 7,900까지 +12.7%",
+    "note": "일반 SKU 정가 9,900→7,920(20% 상시할인)으로 8,900→7,920(-11.0%) — 목표 7,900까지 20원",
     "minPrice": 7900,
     "maxPrice": 8900,
     "avgPrice": 8400,
@@ -2025,7 +2024,7 @@
     "nextDate": "2027-01-22",
     "targetPrice": 7580,
     "livePrice": 7580,
-    "liveDate": "2026-11-23",
+    "liveDate": "2026-11-28",
     "url": "https://www.kurly.com/goods/1001110351",
     "count": 2,
     "history": [
@@ -2042,7 +2041,7 @@
       "2025-04-02",
       "2026-02-26"
     ],
-    "note": "7,580 고정가(할인 없음) — 목표가=현재가 유지",
+    "note": "고정가 7,580 — 목표가=현재가(할인 없음), 쿠팡 곰곰 1.8L(205원/100ml)가 단위가 우위",
     "minPrice": 7580,
     "maxPrice": 7580,
     "avgPrice": 7580,
@@ -2066,7 +2065,7 @@
     "nextDate": "비정기",
     "targetPrice": 5980,
     "livePrice": 5980,
-    "liveDate": "2026-11-23",
+    "liveDate": "2026-11-28",
     "url": "https://www.kurly.com/goods/5049727",
     "count": 2,
     "history": [
@@ -2083,7 +2082,7 @@
       "2024-10-18",
       "2024-12-06"
     ],
-    "note": "5,980 고정가 — 100ml당 332원, 쿠팡 곰곰(205원/100ml)이 단위가 우위",
+    "note": "고정가 5,980(100ml당 332원) — 쿠팡 곰곰 1.8L 3,690원(205원/100ml)이 단위가 우위",
     "minPrice": 5980,
     "maxPrice": 5980,
     "avgPrice": 5980,
@@ -2107,7 +2106,7 @@
     "nextDate": "비정기",
     "targetPrice": 4275,
     "livePrice": 4900,
-    "liveDate": "2026-11-23",
+    "liveDate": "2026-11-28",
     "url": "https://www.kurly.com/goods/5042318",
     "count": 2,
     "history": [
@@ -2125,7 +2124,7 @@
       "2024-10-18",
       "2025-04-02"
     ],
-    "note": "4,900(할인 없음) — 전일과 동일, 목표가 4,275까지 +14.6%",
+    "note": "할인·특가 없음(정가 4,900) — 11-23과 동일, 목표 4,275 대비 +14.6%",
     "minPrice": 4275,
     "maxPrice": 4700,
     "avgPrice": 4488,
@@ -2144,7 +2143,7 @@
     "nextDate": "2027-05-30",
     "targetPrice": 3990,
     "livePrice": 4200,
-    "liveDate": "2026-11-23",
+    "liveDate": "2026-11-28",
     "url": "https://www.kurly.com/goods/5031442",
     "count": 2,
     "history": [
@@ -2163,7 +2162,7 @@
       "2026-02-26",
       "2026-10-13"
     ],
-    "note": "일반 SKU 10031442 4,200(할인 없음, 100g당 420원) — 전일과 동일, 목표가 3,990까지 +5.3%",
+    "note": "일반 SKU 4,200(100g당 420원) — 11-23과 동일, 목표 3,990 대비 +5.3%. 쿠팡 돌 1kg 2,490원이 단위가 우위",
     "minPrice": 3990,
     "maxPrice": 4200,
     "avgPrice": 4095,
@@ -2186,8 +2185,8 @@
     "cycleDays": null,
     "nextDate": "비정기",
     "targetPrice": 21000,
-    "livePrice": 29270,
-    "liveDate": "2026-11-23",
+    "livePrice": 25230,
+    "liveDate": "2026-11-28",
     "url": "https://item.gmarket.co.kr/Item?goodscode=1579104167",
     "count": 2,
     "purchaseDates": [
@@ -2215,7 +2214,7 @@
     "lastDate": "2023-05-08",
     "crossNote": "구성이 10개입→12개입으로 변경됨(캔당 1,626→1,762→2,439원, +38%). 무료배송·11/20 도착예정",
     "liveStatus": "판매중",
-    "note": "29,270원·캔당 2,439원, buybox 쿠폰적용가 24,230원 — sellStatus OnSale, 내일(화) 11/24 도착예정. 전일과 동일"
+    "note": "판매가 25,230(정가 40,400·37% 할인, 12캔 환산 캔당 2,103원) — 11-23 29,270 → -13.8%. 쿠폰 미적용·결제할인가 23,470(캔당 1,956). 목표 21,000 대비 +20.1%"
   },
   {
     "id": "gmarket-chadol",
@@ -2227,8 +2226,8 @@
     "cycleDays": null,
     "nextDate": "비정기",
     "targetPrice": 26700,
-    "livePrice": 36500,
-    "liveDate": "2026-11-23",
+    "livePrice": 30850,
+    "liveDate": "2026-11-28",
     "url": "https://item.gmarket.co.kr/Item?goodscode=1566708507",
     "count": 2,
     "purchaseDates": [
@@ -2252,7 +2251,7 @@
     "lastDate": "2026-01-22",
     "crossNote": "직전 결제가(2026-01)보다 +36.7% — 지금은 목표가(26,700원) 대기 구간. 무료배송",
     "liveStatus": "판매중",
-    "note": "36,500원 — OnSale, 11/24(화)까지 도착 확률 98%. 전일과 동일"
+    "note": "30,850(정가 36,500·15% 할인) — 11-23 36,500 → -15.5%. 쿠폰 미적용·결제할인가 28,690. 목표 26,700 대비 +15.5%. 상품명에서 '양지 1팩 증정' 문구 사라짐"
   },
   {
     "id": "gmarket-georgia",
@@ -2265,7 +2264,7 @@
     "nextDate": "비정기",
     "targetPrice": 14000,
     "livePrice": 18150,
-    "liveDate": "2026-11-23",
+    "liveDate": "2026-11-28",
     "url": "https://item.gmarket.co.kr/Item?goodscode=4140822301",
     "count": 2,
     "purchaseDates": [
@@ -2289,7 +2288,7 @@
     "lastDate": "2022-04-21",
     "crossNote": "원 상품(1789345236)은 판매종료 → 승계상품 4140822301을 추적. 2022년 결제가 대비 +31%. 최저가 판매자(4364016203) 쿠폰적용가 16,160원",
     "liveStatus": "판매중",
-    "note": "18,150원(최저가 판매자 쿠폰적용가 16,160원) — OnSale, 11/26(목)까지 도착 확률 99%. 전일과 동일"
+    "note": "100mL당 253원 — 11-23과 동일, 목표 14,000 대비 +29.6%"
   },
   {
     "id": "naver-chino",
@@ -2302,7 +2301,7 @@
     "nextDate": "비정기",
     "targetPrice": 17500,
     "livePrice": 17800,
-    "liveDate": "2026-11-23",
+    "liveDate": "2026-11-28",
     "liveStatus": "판매중",
     "url": "https://smartstore.naver.com/gammiroun/products/5163218942",
     "count": 2,
@@ -2330,7 +2329,7 @@
     "lastPrice": 16800,
     "lastDate": "2023-04-05",
     "crossNote": "2023년 단가 19,800→16,800원 → 현재 17,800원. 감미로운 · 평점 4.66(리뷰 19,906) · 배송 3,000원(7만원 이상 무료)",
-    "note": "17,800원(정가 25,000, 28% 할인, 배송 3,000원) — 판매중. 전일과 동일, 목표가 17,500까지 +1.7%"
+    "note": "정가 25,000·28% 할인 17,800, 배송 3,000원(7만원 이상 무료) — 11-23과 동일, 목표 17,500까지 +1.7%"
   },
   {
     "id": "naver-kara-tee",
@@ -2343,7 +2342,7 @@
     "nextDate": "비정기",
     "targetPrice": 8000,
     "livePrice": 8000,
-    "liveDate": "2026-11-23",
+    "liveDate": "2026-11-28",
     "url": "https://smartstore.naver.com/bkcompany2021/products/6577156346",
     "count": 2,
     "purchaseDates": [
@@ -2371,7 +2370,7 @@
     "lastDate": "2023-04-12",
     "crossNote": "2023년 단가 9,000~9,750원 → 현재 8,000원(-11~18%), 정가 12,000원 33% 할인. 비케이 쇼핑",
     "liveStatus": "판매중",
-    "note": "8,000원(정가 12,000, 33% 할인, 배송 3,000원) — 판매중·구매버튼 활성. 전일과 동일, 목표가 이하 유지"
+    "note": "정가 12,000·33% 할인 8,000 — 목표가(8,000) 유지(동일가), 배송 3,000원(20만원 이상 무료)"
   },
   {
     "id": "naver-saiki-mochi",
@@ -2384,7 +2383,7 @@
     "nextDate": "비정기",
     "targetPrice": 4500,
     "livePrice": 4500,
-    "liveDate": "2026-11-23",
+    "liveDate": "2026-11-28",
     "liveStatus": "품절",
     "liveStatusDetail": "품절(재입고 대기)",
     "url": "https://smartstore.naver.com/main/products/11288963539",
@@ -2405,6 +2404,6 @@
     "lastPrice": 5690,
     "lastDate": "2025-01-03",
     "crossNote": "2025-01 실구매 5,690원 → 현재 4,500원(-21%)이나 품절(재입고 대기). 재입고 시 목표가 도달",
-    "note": "4,500원 — 품절 유지(\"재입고 시 구매가능\"·구매버튼 \"품절되었습니다\" 비활성). 전일과 동일"
+    "note": "품절 유지 — '이 상품은 현재 구매하실 수 없는 상품이며, 재입고 시 구매가 가능합니다', 구매버튼 '품절되었습니다' 비활성. 재입고 없음"
   }
 ]
