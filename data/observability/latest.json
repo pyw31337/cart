@@ -1,7 +1,7 @@
 {
   "schema": "lets_observability_v1",
-  "run_id": "cart-20261127T015405Z",
-  "observed_at": "2026-11-27T01:54:05.169409+00:00",
+  "run_id": "cart-20261128T013816Z",
+  "observed_at": "2026-11-28T01:38:16.210035+00:00",
   "service_id": "cart",
   "source": "persisted_letscart_catalog",
   "stages": {
@@ -27,8 +27,8 @@
   "counts": {
     "records": 39,
     "catalog_products": 302,
-    "increment": 0,
-    "increment_date": "2026-11-27",
+    "increment": 39,
+    "increment_date": "2026-11-28",
     "reviews": 997520
   },
   "note": "Persisted LetsCart catalog and price snapshot; source service is LetsCart, not deprecated LetsBuy."
