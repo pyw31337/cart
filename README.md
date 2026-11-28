@@ -38,6 +38,23 @@ functions/            Cloudflare Pages Functions
 tracker/              기존 4개 플랫폼 가격 트래커 (data.json 은 루트에 유지)
 ```
 
+## 라임리 연동 피드 (`data/limery.json` · `letscart.limery.v1`)
+
+라임리(가족 플랫폼)는 렛츠카트를 구매 기록의 정본으로 삼고, 이 피드만 읽어 상품 사진·스펙·가격 추이·판매처를 보여 줍니다.
+`scripts/build_limery_feed.mjs` 가 `data/catalog.json`·`data.json`(트래커)을 합쳐 만들고, `.github/workflows/limery-feed.yml` 이 카탈로그가 바뀔 때와 매일 09:40 KST 에 다시 만듭니다.
+
+| 필드 | 뜻 |
+|---|---|
+| `ids` | 카탈로그 ID + 트래커 ID(예: `농심-신라면`, `shin-ramyun`) — 두 체계를 한 상품으로 잇는다 |
+| `img`, `img_source` | 다나와 사진(`danawa`) → 없으면 공유 썸네일(`thumbs`) |
+| `platforms`, `main_platform` | 판매처 코드·이름·상품 링크·지금 가격 (`markets[].logo` 에 마켓 로고) |
+| `purchases`, `price_history` | 내가 산 날짜·가격 / 다나와·트래커 가격 관측 |
+| `spec_table`, `rating`, `reviews`, `price_url` | 제품 스펙·평점·가격 비교 링크 |
+| `rebuy` | 재구매 주기·다음 날짜·목표가·최저/최고/평균가·단위 |
+
+주소·결제수단·주문번호 같은 개인 주문 상세는 넣지 않습니다.
+남은 과제: 사진이 없는 상품(약 1/3)은 맥의 `letscart/src` 수집기가 다나와 사진을 채워야 합니다.
+
 ## 분석 엔진 (렛츠바이 v0.18.3 이식)
 
 `assets/engine/core.js`(메일 파싱·재구매 주기), `insights.js`(17개 카테고리 사전·단위가격·슈링크플레이션·월별 지출),
